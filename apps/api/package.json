@@ -1,0 +1,37 @@
+{
+  "name": "@vcc/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "sync:once": "tsx src/jobs/sync.ts --once",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@fastify/cors": "^10.0.1",
+    "@fastify/sensible": "^6.0.1",
+    "@fastify/static": "^8.0.0",
+    "@vcc/db": "*",
+    "@vcc/shared": "*",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.1.0",
+    "fastify-type-provider-zod": "^4.0.2",
+    "node-cron": "^3.0.3",
+    "pino-pretty": "^11.2.2",
+    "undici": "^6.20.1",
+    "xml2js": "^0.6.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/xml2js": "^0.4.14",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,2 @@
+# This directory holds private runtime data (the SQLite DB, OAuth tokens, MCP
+# client state, backups). Everything here is gitignored except this file.

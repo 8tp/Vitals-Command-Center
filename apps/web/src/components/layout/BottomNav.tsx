@@ -1,0 +1,48 @@
+import { NavLink } from 'react-router-dom';
+import clsx from 'clsx';
+import { NAV } from './nav.js';
+import { NAV_ICONS } from '../shared/icons.js';
+
+/**
+ * Mobile bottom tab bar — the only navigation below md (the Sidebar is
+ * hidden there). Fixed to the bottom, 5 tabs, safe-area aware so it clears
+ * the iPhone home indicator when installed as a PWA.
+ */
+export function BottomNav() {
+  return (
+    <nav
+      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-bg-surface/90 backdrop-blur-md"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      aria-label="Primary"
+    >
+      <ul className="flex items-stretch">
+        {NAV.map((item) => {
+          const Icon = NAV_ICONS[item.icon];
+          return (
+            <li key={item.to} className="flex-1">
+              <NavLink
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  clsx(
+                    'flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 transition-colors',
+                    isActive ? 'text-signal' : 'text-ink-mute hover:text-ink',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon size={22} strokeWidth={isActive ? 2 : 1.75} />
+                    <span className={clsx('text-3xs', isActive ? 'font-semibold' : 'font-medium')}>
+                      {item.short}
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}

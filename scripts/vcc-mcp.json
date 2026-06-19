@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "vitals-command-center": {
+      "command": "/Users/huntermeherin/.local/share/fnm/node-versions/v20.11.1/installation/bin/node",
+      "args": [
+        "/Users/huntermeherin/Personal/Health/node_modules/tsx/dist/cli.mjs",
+        "/Users/huntermeherin/Personal/Health/apps/mcp-server/src/index.ts"
+      ],
+      "env": {
+        "DB_PATH": "/Users/huntermeherin/Personal/Health/data/vitals.db"
+      }
+    }
+  }
+}

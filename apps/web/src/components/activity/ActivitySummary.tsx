@@ -16,7 +16,7 @@ export function ActivitySummary({ daily }: Props) {
 
   const latest = series[series.length - 1] ?? null;
   const avgSteps = avg(series.map((d) => d.steps));
-  const totalBurned = sum(series.map((d) => d.caloriesBurned));
+  const totalBurned = sum(series.map((d) => d.activeCaloriesBurned));
   const stepPct =
     latest?.steps != null ? Math.min(100, Math.round((latest.steps / STEP_TARGET) * 100)) : null;
 
@@ -41,7 +41,7 @@ export function ActivitySummary({ daily }: Props) {
 
       <Tile label="Energy burned today">
         <div className="num text-3xl font-semibold text-ink">
-          {latest?.caloriesBurned != null ? fmtNum(latest.caloriesBurned) : '—'}
+          {latest?.activeCaloriesBurned != null ? fmtNum(latest.activeCaloriesBurned) : '—'}
         </div>
         <div className="text-xs text-ink-mute mt-2">Active calories</div>
       </Tile>

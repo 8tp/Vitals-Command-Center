@@ -1,16 +1,10 @@
 import type { NormalizedDailySummary } from '@vcc/shared';
 
 /**
- * The `caloriesBurned` / `caloriesIn` fields are new on the Fitbit daily row and
- * are not yet present on the shared `FitbitDay` type (the lead/shared package owns
- * that type). Read them defensively so the UI compiles today and lights up the
- * moment the backing fields land. Never returns NaN — null means "no data".
+ * `activeCaloriesBurned` is active energy only (Google Health exposes no basal/
+ * total for Fitbit Air), so the energy "balance" below is intake − active burn,
+ * not a true net. Never returns NaN — null means "no data".
  */
-type FitbitExtras = {
-  caloriesBurned?: number | null;
-  caloriesIn?: number | null;
-};
-
 function num(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null;
 }
@@ -18,9 +12,9 @@ function num(v: unknown): number | null {
 export interface ActivityDay {
   date: string;
   steps: number | null;
-  caloriesBurned: number | null;
+  activeCaloriesBurned: number | null;
   caloriesIn: number | null;
-  /** in − out, only when both sides are present */
+  /** in − active out, only when both sides are present */
   balance: number | null;
 }
 
@@ -28,13 +22,13 @@ export function toActivitySeries(daily: NormalizedDailySummary[]): ActivityDay[]
   return [...daily]
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((d) => {
-      const fb = (d.fitbit ?? {}) as FitbitExtras & { steps?: number | null };
-      const steps = num(fb.steps);
-      const caloriesBurned = num(fb.caloriesBurned);
-      const caloriesIn = num(fb.caloriesIn);
+      const fb = d.fitbit;
+      const steps = num(fb?.steps);
+      const activeCaloriesBurned = num(fb?.activeCaloriesBurned);
+      const caloriesIn = num(fb?.caloriesIn);
       const balance =
-        caloriesIn != null && caloriesBurned != null ? caloriesIn - caloriesBurned : null;
-      return { date: d.date, steps, caloriesBurned, caloriesIn, balance };
+        caloriesIn != null && activeCaloriesBurned != null ? caloriesIn - activeCaloriesBurned : null;
+      return { date: d.date, steps, activeCaloriesBurned, caloriesIn, balance };
     });
 }
 

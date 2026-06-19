@@ -13,7 +13,8 @@ const COL_MAP: Record<string, string> = {
   spo2: 'fitbit_spo2',
   temp_deviation: 'fitbit_skin_temp_delta',
   respiratory_rate: 'fitbit_respiratory_rate',
-  calories_burned: 'fitbit_calories_burned',
+  // DB column kept as fitbit_calories_burned; exposed as active_calories (active energy only).
+  active_calories: 'fitbit_calories_burned',
   calories_in: 'fitbit_calories_in',
 };
 

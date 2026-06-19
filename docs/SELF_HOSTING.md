@@ -41,7 +41,7 @@ on Debian/Ubuntu).
 ## 2. Clone and install
 
 ```bash
-git clone https://github.com/USER/vitals-command-center.git
+git clone https://github.com/8tp/vitals-command-center.git
 cd vitals-command-center
 npm install
 ```

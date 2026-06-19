@@ -1,18 +1,30 @@
 <div align="center">
 
-# Vitals — Command Center
+<img src=".github/assets/banner.png" alt="Vitals — all your wearables, one calm view" width="100%">
 
-### All your wearables, one calm view.
-
-A self-hosted, privacy-first personal health command center. Vitals unifies the
-data from every wearable you own, computes a single daily **readiness** read,
-writes you a daily **AI brief**, and gives you a calm dashboard that you fully
-own — running on your own hardware, with your data in a local SQLite database
+A self-hosted, privacy-first personal health command center. Vitals unifies every
+wearable you own into one daily **readiness** read, writes you a daily **AI brief**,
+and gives you a calm dashboard you fully own — your data in a local SQLite database
 that never touches a vendor cloud.
 
-<img src="site/assets/screenshot-desktop.png" alt="Vitals dashboard" width="820">
+[![License: MIT](https://img.shields.io/badge/license-MIT-0E9C8C.svg)](LICENSE)
+&nbsp;![Self-hosted](https://img.shields.io/badge/self--hosted-yes-14B8A6.svg)
+&nbsp;![AI: local-first](https://img.shields.io/badge/AI-local--first-10B981.svg)
+&nbsp;![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)
+&nbsp;![PRs welcome](https://img.shields.io/badge/PRs-welcome-16B8A6.svg)
 
-<sub>Open-source · MIT licensed · © 8tp</sub>
+<br>
+
+<img src="site/assets/screenshot-desktop.png" alt="Vitals dashboard (light theme)" width="860">
+
+<br><br>
+
+<table>
+<tr>
+<td align="center"><img src="site/assets/screenshot-dark.png" alt="Dark theme" width="380"><br><sub>Soft dark theme</sub></td>
+<td align="center"><img src="site/assets/screenshot-mobile.png" alt="Installable PWA on mobile" width="180"><br><sub>Installable PWA</sub></td>
+</tr>
+</table>
 
 </div>
 
@@ -61,7 +73,7 @@ bridge owns is set by `GOOGLE_HEALTH_SOURCES`. See **[docs/ADAPTERS.md](docs/ADA
 
 ```bash
 # 1. Clone
-git clone https://github.com/USER/vitals-command-center.git
+git clone https://github.com/8tp/vitals-command-center.git
 cd vitals-command-center
 
 # 2. Configure

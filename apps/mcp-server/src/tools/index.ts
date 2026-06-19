@@ -64,7 +64,7 @@ export const TOOL_DEFINITIONS = [
             'spo2',
             'temp_deviation',
             'respiratory_rate',
-            'calories_burned',
+            'active_calories',
             'calories_in',
           ],
         },

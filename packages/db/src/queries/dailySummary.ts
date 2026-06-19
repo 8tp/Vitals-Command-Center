@@ -187,7 +187,8 @@ function toNormalized(r: DailyRow): NormalizedDailySummary {
           remHours: r.fitbit_rem_hours,
           lightHours: r.fitbit_light_hours,
           steps: r.fitbit_steps,
-          caloriesBurned: r.fitbit_calories_burned,
+          // DB column kept as fitbit_calories_burned; exposed as activeCaloriesBurned (active energy only).
+          activeCaloriesBurned: r.fitbit_calories_burned,
           caloriesIn: r.fitbit_calories_in,
         }
       : null,

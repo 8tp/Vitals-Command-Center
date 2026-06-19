@@ -18,7 +18,7 @@ export function EnergyBalance({ daily }: { daily: NormalizedDailySummary[] }) {
   const series = toActivitySeries(daily);
   const data = series.map((d) => ({
     date: d.date,
-    out: d.caloriesBurned,
+    out: d.activeCaloriesBurned,
     in: d.caloriesIn && d.caloriesIn > 0 ? d.caloriesIn : null,
   }));
 

@@ -13,7 +13,7 @@ import type { NormalizedDailySummary, FitbitDay } from '@vcc/shared';
 import { CHART, VAR } from '../../lib/colors.js';
 import { fmtDate } from '../../lib/formatters.js';
 
-type FitbitExt = FitbitDay & { caloriesBurned?: number | null };
+type FitbitExt = FitbitDay;
 
 interface Props {
   daily: NormalizedDailySummary[];
@@ -27,7 +27,7 @@ export function ActivityChart({ daily }: Props) {
       .map((d) => ({
         date: d.date,
         steps: d.fitbit?.steps ?? null,
-        burned: (d.fitbit as FitbitExt | null)?.caloriesBurned ?? null,
+        burned: (d.fitbit as FitbitExt | null)?.activeCaloriesBurned ?? null,
       }));
   }, [daily]);
 

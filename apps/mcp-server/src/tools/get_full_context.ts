@@ -4,7 +4,11 @@ import { queries } from '@vcc/db';
 /**
  * Returns the same analytical packet the server-side briefing generator hands
  * Claude when the direct API is configured: today's full detail + 14-day compact
- * window + 7-day workouts + previous briefing.
+ * window + previous briefing.
+ *
+ * Workouts are intentionally NOT included: in the two-MCP model they live in the
+ * Strava connector (see migration 004), so this DB's workouts table is empty by
+ * design. The briefingTemplate directs Claude to pull training load from Strava.
  *
  * Claude Desktop / claude.ai call this once, then synthesize a briefing or answer
  * and (for briefings) call `save_briefing` to persist.
@@ -14,7 +18,6 @@ import { queries } from '@vcc/db';
  */
 
 const DAYS_WINDOW = 14;
-const WORKOUT_DAYS = 7;
 
 function addDays(dateIso: string, n: number): string {
   const d = new Date(`${dateIso}T00:00:00Z`);
@@ -30,7 +33,6 @@ export function getFullContext(db: Database, args: Record<string, unknown>) {
   // Most recent briefing strictly BEFORE `date` (latestOfType matched the exact
   // date, which never returns a prior brief). Provided by @vcc/db (other agent).
   const previousBriefing = queries.briefings.latestBefore(db, 'daily', date);
-  const recentWorkouts = queries.workouts.list(db, addDays(date, -(WORKOUT_DAYS - 1)), date);
 
   // Fitbit Air is the primary source as of 2026-06; whoop/oura/apple are always
   // null. Prefer fitbit fields first, then the cross-device consensus, then the
@@ -48,24 +50,14 @@ export function getFullContext(db: Database, args: Record<string, unknown>) {
     respiratoryRate: d.fitbit?.respiratoryRate ?? null,
     spo2: d.fitbit?.spo2 ?? d.apple?.spo2 ?? null,
     steps: d.fitbit?.steps ?? d.apple?.steps ?? null,
-    caloriesBurned: d.fitbit?.caloriesBurned ?? null,
+    activeCaloriesBurned: d.fitbit?.activeCaloriesBurned ?? null,
     caloriesIn: d.fitbit?.caloriesIn ?? null,
-  }));
-
-  const workoutsCompact = recentWorkouts.map((w) => ({
-    date: w.date,
-    sport: w.sport,
-    strain: w.strain,
-    durationMin: Math.round(w.durationMinutes),
-    avgHr: w.avgHr,
-    distanceKm: w.distanceKm,
   }));
 
   return {
     date,
     today,
     window: compactWindow,
-    recentWorkouts: workoutsCompact,
     previousBriefing,
     /**
      * Briefing template Claude should follow when asked for a morning briefing.
@@ -74,7 +66,7 @@ export function getFullContext(db: Database, args: Record<string, unknown>) {
     briefingTemplate: `Structure the morning briefing as:
 **Status** — one paragraph: your own recovery read reasoned from HRV vs baseline, RHR, sleep quality and skin-temp deviation (there are no recovery/readiness scores). Cite key numbers + whether today has Fitbit data.
 **Trends** — 2-3 bullets citing specific deltas vs the 14-day window (HRV, RHR, sleep hours/stages, steps).
-**Training** — one line referencing last 7 days of workouts (from Strava) + how today's recovery read should shape the session.
+**Training** — workouts are NOT in this packet. If a Strava connector is available, call its list_activities for the last 7 days and reference that load; otherwise base training advice on recovery + steps. One line on how today's recovery read should shape the session.
 **Recommendations** — up to 5, ranked, specific (dosages/timings/durations).
 
 After you finish the briefing, call save_briefing({ date, content }) so the web dashboard can display it. Use the same date this tool was called with.`,

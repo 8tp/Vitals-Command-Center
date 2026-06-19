@@ -96,6 +96,7 @@ export const DATA_TYPES = {
   rhr: 'daily-resting-heart-rate',
   spo2: 'daily-oxygen-saturation',
   skinTemp: 'daily-sleep-temperature-derivations',
+  respiratoryRate: 'daily-respiratory-rate', // overnight breaths/min (verified via --probe)
   sleep: 'sleep',
   steps: 'steps',
   activeEnergy: 'active-energy-burned', // calories OUT (intraday intervals → sum/day)
@@ -123,7 +124,7 @@ export interface FitbitDailyRow {
   remHours: number | null;
   lightHours: number | null;
   steps: number | null;
-  caloriesBurned: number | null;
+  activeCaloriesBurned: number | null; // active energy only; Google Health exposes no basal/total for Fitbit Air
   caloriesIn: number | null;
 }
 
@@ -424,11 +425,12 @@ export class FitbitClient {
     const endExclusive = addDays(end, 1);
     const f = (dt: string) => FitbitClient.buildFilter(dt, start, endExclusive);
 
-    const [hrv, rhr, spo2, skinTemp, sleep, steps, activeEnergy] = await Promise.all([
+    const [hrv, rhr, spo2, skinTemp, respiratoryRate, sleep, steps, activeEnergy] = await Promise.all([
       this.listAll(DATA_TYPES.hrv, f(DATA_TYPES.hrv)),
       this.listAll(DATA_TYPES.rhr, f(DATA_TYPES.rhr)),
       this.listAll(DATA_TYPES.spo2, f(DATA_TYPES.spo2)),
       this.listAll(DATA_TYPES.skinTemp, f(DATA_TYPES.skinTemp)),
+      this.listAll(DATA_TYPES.respiratoryRate, f(DATA_TYPES.respiratoryRate)),
       this.listAll(DATA_TYPES.sleep, f(DATA_TYPES.sleep)),
       this.listAll(DATA_TYPES.steps, f(DATA_TYPES.steps)),
       this.listAll(DATA_TYPES.activeEnergy, f(DATA_TYPES.activeEnergy)),
@@ -443,12 +445,12 @@ export class FitbitClient {
     }
 
     this.log?.info(
-      { hrv: hrv.length, rhr: rhr.length, spo2: spo2.length, skinTemp: skinTemp.length, sleep: sleep.length, steps: steps.length, activeEnergy: activeEnergy.length, nutritionLog: nutritionLog.length },
+      { hrv: hrv.length, rhr: rhr.length, spo2: spo2.length, skinTemp: skinTemp.length, respiratoryRate: respiratoryRate.length, sleep: sleep.length, steps: steps.length, activeEnergy: activeEnergy.length, nutritionLog: nutritionLog.length },
       'fitbit fetched',
     );
 
     return transform(
-      { hrv, rhr, spo2, skinTemp, sleep, steps, activeEnergy, nutritionLog },
+      { hrv, rhr, spo2, skinTemp, respiratoryRate, sleep, steps, activeEnergy, nutritionLog },
       this.bridgeSources(),
     );
   }
@@ -475,9 +477,18 @@ interface DataPoint {
     nightlyTemperatureCelsius?: number | string;
     baselineTemperatureCelsius?: number | string;
   };
+  dailyRespiratoryRate?: { date: CivilDate; breathsPerMinute?: number | string };
   sleep?: {
     interval: { startTime: string; endTime: string; endUtcOffset?: string };
     stages?: Array<{ startTime: string; endTime: string; type: string }>;
+    // Authoritative per-night totals (Fitbit `STAGES` sleep). Preferred over
+    // re-summing `stages` — an empty/zero session has no usable summary, which
+    // is how we keep "no data" as null rather than a spurious 0h night.
+    summary?: {
+      minutesAsleep?: number | string;
+      minutesAwake?: number | string;
+      stagesSummary?: Array<{ type: string; minutes?: number | string }>;
+    };
   };
   steps?: {
     interval: { civilStartTime?: { date: CivilDate } };
@@ -509,6 +520,7 @@ export function transform(
     rhr: DataPoint[];
     spo2: DataPoint[];
     skinTemp: DataPoint[];
+    respiratoryRate: DataPoint[];
     sleep: DataPoint[];
     steps: DataPoint[];
     activeEnergy: DataPoint[];
@@ -539,7 +551,7 @@ export function transform(
         date,
         hrv: null, rhr: null, spo2: null, skinTempDelta: null, respiratoryRate: null,
         sleepScore: null, sleepHours: null, deepHours: null, remHours: null, lightHours: null,
-        steps: null, caloriesBurned: null, caloriesIn: null,
+        steps: null, activeCaloriesBurned: null, caloriesIn: null,
       };
       b.byDate.set(date, r);
     }
@@ -580,24 +592,47 @@ export function transform(
     const baseline = num(v?.baselineTemperatureCelsius); // "NaN" until ~30d baseline exists
     row(src, date).skinTempDelta = nightly != null && baseline != null ? nightly - baseline : null;
   }
+  for (const p of raw.respiratoryRate) {
+    const src = dev(p.dataSource);
+    const date = civil(p.dailyRespiratoryRate?.date);
+    if (!src || !date) continue;
+    row(src, date).respiratoryRate = num(p.dailyRespiratoryRate?.breathsPerMinute);
+  }
 
-  // Sleep: one session per (source, wake-date); sum stage durations.
+  // Sleep: one session per (source, wake-date). Prefer the API's authoritative
+  // `summary` block; fall back to summing the `stages` array, then to the bare
+  // interval (fallback sources like WHOOP-via-HealthKit give only an interval).
   for (const p of raw.sleep) {
     if (!p.sleep) continue;
     const src = dev(p.dataSource);
     if (!src) continue;
     const s = p.sleep;
     const date = civilDateFromIso(s.interval.endTime, s.interval.endUtcOffset);
+
     const mins = { AWAKE: 0, LIGHT: 0, DEEP: 0, REM: 0 };
-    for (const st of s.stages ?? []) {
-      const d = (Date.parse(st.endTime) - Date.parse(st.startTime)) / 60_000;
-      if (st.type in mins) mins[st.type as keyof typeof mins] += Number.isFinite(d) ? d : 0;
+    const stagesSummary = s.summary?.stagesSummary;
+    if (stagesSummary?.length) {
+      for (const ss of stagesSummary) {
+        if (ss.type in mins) mins[ss.type as keyof typeof mins] = num(ss.minutes) ?? 0;
+      }
+    } else {
+      for (const st of s.stages ?? []) {
+        const d = (Date.parse(st.endTime) - Date.parse(st.startTime)) / 60_000;
+        if (st.type in mins) mins[st.type as keyof typeof mins] += Number.isFinite(d) ? d : 0;
+      }
     }
-    // Fitbit nights carry stage detail; fallback sources (e.g. WHOOP via
-    // HealthKit) may give only an interval — use its duration as total asleep.
-    const hasStages = (s.stages?.length ?? 0) > 0;
+    const hasStages = mins.LIGHT + mins.DEEP + mins.REM > 0;
     const intervalMin = (Date.parse(s.interval.endTime) - Date.parse(s.interval.startTime)) / 60_000;
-    const asleep = hasStages ? mins.LIGHT + mins.DEEP + mins.REM : Math.max(0, intervalMin);
+    // minutesAsleep is authoritative when present; else summed stages; else interval.
+    const asleep =
+      num(s.summary?.minutesAsleep) ??
+      (hasStages ? mins.LIGHT + mins.DEEP + mins.REM : Math.max(0, intervalMin));
+
+    // Standardize the "no data" sentinel on NULL: an empty / zero-duration sleep
+    // record is not a real 0h night. Skip it so sleepHours stays null rather than
+    // 0 (which would otherwise drag down averages/baselines downstream).
+    if (!asleep || asleep <= 0) continue;
+
     const r = row(src, date);
     r.sleepHours = asleep / 60;
     r.deepHours = hasStages ? mins.DEEP / 60 : null;
@@ -612,9 +647,12 @@ export function transform(
       deepMinutes: hasStages ? Math.round(mins.DEEP) : null,
       remMinutes: hasStages ? Math.round(mins.REM) : null,
       lightMinutes: hasStages ? Math.round(mins.LIGHT) : null,
-      awakeMinutes: hasStages ? Math.round(mins.AWAKE) : null,
-      sleepScore: null, // not exposed by this API surface
-      avgRespiratoryRate: null,
+      awakeMinutes: hasStages ? Math.round(num(s.summary?.minutesAwake) ?? mins.AWAKE) : null,
+      // Fitbit's sleep SCORE is not exposed by the Google Health API (no
+      // sleep-score / sleep-quality dataType exists; verified via --probe).
+      // Left null deliberately — this is a source limitation, not a mapping gap.
+      sleepScore: null,
+      avgRespiratoryRate: null, // per-night value not in the sleep payload; daily-respiratory-rate is mapped on the daily row instead
       spo2: null,
     });
   }
@@ -636,7 +674,7 @@ export function transform(
     (p) => kcal(p.activeEnergyBurned),
     dev,
   )) {
-    row(src, date).caloriesBurned = Math.round(sum);
+    row(src, date).activeCaloriesBurned = Math.round(sum);
   }
 
   // Food intake (calories in): nutrition-log entries → sum per (source, day).

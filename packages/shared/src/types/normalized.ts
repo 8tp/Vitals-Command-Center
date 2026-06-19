@@ -74,7 +74,7 @@ export interface FitbitDay {
   remHours: number | null;
   lightHours: number | null;
   steps: number | null;
-  caloriesBurned: number | null; // active energy burned (kcal)
+  activeCaloriesBurned: number | null; // active energy burned (kcal). Basal/total is NOT available from Google Health for Fitbit Air.
   caloriesIn: number | null; // logged food intake (kcal); null when not logged / no nutrition scope
 }
 

@@ -7,11 +7,7 @@ interface Props {
   daily: NormalizedDailySummary[];
 }
 
-/** caloriesBurned / caloriesIn are newer Fitbit fields not yet in the type. */
-type FitbitExt = FitbitDay & {
-  caloriesBurned?: number | null;
-  caloriesIn?: number | null;
-};
+type FitbitExt = FitbitDay;
 
 interface Latest {
   value: number | null;
@@ -65,7 +61,7 @@ export function MetricsGrid({ daily }: Props) {
   const resp = latest(daily, (f) => f.respiratoryRate);
   const skin = latest(daily, (f) => f.skinTempDelta);
   const steps = latest(daily, (f) => f.steps);
-  const burned = latest(daily, (f) => f.caloriesBurned);
+  const burned = latest(daily, (f) => f.activeCaloriesBurned);
   const intake = latest(daily, (f) => f.caloriesIn);
 
   return (

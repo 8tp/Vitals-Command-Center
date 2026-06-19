@@ -54,7 +54,7 @@ export function buildBriefContext(db: Database, date: string): string {
       remH: f?.remHours ?? null,
       skinTempDelta: f?.skinTempDelta ?? null,
       steps: f?.steps ?? null,
-      calOut: (f as { caloriesBurned?: number | null })?.caloriesBurned ?? null,
+      calOut: (f as { activeCaloriesBurned?: number | null })?.activeCaloriesBurned ?? null,
       calIn: (f as { caloriesIn?: number | null })?.caloriesIn ?? null,
     };
   });

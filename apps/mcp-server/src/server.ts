@@ -84,12 +84,24 @@ export function buildServer(db: Database, opts: BuildServerOptions = {}): Server
         isError: true,
       };
     }
-    const result = await runTool(db, name, args ?? {});
-    return {
-      content: [
-        { type: 'text', text: typeof result === 'string' ? result : JSON.stringify(result, null, 2) },
-      ],
-    };
+    try {
+      const result = await runTool(db, name, args ?? {});
+      return {
+        content: [
+          { type: 'text', text: typeof result === 'string' ? result : JSON.stringify(result, null, 2) },
+        ],
+      };
+    } catch (err) {
+      // Without this, a thrown tool error reaches the SDK as an opaque
+      // "Error occurred during tool execution" with no server-side trace.
+      // Log the full stack and return the real message so failures are debuggable.
+      const e = err as Error;
+      process.stderr.write(`[vcc-mcp] tool ${name} failed: ${e.stack ?? e.message}\n`);
+      return {
+        content: [{ type: 'text' as const, text: `Tool "${name}" failed: ${e.message}` }],
+        isError: true,
+      };
+    }
   });
 
   return server;

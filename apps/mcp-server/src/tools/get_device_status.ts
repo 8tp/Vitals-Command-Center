@@ -7,9 +7,10 @@ export function getDeviceStatus(db: Database) {
   const latest = queries.syncLog.latestPerSource(db);
   return {
     date: today,
-    hasWhoop: row?.devices.whoop ?? false,
-    hasOura: row?.devices.oura ?? false,
-    hasApple: row?.devices.apple ?? false,
+    hasFitbit: row?.devices?.fitbit ?? false, // primary device as of 2026-06
+    hasWhoop: row?.devices?.whoop ?? false,
+    hasOura: row?.devices?.oura ?? false,
+    hasApple: row?.devices?.apple ?? false,
     lastSyncs: latest,
   };
 }

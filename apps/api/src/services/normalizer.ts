@@ -131,7 +131,7 @@ export function normalizeAndUpsert(
         fitbit_rem_hours: fb?.remHours ?? null,
         fitbit_light_hours: fb?.lightHours ?? null,
         fitbit_steps: fb?.steps ?? null,
-        fitbit_calories_burned: fb?.caloriesBurned ?? null,
+        fitbit_calories_burned: fb?.activeCaloriesBurned ?? null,
         fitbit_calories_in: fb?.caloriesIn ?? null,
 
         consensus_hrv: consensusHrv,
@@ -160,9 +160,13 @@ function indexByDate<T extends { date: string }>(rows: T[]): Map<string, T> {
 function weightedAvg(metric: string, values: Record<DeviceSource, number | null>): number | null {
   let num = 0;
   let den = 0;
+  const isSleep = metric === 'sleep_stages';
   for (const device of DEVICE_SOURCES) {
     const v = values[device];
     if (v == null || !Number.isFinite(v)) continue;
+    // A 0h sleep value means "no data", not a real zero-length night — exclude it
+    // so it can't drag the consensus/baseline down (mirrors the null sentinel).
+    if (isSleep && v <= 0) continue;
     const w = accuracyWeight(metric, device);
     if (w === 0) continue;
     num += v * w;

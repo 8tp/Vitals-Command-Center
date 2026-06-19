@@ -1,0 +1,38 @@
+{
+  "name": "vitals-command-center",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal health intelligence platform aggregating WHOOP, Oura, and Apple Watch data into a tactical dashboard.",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web,mcp -c red,blue,magenta \"npm run dev --workspace apps/api\" \"npm run dev --workspace apps/web\" \"npm run dev --workspace apps/mcp-server\"",
+    "dev:api": "npm run dev --workspace apps/api",
+    "dev:web": "npm run dev --workspace apps/web",
+    "dev:mcp": "npm run dev --workspace apps/mcp-server",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "tsc -b",
+    "lint": "eslint \"{apps,packages,scripts}/**/*.{ts,tsx}\"",
+    "format": "prettier --write \"{apps,packages,scripts}/**/*.{ts,tsx,css,json,md}\"",
+    "db:migrate": "npm run db:migrate --workspace packages/db",
+    "db:seed": "tsx scripts/seed_demo_data.ts",
+    "sync:manual": "tsx apps/api/src/jobs/sync.ts --once",
+    "setup": "bash scripts/setup.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/node": "^22.7.0",
+    "concurrently": "^9.0.1",
+    "eslint": "^9.12.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.8.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

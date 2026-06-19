@@ -1,0 +1,31 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="46%" r="50%">
+      <stop offset="0%" stop-color="#5FE3C4" stop-opacity="0.16"/>
+      <stop offset="55%" stop-color="#5FE3C4" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#5FE3C4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5FE3C4"/>
+      <stop offset="100%" stop-color="#39C9C0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- backdrop -->
+  <rect width="1024" height="1024" rx="224" fill="#0C1116"/>
+  <rect x="6" y="6" width="1012" height="1012" rx="220" fill="none" stroke="#5FE3C4" stroke-opacity="0.08" stroke-width="2"/>
+  <circle cx="512" cy="500" r="330" fill="url(#glow)"/>
+
+  <!-- gauge track (270°, opening at bottom) -->
+  <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="#22303E" stroke-width="46" stroke-linecap="round"/>
+
+  <!-- readiness progress (~66%) -->
+  <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="url(#arc)" stroke-width="46" stroke-linecap="round" stroke-dasharray="1057 1700"/>
+
+  <!-- progress endpoint marker -->
+  <circle cx="744.6" cy="252.1" r="15" fill="#0C1116" stroke="#5FE3C4" stroke-width="10"/>
+
+  <!-- heartbeat / pulse through the center -->
+  <path d="M 352 512 L 452 512 L 486 470 L 514 512 L 540 512 L 566 402 L 596 624 L 622 512 L 672 512"
+        fill="none" stroke="#5FE3C4" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

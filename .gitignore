@@ -1,0 +1,50 @@
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build output ---
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+apps/web/dev-dist/
+
+# --- Secrets / local env — NEVER commit ---
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- Private runtime data: health DB, OAuth tokens, MCP clients, backups ---
+# The ENTIRE data dir is private (vitals.db, .google-tokens.json,
+# .mcp-oauth.json, .whoop-tokens.json, backups, exports, briefings).
+# Keep the directory itself via .gitkeep so a fresh clone has the path.
+data/*
+!data/.gitkeep
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+pm2.log
+
+# --- Editor / OS ---
+.DS_Store
+.AppleDouble
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# --- Testing / coverage ---
+coverage/
+.nyc_output
+
+# --- Cache / keys ---
+.cache/
+.eslintcache
+*.pem
+*.key

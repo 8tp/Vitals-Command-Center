@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitals — All your wearables, one calm view.</title>
+  <meta name="description" content="Vitals is a private, self-hosted health dashboard. Unify Fitbit, Oura, WHOOP, Apple Health and more, see a friendly readiness ring, and get a daily AI brief — all running on a box you own." />
+  <meta name="theme-color" content="#F6F7F9" />
+
+  <!-- MAINTAINER: replace USER in all github.com/USER/... links with your GitHub handle/org -->
+  <link rel="canonical" href="https://github.com/USER/vitals-command-center" />
+
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Vitals — All your wearables, one calm view." />
+  <meta property="og:description" content="A private, self-hosted health dashboard. Unify your wearables, see a friendly readiness ring, and get a daily AI brief — on a box you own." />
+  <!-- MAINTAINER: set og:url + og:image to your absolute deployed URLs (e.g. https://USER.github.io/vitals-command-center/) -->
+  <meta property="og:image" content="assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vitals — All your wearables, one calm view." />
+  <meta name="twitter:description" content="A private, self-hosted health dashboard for your wearables. Your box, your data." />
+  <meta name="twitter:image" content="assets/og-image.png" />
+
+  <link rel="icon" href="assets/icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav" id="top">
+    <div class="wrap nav__inner">
+      <a class="brand" href="#top" aria-label="Vitals home">
+        <img class="brand__mark" src="assets/icon.png" alt="" width="32" height="32" />
+        <span class="brand__name">Vitals</span>
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#self-host">Self-host</a>
+        <a class="nav__cta" href="https://github.com/USER/vitals-command-center" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <img class="hero__art" src="assets/hero.jpg" alt="" aria-hidden="true" />
+      <div class="hero__scrim" aria-hidden="true"></div>
+      <div class="wrap hero__inner">
+        <p class="kicker">Private · self-hosted · open source</p>
+        <h1 class="hero__title">Your health, gently<br />brought together.</h1>
+        <p class="hero__sub">
+          Vitals unifies every wearable you wear, shows a friendly readiness ring,
+          and writes you a calm daily brief — all on a box you own, with your data
+          never leaving home.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="https://github.com/USER/vitals-command-center" rel="noopener">View on GitHub</a>
+          <a class="btn btn--soft" href="#self-host">Self-host it</a>
+        </div>
+        <p class="tagline"><span class="tagline__dot" aria-hidden="true"></span>All your wearables, one calm view.</p>
+      </div>
+    </section>
+
+    <!-- ===== SOURCE CHIPS ===== -->
+    <section class="sources" aria-label="Supported data sources">
+      <div class="wrap">
+        <p class="sources__label">Bring the wearables you already love</p>
+        <ul class="chips">
+          <li class="chip">Fitbit</li>
+          <li class="chip">Pixel</li>
+          <li class="chip">Google Health</li>
+          <li class="chip">Oura</li>
+          <li class="chip">WHOOP</li>
+          <li class="chip">Apple Health</li>
+          <li class="chip chip--soft">Garmin <span class="chip__tag">via adapter API</span></li>
+        </ul>
+        <p class="sources__note">More sources are easy to add through a simple, community-extensible adapter API.</p>
+      </div>
+    </section>
+
+    <!-- ===== PROBLEM → SOLUTION ===== -->
+    <section class="ps reveal">
+      <div class="wrap ps__grid">
+        <article class="ps__col">
+          <p class="eyebrow">The problem</p>
+          <h2>Your health lives in a dozen different apps.</h2>
+          <p class="ps__body">
+            Sleep in one app, heart rate in another, steps and meals somewhere else —
+            each behind its own login, subscription, and cloud you can't see into.
+            There's no single, calm place that just tells you how you're doing today.
+          </p>
+        </article>
+        <article class="ps__col ps__col--solution">
+          <p class="eyebrow eyebrow--brand">The calm alternative</p>
+          <h2>One warm view that brings it all home.</h2>
+          <p class="ps__body">
+            Vitals gathers every source into a single dashboard on your own hardware,
+            distills it into a friendly readiness read, and surfaces the trends that
+            matter — quietly, privately, and entirely yours.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== FEATURE SHOWCASE ===== -->
+    <section class="features" id="features">
+      <div class="wrap">
+        <header class="sec-head reveal">
+          <p class="eyebrow eyebrow--brand">What you'll see</p>
+          <h2 class="sec-head__title">A dashboard that feels like a deep breath.</h2>
+          <p class="sec-head__sub">
+            A friendly readiness ring, sleep, energy in and out, steps, gentle trends,
+            and your daily brief — everything in one calm, glanceable place.
+          </p>
+        </header>
+
+        <figure class="shot shot--wide reveal">
+          <div class="shot__frame">
+            <img src="assets/screenshot-desktop.png" alt="The Vitals dashboard in light mode: a friendly readiness ring, sleep and energy cards, steps, gentle trend charts, and the daily brief." loading="lazy" decoding="async" width="1600" height="1000" />
+          </div>
+          <figcaption><strong>The readiness dashboard.</strong> Sleep, recovery, and energy distilled into one friendly number — with kind, plain-language guidance for the day.</figcaption>
+        </figure>
+
+        <div class="theme-pair reveal">
+          <div class="theme-pair__head">
+            <p class="eyebrow eyebrow--brand">Light &amp; dark</p>
+            <h3>Beautiful, whichever way you like it.</h3>
+            <p>Soft and airy by day, calm and premium by night. Vitals follows your taste with a gentle, flicker-free theme switch.</p>
+          </div>
+          <div class="theme-pair__shots">
+            <figure class="shot shot--pair">
+              <div class="shot__frame">
+                <img src="assets/screenshot-desktop.png" alt="Vitals dashboard in its light theme." loading="lazy" decoding="async" width="1600" height="1000" />
+              </div>
+              <figcaption>Light</figcaption>
+            </figure>
+            <figure class="shot shot--pair">
+              <div class="shot__frame shot__frame--dark">
+                <img src="assets/screenshot-dark.png" alt="Vitals dashboard in its soft, premium dark theme." loading="lazy" decoding="async" width="1600" height="1000" />
+              </div>
+              <figcaption>Dark</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="mobile-row reveal">
+          <div class="phone">
+            <div class="phone__notch" aria-hidden="true"></div>
+            <img src="assets/screenshot-mobile.png" alt="Vitals installed as a mobile app: the readiness ring and metric cards with a friendly bottom navigation bar." loading="lazy" decoding="async" width="600" height="1298" />
+          </div>
+          <div class="mobile-row__copy">
+            <p class="eyebrow eyebrow--brand">In your pocket</p>
+            <h3>Install it like any app.</h3>
+            <p>Vitals is a progressive web app — add it to your home screen and it opens full-screen, works offline-first, and feels right at home next to your other health apps.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DAILY BRIEF ===== -->
+    <section class="brief" id="brief">
+      <img class="brief__art" src="assets/atmos.jpg" alt="" aria-hidden="true" loading="lazy" />
+      <div class="wrap brief__grid">
+        <div class="brief__copy reveal">
+          <p class="eyebrow eyebrow--brand">Your daily brief</p>
+          <h2>A friendly morning read, written by your AI.</h2>
+          <p class="brief__body">
+            Each morning Vitals looks at your overnight data and writes a warm,
+            plain-language brief — readiness, sleep, food, training, and a few gentle
+            suggestions. It's bring-your-own-model: run it fully local with
+            <strong>Ollama or LocalAI</strong> for 100% privacy and no cloud, or point it
+            at Claude or Codex if you prefer. The local path needs no API key.
+          </p>
+          <ul class="brief__feats">
+            <li><span class="badge badge--brand">100% local</span> Run entirely on your machine with Ollama or LocalAI. Nothing ever leaves the box.</li>
+            <li><span class="badge">Your choice</span> Prefer a cloud model? Point it at Claude or Codex instead. Swap any time.</li>
+            <li><span class="badge">Ask anywhere</span> A built-in MCP server lets you query your data from claude.ai or Claude Desktop.</li>
+          </ul>
+        </div>
+
+        <figure class="brief__card reveal" aria-label="Example daily brief">
+          <header class="bc__head">
+            <span class="bc__title">Daily brief</span>
+            <span class="bc__meta">June 19 · 6:13 AM · local model</span>
+          </header>
+          <dl class="bc__body">
+            <div class="bc__row">
+              <dt>Readiness</dt>
+              <dd><span class="bc__state bc__state--warn">Take it easy · 64</span> Your recovery is a little below your baseline today — keep the intensity gentle and you'll bounce back.</dd>
+            </div>
+            <div class="bc__row">
+              <dt>Sleep</dt>
+              <dd>7h 05m, just under your usual. Deep sleep looked good; REM ran a touch light. A steady wake time will help.</dd>
+            </div>
+            <div class="bc__row">
+              <dt>Food</dt>
+              <dd>Yesterday landed a bit over maintenance. Easing back toward balance today — maybe a little more protein.</dd>
+            </div>
+            <div class="bc__row">
+              <dt>Training</dt>
+              <dd>A relaxed zone-2 walk or an easy 30 minutes would suit today nicely. Save the hard session for tomorrow.</dd>
+            </div>
+          </dl>
+          <p class="bc__foot">Example output — the tone and format are entirely yours to edit.</p>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== PRIVACY / SELF-HOSTED / OPEN SOURCE ===== -->
+    <section class="trio">
+      <div class="wrap">
+        <header class="sec-head reveal">
+          <p class="eyebrow eyebrow--brand">Yours, by design</p>
+          <h2 class="sec-head__title">Private. Self-hosted. Open.</h2>
+          <p class="sec-head__sub">Vitals runs on your own always-on machine. Every reading lives in a local database on hardware you control.</p>
+        </header>
+        <div class="trio__grid reveal">
+          <article class="tcard">
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h3>Truly private</h3>
+            <p>Your data lives in a local database on your own box — a Mac mini or any always-on machine. No vendor cloud, no telemetry. Reach it from anywhere over a private Tailscale network.</p>
+          </article>
+          <article class="tcard">
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+            </div>
+            <h3>Self-hosted</h3>
+            <p>You run Vitals yourself, on your own hardware, on your own terms. Keep it alive with launchd on macOS or systemd on Linux, and it just quietly does its job.</p>
+          </article>
+          <article class="tcard">
+            <div class="tcard__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18c-4 1-4-2-6-2"/><path d="M15 21v-3.5a3 3 0 00-.8-2.3c2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.3 4.3 0 00-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 00-6 0C10.5 1.2 9.5 1.5 9.5 1.5a4.3 4.3 0 00-.1 3.2A4.6 4.6 0 008 7.9c0 4.6 2.7 5.7 5.5 6a3 3 0 00-.8 2.3V21"/></svg>
+            </div>
+            <h3>Open source</h3>
+            <p>A readable, friendly codebase you can audit, fork, and extend. Add a wearable, reshape the brief, or run it untouched forever — it answers only to you.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SELF-HOST ===== -->
+    <section class="install" id="self-host">
+      <div class="wrap install__grid">
+        <div class="install__copy reveal">
+          <p class="eyebrow eyebrow--brand">Self-host in minutes</p>
+          <h2>Up and running, gently.</h2>
+          <ol class="steps">
+            <li><span class="steps__n">1</span><div><strong>Clone &amp; install.</strong> Grab the repo and install dependencies.</div></li>
+            <li><span class="steps__n">2</span><div><strong>Configure.</strong> Copy <code>.env.example</code> to <code>.env</code> and add your settings.</div></li>
+            <li><span class="steps__n">3</span><div><strong>Connect a wearable.</strong> Link Fitbit, Oura, WHOOP, or Apple Health in a few clicks.</div></li>
+            <li><span class="steps__n">4</span><div><strong>Run it.</strong> Start in dev, then keep it always-on with launchd or systemd.</div></li>
+          </ol>
+          <a class="btn btn--primary" href="https://github.com/USER/vitals-command-center#readme" rel="noopener">Read the full setup</a>
+        </div>
+
+        <figure class="code reveal" aria-label="Quickstart commands">
+          <div class="code__bar">
+            <span class="code__dot"></span><span class="code__dot"></span><span class="code__dot"></span>
+            <span class="code__name">quickstart.sh</span>
+            <button class="code__copy" type="button" data-copy="git clone https://github.com/USER/vitals-command-center.git
+cd vitals-command-center
+cp .env.example .env
+npm install
+npm run dev">Copy</button>
+          </div>
+<pre class="code__body"><code><span class="c-c"># clone the repo</span>
+git clone https://github.com/USER/vitals-command-center.git
+cd vitals-command-center
+
+<span class="c-c"># configure your settings</span>
+cp .env.example .env
+
+<span class="c-c"># install + run the app, API, and MCP server</span>
+npm install
+npm run dev
+
+<span class="c-c"># keep it always-on (macOS)</span>
+launchctl load ~/Library/LaunchAgents/vitals.plist</code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== FINAL CTA ===== -->
+    <section class="finalcta">
+      <div class="wrap finalcta__inner reveal">
+        <h2>Bring your health home.</h2>
+        <p>Clone it, connect your wearables, and own your data. New source adapters and contributions are always welcome.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="https://github.com/USER/vitals-command-center" rel="noopener">View on GitHub</a>
+          <a class="btn btn--soft" href="#self-host">Self-host it</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__brand">
+        <img class="brand__mark" src="assets/icon.png" alt="" width="28" height="28" />
+        <span class="brand__name">Vitals</span>
+      </div>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="#features">Features</a>
+        <a href="#self-host">Self-host</a>
+        <a href="https://github.com/USER/vitals-command-center" rel="noopener">GitHub</a>
+        <a href="https://github.com/USER/vitals-command-center/blob/main/LICENSE" rel="noopener">License</a>
+      </nav>
+      <!-- MAINTAINER: confirm the license. MIT is used here as a placeholder. -->
+      <p class="footer__meta">Open source · MIT License · All your wearables, one calm view.</p>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>

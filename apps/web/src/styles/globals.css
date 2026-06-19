@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--base);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Calm cross-fade when the theme flips (skipped under reduced-motion). */
+  @media (prefers-reduced-motion: no-preference) {
+    body,
+    .card,
+    .panel,
+    .panel-inset,
+    .instrument {
+      transition: background-color 0.25s ease, border-color 0.25s ease,
+        box-shadow 0.25s ease, color 0.25s ease;
+    }
+  }
+
+  /* Soft ambient brand wash so flat surfaces feel warm, not void. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(120% 80% at 50% -10%, var(--page-glow), transparent 65%);
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Visible, friendly focus ring everywhere */
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* Numerics: aligned via tabular-nums, but in the friendly sans (NO mono). */
+  .num {
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+}
+
+@layer components {
+  /* ---- Small label: sentence case, friendly, normal tracking ---- */
+  .label-micro {
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-dim);
+    font-weight: 600;
+  }
+  .section-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---- Card: the base soft, rounded, shadowed surface ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+
+  /* Aliases retained for the contract — all map to the soft card. */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .panel-inset {
+    background: var(--surface-inset);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+  }
+
+  /* ---- Instrument (legacy name): now a soft interactive card ---- */
+  .instrument {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+  .instrument:hover {
+    border-color: var(--hairline-strong);
+    box-shadow: var(--shadow-card-hover);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .instrument:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  /* ---- Pill / chip: rounded, sentence case, friendly ---- */
+  .pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: var(--font-body);
+  }
+
+  /* Interactive pills used as real buttons get a comfortable touch target
+     on small screens; collapses back to compact density at md+. */
+  .pill-tap {
+    @apply min-h-[44px] px-4;
+  }
+  /* Square-ish variant for dense rows (1–5 scale) so 5 targets still fit at 390px. */
+  .pill-tap-sq {
+    @apply min-h-[44px] min-w-[40px] justify-center;
+  }
+  @media (min-width: 768px) {
+    .pill-tap {
+      @apply min-h-0 px-3;
+    }
+    .pill-tap-sq {
+      @apply min-h-0 min-w-0;
+    }
+  }
+
+  /* ---- Primary CTA: the ONE brand-gradient button ---- */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-white;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.28);
+    transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 6px 20px rgba(20, 184, 166, 0.34);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+  }
+
+  /* ---- Secondary / quiet button ---- */
+  .btn-soft {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-ink;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .btn-soft:hover {
+    border-color: var(--hairline-strong);
+    background: var(--surface);
+  }
+
+  /* ---- Device dot ---- */
+  .device-dot {
+    @apply inline-block rounded-full;
+    width: 7px;
+    height: 7px;
+  }
+
+  /* ---- Track + fill (confidence, mini-progress) — soft + rounded ---- */
+  .track {
+    @apply w-full overflow-hidden;
+    border-radius: var(--radius-pill);
+    height: 8px;
+    background: var(--surface-inset);
+  }
+  .track-fill {
+    @apply h-full;
+    border-radius: var(--radius-pill);
+    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--hairline-strong) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--hairline-strong);
+    border-radius: 999px;
+  }
+}
+
+@layer utilities {
+  /* Hairline rule used as soft dividers */
+  .rule {
+    border-color: var(--hairline);
+  }
+  /* Brand gradient text (wordmark accent, etc.) */
+  .text-gradient-brand {
+    background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+/* ---- Motion: gentle, smooth, reduced-motion respected ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .arc-anim {
+    animation: arc-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .ring-anim {
+    animation: ring-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arc-anim {
+    stroke-dashoffset: var(--arc-target) !important;
+  }
+  .ring-anim {
+    stroke-dashoffset: var(--ring-target) !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

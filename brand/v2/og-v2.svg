@@ -1,0 +1,16 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F6F7F9" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#F6F7F9" stop-opacity="0.55"/>
+      <stop offset="75%" stop-color="#F6F7F9" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#F6F7F9"/>
+  <image href="hero.png" xlink:href="hero.png" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1200" height="630" fill="url(#wash)"/>
+  <image href="icon.png" xlink:href="icon.png" x="74" y="150" width="92" height="92"/>
+  <text x="72" y="372" font-family="Plus Jakarta Sans" font-weight="800" font-size="112" fill="#1A2330">Vitals</text>
+  <text x="76" y="430" font-family="Plus Jakarta Sans" font-weight="500" font-size="32" fill="#5B6776">All your wearables, one calm view.</text>
+  <text x="76" y="476" font-family="Plus Jakarta Sans" font-weight="500" font-size="24" fill="#0E9C8C">Private · self-hosted · open source</text>
+</svg>

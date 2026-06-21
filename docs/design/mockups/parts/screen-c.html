@@ -1,0 +1,911 @@
+<style>
+/* ============================================================
+   SCREEN C — ETHEREAL GLASS · Vitals
+   Vibe: Ethereal Glass · Layout: Asymmetrical Bento
+   All selectors scoped to #screen-c. Keyframes prefixed c-.
+   ============================================================ */
+#screen-c{
+  --c-ease:cubic-bezier(0.32,0.72,0,1);
+  --c-bg:#050505;
+  --c-ink:#f4f7f6;
+  --c-mut:#8b938f;
+  --c-faint:#5c6360;
+  --c-acc:#34e0b0;          /* single accent — emerald/teal */
+  --c-acc-deep:#0e9c7c;
+  --c-glass:rgba(255,255,255,.045);
+  --c-glass-core:rgba(14,17,16,.55);
+  --c-hair:rgba(255,255,255,.10);
+  --c-hair-soft:rgba(255,255,255,.06);
+  --c-inset:inset 0 1px 0 rgba(255,255,255,.12);
+  --c-r-out:28px;
+  --c-r-in:20px;
+  position:relative;
+  min-height:100%;
+  width:100%;
+  color:var(--c-ink);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:
+    radial-gradient(620px 440px at 12% -6%, rgba(52,224,176,.16), transparent 60%),
+    radial-gradient(720px 560px at 96% 8%, rgba(20,140,120,.14), transparent 62%),
+    radial-gradient(900px 700px at 78% 112%, rgba(40,180,150,.10), transparent 60%),
+    radial-gradient(540px 520px at 30% 78%, rgba(16,110,96,.08), transparent 64%),
+    var(--c-bg);
+  letter-spacing:-.01em;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+/* faint film/vignette so orbs feel atmospheric, not flat */
+#screen-c::before{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(120% 90% at 50% -10%, transparent 55%, rgba(0,0,0,.55) 100%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;
+  opacity:.5;
+}
+
+#screen-c *{box-sizing:border-box}
+
+#screen-c .wrap{
+  position:relative;
+  z-index:1;
+  max-width:1240px;
+  margin:0 auto;
+  padding:30px 30px 96px;
+}
+
+/* shared entry motion */
+#screen-c .rise{
+  opacity:0;
+  transform:translateY(26px);
+  filter:blur(10px);
+  animation:c-rise .95s var(--c-ease) forwards;
+}
+#screen-c .d1{animation-delay:.05s}
+#screen-c .d2{animation-delay:.12s}
+#screen-c .d3{animation-delay:.19s}
+#screen-c .d4{animation-delay:.26s}
+#screen-c .d5{animation-delay:.33s}
+#screen-c .d6{animation-delay:.40s}
+#screen-c .d7{animation-delay:.47s}
+@keyframes c-rise{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+
+#screen-c .eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font:600 9.5px/1 'Space Grotesk','Plus Jakarta Sans',sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  color:var(--c-mut);
+  padding:6px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--c-hair-soft);
+}
+#screen-c .eyebrow .dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--c-acc);
+  box-shadow:0 0 9px 1px rgba(52,224,176,.85);
+}
+
+/* ============================================================
+   DOUBLE-BEZEL primitives (outer shell + inner core)
+   ============================================================ */
+#screen-c .bezel{
+  position:relative;
+  background:var(--c-glass);
+  border:1px solid var(--c-hair);
+  border-radius:var(--c-r-out);
+  padding:7px;
+  -webkit-backdrop-filter:blur(26px) saturate(120%);
+  backdrop-filter:blur(26px) saturate(120%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 30px 70px -34px rgba(0,0,0,.9);
+  transition:transform .8s var(--c-ease), border-color .6s var(--c-ease);
+  will-change:transform;
+}
+#screen-c .core{
+  position:relative;
+  border-radius:var(--c-r-in);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012) 40%),
+    var(--c-glass-core);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:22px;
+  height:100%;
+  overflow:hidden;
+}
+#screen-c .lift:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18)}
+
+/* ============================================================
+   1 · FLOATING GLASS NAV PILL
+   ============================================================ */
+#screen-c .topline{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:22px;margin-bottom:24px;flex-wrap:wrap;
+}
+#screen-c .greet h1{
+  font-family:'Sora',sans-serif;
+  font-weight:600;
+  font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:-.035em;
+  line-height:1.02;
+  background:linear-gradient(180deg,#ffffff,#aeb6b2);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+#screen-c .greet .date{
+  margin-top:9px;
+  font-size:12.5px;color:var(--c-mut);letter-spacing:.04em;
+}
+
+#screen-c .nav{
+  display:flex;align-items:center;gap:6px;
+  padding:7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--c-hair);
+  -webkit-backdrop-filter:blur(30px) saturate(130%);
+  backdrop-filter:blur(30px) saturate(130%);
+  box-shadow:var(--c-inset), 0 24px 50px -28px rgba(0,0,0,.85);
+}
+#screen-c .brand{
+  display:flex;align-items:center;gap:9px;
+  padding:0 12px 0 8px;
+  font-family:'Sora',sans-serif;font-weight:700;
+  font-size:15px;letter-spacing:-.02em;
+  white-space:nowrap;
+}
+#screen-c .brand .glyph{
+  width:26px;height:26px;border-radius:9px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg, var(--c-acc), var(--c-acc-deep));
+  box-shadow:0 0 16px -2px rgba(52,224,176,.7), var(--c-inset);
+}
+#screen-c .brand .glyph svg{width:15px;height:15px;display:block}
+#screen-c .navsep{width:1px;height:20px;background:var(--c-hair);margin:0 2px}
+
+#screen-c .navlinks{display:flex;align-items:center;gap:2px}
+#screen-c .navlink{
+  font:600 12.5px/1 'Space Grotesk','Plus Jakarta Sans',sans-serif;
+  letter-spacing:-.01em;
+  color:var(--c-mut);
+  padding:9px 13px;border-radius:999px;
+  cursor:pointer;white-space:nowrap;
+  transition:color .5s var(--c-ease), background .5s var(--c-ease);
+}
+#screen-c .navlink:hover{color:var(--c-ink);background:rgba(255,255,255,.05)}
+#screen-c .navlink.active{
+  color:#04140f;
+  background:linear-gradient(180deg, #ffffff, #d6f6ec);
+  box-shadow:var(--c-inset);
+}
+
+/* device indicator chip */
+#screen-c .device{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 13px;border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--c-hair-soft);
+  font:600 11.5px/1 'Space Grotesk',sans-serif;
+  color:#cfd6d2;white-space:nowrap;
+}
+#screen-c .device .pulse{
+  position:relative;width:7px;height:7px;border-radius:50%;
+  background:#00b0b9;box-shadow:0 0 0 0 rgba(0,176,185,.6);
+  animation:c-pulse 2.4s var(--c-ease) infinite;
+}
+@keyframes c-pulse{
+  0%{box-shadow:0 0 0 0 rgba(0,176,185,.55)}
+  70%{box-shadow:0 0 0 7px rgba(0,176,185,0)}
+  100%{box-shadow:0 0 0 0 rgba(0,176,185,0)}
+}
+
+/* SYNC — button-in-button pill */
+#screen-c .sync{
+  display:inline-flex;align-items:center;gap:11px;
+  padding:7px 7px 7px 17px;
+  border:0;cursor:pointer;
+  border-radius:999px;
+  font:600 12.5px/1 'Space Grotesk',sans-serif;
+  letter-spacing:-.01em;
+  color:#04130e;
+  background:linear-gradient(180deg,#5df0c6,#1fc79c);
+  box-shadow:var(--c-inset), 0 12px 30px -10px rgba(40,210,165,.6);
+  transition:transform .55s var(--c-ease), box-shadow .55s var(--c-ease), filter .5s var(--c-ease);
+}
+#screen-c .sync:hover{transform:translateY(-1px);box-shadow:var(--c-inset),0 16px 36px -10px rgba(40,210,165,.75);filter:brightness(1.04)}
+#screen-c .sync:active{transform:scale(.975)}
+#screen-c .sync .knob{
+  width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(4,19,14,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .55s var(--c-ease);
+}
+#screen-c .sync:hover .knob{transform:translate(2px,-1px) scale(1.06)}
+#screen-c .sync .knob svg{width:14px;height:14px;display:block}
+#screen-c .syncing .sync-icon{animation:c-spin 1s linear infinite;transform-origin:50% 50%}
+@keyframes c-spin{to{transform:rotate(360deg)}}
+
+/* settings gear */
+#screen-c .gear{
+  width:42px;height:42px;flex:0 0 auto;
+  border:1px solid var(--c-hair-soft);
+  border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.04);
+  color:#cfd6d2;
+  transition:transform .6s var(--c-ease), color .5s var(--c-ease), background .5s var(--c-ease);
+}
+#screen-c .gear:hover{transform:rotate(35deg);color:#fff;background:rgba(255,255,255,.08)}
+#screen-c .gear svg{width:19px;height:19px;display:block}
+
+/* nav row sits in a flex line; greeting + nav */
+#screen-c .navrow{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;flex-wrap:wrap;margin-bottom:30px;
+}
+#screen-c .navtools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+/* ============================================================
+   ASYMMETRICAL BENTO GRID
+   ============================================================ */
+#screen-c .bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:18px;
+  align-items:stretch;
+}
+#screen-c .col-hero{grid-column:span 7}
+#screen-c .col-trend{grid-column:span 5}
+#screen-c .col-4{grid-column:span 4}
+#screen-c .col-3{grid-column:span 3}
+#screen-c .col-5{grid-column:span 5}
+#screen-c .col-7{grid-column:span 7}
+#screen-c .col-6{grid-column:span 6}
+
+/* ---- READINESS HERO ---- */
+#screen-c .hero .core{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+#screen-c .ringwrap{position:relative;flex:0 0 auto;width:188px;height:188px;display:grid;place-items:center}
+#screen-c .ringwrap svg{width:188px;height:188px;transform:rotate(-90deg);display:block;filter:drop-shadow(0 0 12px rgba(52,224,176,.4))}
+#screen-c .ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:11}
+#screen-c .ring-prog{
+  fill:none;stroke:url(#c-ringgrad);stroke-width:11;stroke-linecap:round;
+  stroke-dasharray:471;
+  stroke-dashoffset:471;
+  animation:c-ring 1.7s var(--c-ease) .35s forwards;
+}
+@keyframes c-ring{to{stroke-dashoffset:84.8}} /* 82% of 471 */
+#screen-c .ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+}
+#screen-c .ring-center .num{
+  font-family:'Sora',sans-serif;font-weight:700;
+  font-size:54px;letter-spacing:-.05em;line-height:.9;
+  background:linear-gradient(180deg,#ffffff,#79e8c7);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+#screen-c .ring-center .den{font:600 12px/1 'Space Grotesk',sans-serif;color:var(--c-faint);margin-top:6px;letter-spacing:.04em}
+
+#screen-c .hero-meta{flex:1 1 230px;min-width:200px}
+#screen-c .hero-meta h2{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:25px;
+  letter-spacing:-.03em;margin:14px 0 6px;line-height:1.05;
+}
+#screen-c .hero-meta .sub{font-size:13px;color:var(--c-mut);line-height:1.55;max-width:30ch}
+
+/* recovery trio inside hero */
+#screen-c .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+#screen-c .trio .t{
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:12px 12px 13px;
+}
+#screen-c .trio .lbl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--c-faint)}
+#screen-c .trio .val{font-family:'Sora',sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;margin-top:9px}
+#screen-c .trio .val small{font-size:11px;color:var(--c-mut);font-weight:500;margin-left:2px}
+#screen-c .trio .delta{font:600 10.5px/1 'JetBrains Mono',monospace;margin-top:7px;display:inline-flex;align-items:center;gap:3px}
+#screen-c .up{color:var(--c-acc)}
+#screen-c .down{color:#6fd0ff}
+
+/* ---- HRV TREND ---- */
+#screen-c .trend .core{display:flex;flex-direction:column;height:100%}
+#screen-c .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+#screen-c .card-head .t-title{font-family:'Sora',sans-serif;font-weight:600;font-size:16px;letter-spacing:-.02em;margin-top:10px}
+#screen-c .card-head .t-sub{font:600 10px/1 'JetBrains Mono',monospace;color:var(--c-mut);margin-top:7px;letter-spacing:.02em}
+#screen-c .chartbox{position:relative;flex:1;min-height:118px;margin-top:auto}
+#screen-c .chartbox svg{width:100%;height:100%;display:block;overflow:visible}
+#screen-c .chart-base{stroke:rgba(255,255,255,.14);stroke-width:1;stroke-dasharray:3 5}
+#screen-c .chart-line{
+  fill:none;stroke:url(#c-linegrad);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 1px 8px rgba(52,224,176,.55));
+  stroke-dasharray:760;stroke-dashoffset:760;
+  animation:c-draw 2s var(--c-ease) .5s forwards;
+}
+@keyframes c-draw{to{stroke-dashoffset:0}}
+#screen-c .chart-dot{fill:#bff7e6;filter:drop-shadow(0 0 6px rgba(52,224,176,.9));opacity:0;animation:c-fade .6s var(--c-ease) 2.1s forwards}
+@keyframes c-fade{to{opacity:1}}
+#screen-c .trend-foot{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+#screen-c .trend-foot .f{font:600 10px/1 'Space Grotesk',sans-serif;color:var(--c-faint);letter-spacing:.04em}
+#screen-c .trend-foot .f b{color:var(--c-ink);font-family:'Sora',sans-serif;font-size:14px;margin-left:5px;letter-spacing:-.02em}
+
+/* ---- VITALS BENTO TILES ---- */
+#screen-c .vit-eyebrow{margin:34px 0 16px;display:flex;align-items:center;gap:12px}
+#screen-c .vit-eyebrow .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--c-hair),transparent)}
+
+#screen-c .tile .core{display:flex;flex-direction:column;justify-content:space-between;min-height:118px}
+#screen-c .tile .tl-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#screen-c .tile .tl-lbl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--c-faint)}
+#screen-c .tile .tl-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(52,224,176,.10);border:1px solid rgba(52,224,176,.22);color:var(--c-acc)}
+#screen-c .tile .tl-ic svg{width:15px;height:15px;display:block}
+#screen-c .tile .tl-val{font-family:'Sora',sans-serif;font-weight:600;font-size:30px;letter-spacing:-.04em;line-height:1;margin-top:16px}
+#screen-c .tile .tl-val small{font-size:13px;color:var(--c-mut);font-weight:500;letter-spacing:-.01em}
+#screen-c .tile .tl-meta{font:500 11px/1 'Space Grotesk',sans-serif;color:var(--c-mut);margin-top:8px}
+
+/* steps progress within its tile */
+#screen-c .steps-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:12px;box-shadow:inset 0 1px 0 rgba(0,0,0,.4)}
+#screen-c .steps-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--c-acc-deep),var(--c-acc));box-shadow:0 0 12px rgba(52,224,176,.6);width:0;animation:c-steps 1.6s var(--c-ease) .6s forwards}
+@keyframes c-steps{to{width:84.31%}}
+
+/* calorie dual mini */
+#screen-c .cal-rows{display:flex;flex-direction:column;gap:11px;margin-top:14px}
+#screen-c .cal-rows .cr{display:flex;align-items:center;gap:10px}
+#screen-c .cal-rows .cr .ck{width:7px;height:7px;border-radius:2px}
+#screen-c .cal-rows .cr .cn{font-family:'Sora',sans-serif;font-weight:600;font-size:21px;letter-spacing:-.03em}
+#screen-c .cal-rows .cr .cl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--c-faint);margin-left:auto}
+
+/* ---- SLEEP STAGES ---- */
+#screen-c .sleep .core{display:flex;flex-direction:column;height:100%}
+#screen-c .sleep-total{font-family:'Sora',sans-serif;font-weight:600;font-size:30px;letter-spacing:-.04em;margin-top:12px}
+#screen-c .sleep-total small{font-size:12px;color:var(--c-mut);font-weight:500;margin-left:4px}
+#screen-c .stagebar{display:flex;height:13px;border-radius:999px;overflow:hidden;margin:18px 0 16px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5), var(--c-inset);background:rgba(255,255,255,.05)}
+#screen-c .stagebar i{display:block;height:100%;opacity:0;transform:scaleX(.2);transform-origin:left;animation:c-grow .9s var(--c-ease) forwards}
+#screen-c .stagebar i:nth-child(1){animation-delay:.55s}
+#screen-c .stagebar i:nth-child(2){animation-delay:.68s}
+#screen-c .stagebar i:nth-child(3){animation-delay:.81s}
+#screen-c .stagebar i:nth-child(4){animation-delay:.94s}
+@keyframes c-grow{to{opacity:1;transform:scaleX(1)}}
+#screen-c .sg-deep{background:linear-gradient(180deg,#1f7d9e,#155a73)}
+#screen-c .sg-rem{background:linear-gradient(180deg,#34e0b0,#13a585)}
+#screen-c .sg-light{background:linear-gradient(180deg,#6c7cf5,#4453c9)}
+#screen-c .sg-awake{background:linear-gradient(180deg,#3a4046,#262b30)}
+#screen-c .sleep-legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:auto}
+#screen-c .sleep-legend .sl{display:flex;align-items:center;gap:9px}
+#screen-c .sleep-legend .sl .sk{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+#screen-c .sleep-legend .sl .sn{font:600 11px/1 'Space Grotesk',sans-serif;color:var(--c-mut)}
+#screen-c .sleep-legend .sl .sv{margin-left:auto;font-family:'Sora',sans-serif;font-weight:600;font-size:13px;letter-spacing:-.02em}
+
+/* ---- TODAY'S RUN ---- */
+#screen-c .run .core{display:flex;flex-direction:column;height:100%}
+#screen-c .run-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+#screen-c .run-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:rgba(252,82,0,.12);border:1px solid rgba(252,82,0,.3);font:600 10px/1 'Space Grotesk',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ff8651}
+#screen-c .run-badge .sk{width:6px;height:6px;border-radius:50%;background:#fc5200;box-shadow:0 0 8px #fc5200}
+#screen-c .run-name{font-family:'Sora',sans-serif;font-weight:600;font-size:23px;letter-spacing:-.03em;margin:18px 0 4px}
+#screen-c .run-dist{font:600 12px/1 'JetBrains Mono',monospace;color:var(--c-mut);letter-spacing:.02em}
+#screen-c .run-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:auto;padding-top:20px}
+#screen-c .run-stats .rs{border-left:1px solid var(--c-hair-soft);padding-left:13px}
+#screen-c .run-stats .rs:first-child{border-left:0;padding-left:0}
+#screen-c .run-stats .rsv{font-family:'Sora',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.03em}
+#screen-c .run-stats .rsv small{font-size:11px;color:var(--c-mut);font-weight:500}
+#screen-c .run-stats .rsl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--c-faint);margin-top:7px}
+
+/* ============================================================
+   7 · SETTINGS OVERLAY (big glass modal)
+   ============================================================ */
+#screen-c .settings-overlay{display:none}
+#screen-c.show-settings .settings-overlay{
+  display:flex;
+  position:fixed;inset:0;z-index:900;
+  align-items:center;justify-content:center;
+  padding:28px;
+  background:rgba(3,5,4,.62);
+  -webkit-backdrop-filter:blur(22px) saturate(120%);
+  backdrop-filter:blur(22px) saturate(120%);
+  animation:c-overlay .5s var(--c-ease);
+}
+@keyframes c-overlay{from{opacity:0}to{opacity:1}}
+#screen-c .settings-overlay .scrim{position:absolute;inset:0;cursor:pointer}
+#screen-c .modal{
+  position:relative;z-index:1;
+  width:min(620px,100%);
+  max-height:88vh;overflow:auto;
+  border-radius:32px;
+  padding:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--c-hair);
+  -webkit-backdrop-filter:blur(34px) saturate(140%);
+  backdrop-filter:blur(34px) saturate(140%);
+  box-shadow:var(--c-inset), 0 50px 120px -40px rgba(0,0,0,.95);
+  animation:c-modal .6s var(--c-ease);
+}
+@keyframes c-modal{from{opacity:0;transform:translateY(22px) scale(.97);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+#screen-c .modal-core{
+  border-radius:24px;
+  background:
+    radial-gradient(420px 240px at 100% 0%, rgba(52,224,176,.10), transparent 60%),
+    var(--c-glass-core);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:28px;
+}
+#screen-c .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+#screen-c .modal-head h3{font-family:'Sora',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.03em;margin-top:12px}
+#screen-c .modal-head p{font-size:12.5px;color:var(--c-mut);margin-top:9px;max-width:42ch;line-height:1.5}
+#screen-c .x{
+  width:38px;height:38px;flex:0 0 auto;border:1px solid var(--c-hair-soft);border-radius:50%;
+  background:rgba(255,255,255,.04);color:#cfd6d2;cursor:pointer;display:grid;place-items:center;
+  transition:transform .5s var(--c-ease), background .5s var(--c-ease), color .5s var(--c-ease);
+}
+#screen-c .x:hover{transform:rotate(90deg);background:rgba(255,255,255,.09);color:#fff}
+#screen-c .x svg{width:16px;height:16px;display:block}
+
+/* master sync row */
+#screen-c .master{
+  display:flex;align-items:center;gap:14px;
+  margin:20px 0 18px;padding:7px;
+  border-radius:18px;background:rgba(52,224,176,.06);border:1px solid rgba(52,224,176,.18);
+}
+#screen-c .master .mcore{
+  flex:1;display:flex;align-items:center;gap:13px;
+  padding:13px 15px;border-radius:13px;
+  background:rgba(255,255,255,.03);box-shadow:var(--c-inset);
+}
+#screen-c .master .micon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,var(--c-acc),var(--c-acc-deep));color:#04130e;box-shadow:var(--c-inset)}
+#screen-c .master .micon svg{width:17px;height:17px;display:block}
+#screen-c .master .mt{font-family:'Sora',sans-serif;font-weight:600;font-size:14px;letter-spacing:-.02em}
+#screen-c .master .ms{font:500 11px/1.4 'Space Grotesk',sans-serif;color:var(--c-mut);margin-top:4px}
+
+/* integration rows — double-bezel each */
+#screen-c .intlist{display:flex;flex-direction:column;gap:11px}
+#screen-c .introw{
+  padding:6px;border-radius:18px;
+  background:rgba(255,255,255,.035);border:1px solid var(--c-hair-soft);
+  transition:border-color .5s var(--c-ease), transform .5s var(--c-ease);
+}
+#screen-c .introw:hover{border-color:rgba(255,255,255,.16);transform:translateY(-1px)}
+#screen-c .introw .ircore{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 14px;border-radius:13px;
+  background:var(--c-glass-core);box-shadow:var(--c-inset);
+}
+#screen-c .introw .iric{width:38px;height:38px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;box-shadow:var(--c-inset);border:1px solid rgba(255,255,255,.12)}
+#screen-c .introw .iric svg{width:19px;height:19px;display:block}
+#screen-c .introw .irname{font-family:'Sora',sans-serif;font-weight:600;font-size:14.5px;letter-spacing:-.02em}
+#screen-c .introw .irmeta{font:600 10px/1 'JetBrains Mono',monospace;color:var(--c-faint);margin-top:6px;letter-spacing:.02em;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#screen-c .introw .irmeta .ok{color:var(--c-acc)}
+#screen-c .introw .irmeta .offt{color:var(--c-faint)}
+#screen-c .introw .irbody{flex:1;min-width:0}
+
+/* glass toggle */
+#screen-c .toggle{
+  width:48px;height:27px;flex:0 0 auto;border-radius:999px;position:relative;
+  background:rgba(255,255,255,.08);border:1px solid var(--c-hair-soft);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+  transition:background .5s var(--c-ease);
+}
+#screen-c .toggle::after{
+  content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
+  background:linear-gradient(180deg,#fff,#cdd4d0);
+  box-shadow:0 2px 5px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.8);
+  transition:transform .55s var(--c-ease);
+}
+#screen-c .toggle.on{background:linear-gradient(180deg,var(--c-acc),var(--c-acc-deep));border-color:transparent;box-shadow:inset 0 1px 2px rgba(0,0,0,.3),0 0 14px rgba(52,224,176,.5)}
+#screen-c .toggle.on::after{transform:translateX(21px)}
+
+#screen-c .modal-note{
+  margin-top:18px;padding:13px 15px;border-radius:13px;
+  background:rgba(255,255,255,.03);border:1px solid var(--c-hair-soft);
+  font-size:11.5px;color:var(--c-mut);line-height:1.55;
+  display:flex;gap:10px;align-items:flex-start;
+}
+#screen-c .modal-note svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;color:var(--c-acc)}
+
+/* ============================================================
+   RESPONSIVE — bento collapses to single column < 768
+   ============================================================ */
+@media (max-width:980px){
+  #screen-c .col-hero,#screen-c .col-trend{grid-column:span 12}
+  #screen-c .col-4,#screen-c .col-3{grid-column:span 6}
+  #screen-c .col-5,#screen-c .col-7,#screen-c .col-6{grid-column:span 12}
+}
+@media (max-width:768px){
+  #screen-c .wrap{padding:20px 16px 72px}
+  #screen-c .navrow{flex-direction:column;align-items:stretch}
+  #screen-c .nav{overflow-x:auto;flex-wrap:nowrap}
+  #screen-c .navlinks{flex-wrap:nowrap}
+  #screen-c .col-4,#screen-c .col-3,#screen-c .col-5,#screen-c .col-7,#screen-c .col-6{grid-column:span 12}
+  #screen-c .trio{grid-template-columns:1fr}
+  #screen-c .sleep-legend{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  #screen-c *{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}
+  #screen-c .rise{opacity:1;transform:none;filter:none}
+}
+</style>
+
+<section class="screen" id="screen-c">
+  <!-- inline SVG defs (gradients) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="c-ringgrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7df0d0"/>
+        <stop offset="0.55" stop-color="#34e0b0"/>
+        <stop offset="1" stop-color="#0e9c7c"/>
+      </linearGradient>
+      <linearGradient id="c-linegrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#1fc79c"/>
+        <stop offset="1" stop-color="#7df0d0"/>
+      </linearGradient>
+      <linearGradient id="c-areagrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(52,224,176,.42)"/>
+        <stop offset="1" stop-color="rgba(52,224,176,0)"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wrap">
+
+    <!-- ===== NAV ROW ===== -->
+    <div class="navrow rise d1">
+      <div class="greet">
+        <h1>Good morning, Alex</h1>
+        <div class="date">Saturday, June 20</div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <div class="brand">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 13h3.2l1.8-5 3 11 2.4-8 1.6 2h3.4" stroke="#04140f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Vitals
+        </div>
+        <span class="navsep"></span>
+        <div class="navlinks">
+          <span class="navlink active">Dashboard</span>
+          <span class="navlink">Sleep</span>
+          <span class="navlink">Activity</span>
+          <span class="navlink">Habits</span>
+          <span class="navlink">Ask Claude</span>
+        </div>
+      </nav>
+      <div class="navtools">
+        <span class="device"><span class="pulse"></span>Fitbit Air</span>
+        <button class="sync" data-sync type="button">
+          Sync
+          <span class="knob"><svg class="sync-icon" viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14.3-4.6M4 13a8 8 0 0 0 14.3 4.6" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4v3.2h3.2M20 20v-3.2h-3.2" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+        <button class="gear" data-open-settings type="button" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 3.5 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 3.5l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 20.5 7l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== BENTO ===== -->
+    <div class="bento">
+
+      <!-- HERO -->
+      <div class="hero col-hero bezel lift rise d2">
+        <div class="core">
+          <div class="ringwrap">
+            <svg viewBox="0 0 188 188" aria-hidden="true">
+              <circle class="ring-track" cx="94" cy="94" r="75"/>
+              <circle class="ring-prog" cx="94" cy="94" r="75"/>
+            </svg>
+            <div class="ring-center">
+              <div class="num">82</div>
+              <div class="den">/ 100</div>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <span class="eyebrow"><span class="dot"></span>Morning Readiness</span>
+            <h2>Primed for training</h2>
+            <p class="sub">Recovery is trending above baseline. Your body is ready for a high-intensity session today.</p>
+            <div class="trio">
+              <div class="t">
+                <div class="lbl">HRV</div>
+                <div class="val">64<small>ms</small></div>
+                <div class="delta up">▲ 6%</div>
+              </div>
+              <div class="t">
+                <div class="lbl">Resting HR</div>
+                <div class="val">52<small>bpm</small></div>
+                <div class="delta down">▼ 3</div>
+              </div>
+              <div class="t">
+                <div class="lbl">Sleep</div>
+                <div class="val">7h 24m</div>
+                <div class="delta up">▲ 18m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HRV TREND -->
+      <div class="trend col-trend bezel lift rise d3">
+        <div class="core">
+          <div class="card-head">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>14-Day HRV</span>
+              <div class="t-title">Heart rate variability</div>
+            </div>
+            <div class="t-sub">AVG 64 · BASE 60</div>
+          </div>
+          <div class="chartbox">
+            <svg viewBox="0 0 300 130" preserveAspectRatio="none" aria-hidden="true">
+              <!-- baseline (60ms) -->
+              <line class="chart-base" x1="0" y1="78" x2="300" y2="78"/>
+              <!-- area + line for: 58,62,57,64,60,66,63,69,61,67,72,65,68,64 (min56 max74 -> y) -->
+              <path d="M0,98 C7,98 14,82 23,82 C30,82 39,108 46,108 C53,108 62,72 69,72 C76,72 85,90 92,90 C99,90 108,62 115,62 C122,62 131,80 138,80 C145,80 154,44 161,44 C168,44 177,98 184,98 C191,98 200,62 207,62 C214,62 223,17 230,17 C237,17 246,80 253,80 C260,80 269,53 276,53 C283,53 293,72 300,72 L300,130 L0,130 Z" fill="url(#c-areagrad)" opacity=".9"/>
+              <path class="chart-line" d="M0,98 C7,98 14,82 23,82 C30,82 39,108 46,108 C53,108 62,72 69,72 C76,72 85,90 92,90 C99,90 108,62 115,62 C122,62 131,80 138,80 C145,80 154,44 161,44 C168,44 177,98 184,98 C191,98 200,62 207,62 C214,62 223,17 230,17 C237,17 246,80 253,80 C260,80 269,53 276,53 C283,53 293,72 300,72"/>
+              <circle class="chart-dot" cx="300" cy="72" r="3.4"/>
+            </svg>
+          </div>
+          <div class="trend-foot">
+            <span class="f">Latest<b>64 ms</b></span>
+            <span class="f">Peak<b>72 ms</b></span>
+            <span class="f">Range<b>57–72</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TODAY'S VITALS eyebrow ===== -->
+    <div class="vit-eyebrow rise d3">
+      <span class="eyebrow"><span class="dot"></span>Today's Vitals</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="bento">
+      <!-- SpO2 -->
+      <div class="tile col-3 bezel lift rise d4">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">SpO₂</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5C12 3.5 6 9.5 6 14a6 6 0 0 0 12 0c0-4.5-6-10.5-6-10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">98<small>%</small></div>
+            <div class="tl-meta">Blood oxygen · normal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Respiratory -->
+      <div class="tile col-3 bezel lift rise d4">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Respiratory</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h3l2-4 3 8 2-6 1.6 2H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">14.2<small> br/min</small></div>
+            <div class="tl-meta">Steady overnight</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skin temp -->
+      <div class="tile col-3 bezel lift rise d5">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Skin Temp</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">−0.2<small>°</small></div>
+            <div class="tl-meta">From your baseline</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps (wider) -->
+      <div class="tile col-3 bezel lift rise d5">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Steps</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4c1.5 0 2.5 1.3 2.5 3.5S10.5 13 10.5 15c0 1.5.8 2.5 2 2.5M15.5 7c1.2 0 2 1 2 2.6 0 1.4-.8 3.4-.8 4.9 0 1.2.6 2 1.6 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">8,431</div>
+            <div class="steps-bar"><span class="steps-fill"></span></div>
+            <div class="tl-meta">84% of 10,000 goal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calories (dual, wider) -->
+      <div class="tile col-6 bezel lift rise d6">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Energy Balance</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div class="cal-rows">
+            <div class="cr"><span class="ck" style="background:#34e0b0;box-shadow:0 0 8px rgba(52,224,176,.7)"></span><span class="cn">2,180</span><span class="cl">Burned</span></div>
+            <div class="cr"><span class="ck" style="background:#6c7cf5;box-shadow:0 0 8px rgba(108,124,245,.6)"></span><span class="cn">1,940</span><span class="cl">Eaten</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLEEP STAGES (wider) -->
+      <div class="sleep col-6 bezel lift rise d6">
+        <div class="core">
+          <div class="card-head">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>Sleep Stages</span>
+              <div class="sleep-total">7h 24m<small>last night</small></div>
+            </div>
+          </div>
+          <div class="stagebar" aria-hidden="true">
+            <i class="sg-deep"   style="width:20.7%"></i>
+            <i class="sg-rem"    style="width:24.3%"></i>
+            <i class="sg-light"  style="width:49.8%"></i>
+            <i class="sg-awake"  style="width:5.2%"></i>
+          </div>
+          <div class="sleep-legend">
+            <div class="sl"><span class="sk sg-deep"></span><span class="sn">Deep</span><span class="sv">1h 32m</span></div>
+            <div class="sl"><span class="sk sg-rem"></span><span class="sn">REM</span><span class="sv">1h 48m</span></div>
+            <div class="sl"><span class="sk sg-light"></span><span class="sn">Light</span><span class="sv">3h 41m</span></div>
+            <div class="sl"><span class="sk sg-awake"></span><span class="sn">Awake</span><span class="sv">23m</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODAY'S RUN (full width) -->
+      <div class="run col-6 bezel lift rise d7">
+        <div class="core">
+          <div class="run-top">
+            <div>
+              <span class="run-badge"><span class="sk"></span>Strava · Today's Run</span>
+              <div class="run-name">Morning Run</div>
+              <div class="run-dist">5.02 km</div>
+            </div>
+            <span class="tl-ic" style="width:42px;height:42px;border-radius:13px"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19l5.5-11 4 7.5 2-3.5L20 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div class="run-stats">
+            <div class="rs"><div class="rsv">37:13</div><div class="rsl">Duration</div></div>
+            <div class="rs"><div class="rsv">400<small> cal</small></div><div class="rsl">Energy</div></div>
+            <div class="rs"><div class="rsv">7:25<small>/km</small></div><div class="rsl">Avg Pace</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI nudge companion to balance run row -->
+      <div class="run col-6 bezel lift rise d7">
+        <div class="core">
+          <div class="run-top">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>Claude's Read</span>
+              <div class="run-name">Green light to push</div>
+            </div>
+            <span class="tl-ic" style="width:42px;height:42px;border-radius:13px"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg></span>
+          </div>
+          <p class="sub" style="margin-top:16px;color:var(--c-mut);font-size:13px;line-height:1.6;max-width:46ch">HRV is up 6% and resting HR dropped to 52. After that easy 5K, your system has headroom — a tempo or intervals block would land well this afternoon.</p>
+        </div>
+      </div>
+
+    </div><!-- /bento -->
+  </div><!-- /wrap -->
+
+  <!-- ===== SETTINGS OVERLAY ===== -->
+  <div class="settings-overlay">
+    <div class="scrim" data-close-settings></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="modal-core">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow"><span class="dot"></span>Settings</span>
+            <h3>Connected integrations</h3>
+            <p>Manage which sources feed Vitals. Sync runs automatically in the background.</p>
+          </div>
+          <button class="x" data-close-settings type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <!-- master auto-sync -->
+        <div class="master">
+          <div class="mcore">
+            <span class="micon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14.3-4.6M4 13a8 8 0 0 0 14.3 4.6" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4v3.2h3.2M20 20v-3.2h-3.2" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div style="flex:1">
+              <div class="mt">Automatic sync</div>
+              <div class="ms">Pull fresh data from every connected source on a schedule.</div>
+            </div>
+            <span class="toggle on" role="switch" aria-checked="true"></span>
+          </div>
+        </div>
+
+        <!-- integration rows -->
+        <div class="intlist">
+
+          <!-- Fitbit Air -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(0,176,185,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="1.7" fill="#00b0b9"/><circle cx="12" cy="6" r="1.7" fill="#00b0b9"/><circle cx="18" cy="6" r="1.7" fill="#00b0b9"/><circle cx="6" cy="12" r="1.7" fill="#00b0b9"/><circle cx="12" cy="12" r="2.4" fill="#00b0b9"/><circle cx="18" cy="12" r="1.7" fill="#00b0b9"/><circle cx="12" cy="18" r="1.7" fill="#00b0b9"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Fitbit Air</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 4h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- Apple Watch Ultra 2 -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(55,138,221,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="7" y="5.5" width="10" height="13" rx="3.4" stroke="#378add" stroke-width="1.6"/><path d="M9 5.5l.5-2h5l.5 2M9 18.5l.5 2h5l.5-2" stroke="#378add" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Apple Watch Ultra 2</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 4h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- Strava -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(252,82,0,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M10 3 4 15h3.6L10 10l2.4 5H16L10 3Z" fill="#fc5200"/><path d="M14.4 15 16 18l1.6-3H20l-3.6 6-3.6-6h2.6Z" fill="#fc5200" opacity=".7"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Strava</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 1h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- WHOOP MG (off) -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(226,75,74,.14)">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 14c3 0 3-4 6-4s3 4 6 4M5 18c2.6 0 2.6-3 5-3" stroke="#e24b4a" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">WHOOP MG</div>
+                <div class="irmeta"><span class="offt">○ Off</span><span>·</span><span>won't appear as offline</span></div>
+              </div>
+              <span class="toggle" role="switch" aria-checked="false"></span>
+            </div>
+          </div>
+
+          <!-- Oura Ring 4 (off) -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(29,158,117,.14)">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#1d9e75" stroke-width="2.4"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Oura Ring 4</div>
+                <div class="irmeta"><span class="offt">○ Off</span><span>·</span><span>won't appear as offline</span></div>
+              </div>
+              <span class="toggle" role="switch" aria-checked="false"></span>
+            </div>
+          </div>
+
+        </div><!-- /intlist -->
+
+        <div class="modal-note">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5M12 7.5v.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Turning a source off removes it from your dashboard entirely — it won't be flagged as “offline.” Re-enable any time to resume syncing.</span>
+        </div>
+
+      </div><!-- /modal-core -->
+    </div><!-- /modal -->
+  </div><!-- /settings-overlay -->
+
+</section>

@@ -26,6 +26,17 @@ export async function apiPost<TBody, TRes>(path: string, body: TBody): Promise<T
   return json.data;
 }
 
+export async function apiPatch<TBody, TRes>(path: string, body: TBody): Promise<TRes> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json()) as ApiResponse<TRes>;
+  if (!json.ok) throw new ApiError(json.error.code, json.error.error, json.error.details);
+  return json.data;
+}
+
 export function askStream(
   body: { question: string; context?: { date?: string; includeBriefing?: boolean } },
   onToken: (chunk: string) => void,

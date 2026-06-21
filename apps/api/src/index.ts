@@ -33,6 +33,7 @@ import { registerSyncRoutes } from './routes/sync.js';
 import { registerIngestRoutes } from './routes/ingest.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerConfigRoutes } from './routes/config.js';
+import { registerSettingsRoutes } from './routes/settings.js';
 import { startSchedulers } from './jobs/scheduler.js';
 
 const PORT = Number(process.env.API_PORT ?? 3001);
@@ -89,6 +90,7 @@ async function main() {
   await app.register(registerIngestRoutes, { prefix: '/api' });
   await app.register(registerAuthRoutes, { prefix: '/api' });
   await app.register(registerConfigRoutes, { prefix: '/api' });
+  await app.register(registerSettingsRoutes, { prefix: '/api' });
 
   // Serve the built web dashboard (production). Absent in dev (Vite serves it),
   // so this no-ops cleanly until `apps/web` is built. SPA: unknown GET → index.html.

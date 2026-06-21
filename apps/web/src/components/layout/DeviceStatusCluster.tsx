@@ -1,67 +1,61 @@
+import { useEffect } from 'react';
 import { DEVICE_LABEL, DEVICE_SOURCES, type DeviceSource } from '@vcc/shared';
-import { useDeviceStatus } from '../../hooks/useDeviceStatus.js';
-import { DeviceDot } from '../shared/DeviceDot.js';
+import { useHealthStore } from '../../stores/healthStore.js';
+import { useUiStore } from '../../stores/uiStore.js';
+
+const DEVICE_COLOR: Record<DeviceSource, string> = {
+  fitbit: 'var(--device-fitbit)',
+  whoop: 'var(--device-whoop)',
+  oura: 'var(--device-oura)',
+  apple: 'var(--device-apple)',
+};
 
 /**
- * Multi-device status in the header. Shows a dot per connected source (Fitbit,
- * WHOOP, Oura, Apple) with a short label, and degrades to a single "no sync"
- * pill when nothing is reporting. Replaces the old single Fitbit pill.
+ * Connected-device chip for the rail foot. Shows a STATIC dot per connected
+ * (enabled) source — no flashing. The /api/devices/status endpoint already
+ * filters to enabled wearables, so a disabled device never appears as "offline".
  */
 export function DeviceStatusCluster() {
-  const ds = useDeviceStatus();
+  const ds = useHealthStore((s) => s.deviceStatus);
+  const fetchAll = useHealthStore((s) => s.fetchAll);
+  const range = useUiStore((s) => s.range);
+
+  // The rail is always mounted; ensure device status loads even on pages that
+  // don't otherwise fetch health data (e.g. Habits), so the chip is consistent.
+  useEffect(() => {
+    if (!ds) void fetchAll(range);
+  }, [ds, fetchAll, range]);
+
   const statuses = ds?.statuses ?? [];
 
-  const bySource = new Map<DeviceSource, boolean>();
-  for (const s of statuses) {
-    const src = s.source as DeviceSource;
-    if ((DEVICE_SOURCES as readonly string[]).includes(src)) {
-      bySource.set(src, s.connected);
-    }
-  }
-
-  const connected = DEVICE_SOURCES.filter((s) => bySource.get(s));
+  const connected = DEVICE_SOURCES.filter((s) =>
+    statuses.some((st) => st.source === s && st.connected),
+  );
 
   if (connected.length === 0) {
     return (
-      <span
-        className="hidden sm:inline-flex pill border border-hairline ml-1"
-        title="No tracker syncing"
-      >
-        <DeviceDot source="fitbit" active={false} size="xs" />
-        <span className="text-ink-mute">No sync</span>
-      </span>
+      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-[11px] bg-bg-surface2 text-[12.5px] font-medium text-ink-mute">
+        <span className="w-[7px] h-[7px] rounded-full bg-ink-mute/50 shrink-0" />
+        No device syncing
+      </div>
     );
   }
 
-  // Multiple sources: compact dot cluster + count. Single source: dot + label.
-  if (connected.length === 1) {
-    const s = connected[0]!;
-    return (
-      <span
-        className="hidden sm:inline-flex pill border border-hairline ml-1"
-        title={`${DEVICE_LABEL[s]} connected`}
-      >
-        <DeviceDot source={s} size="xs" />
-        <span className="text-ink-dim">{shortLabel(s)}</span>
-      </span>
-    );
-  }
+  const single = connected.length === 1 ? connected[0]! : null;
 
   return (
-    <span
-      className="hidden sm:inline-flex items-center gap-1.5 pill border border-hairline ml-1"
+    <div
+      className="flex items-center gap-2.5 px-3 py-2.5 rounded-[11px] bg-bg-surface2 text-[12.5px] font-medium text-ink-dim"
       title={connected.map((s) => DEVICE_LABEL[s]).join(' · ')}
     >
-      <span className="flex items-center gap-1">
+      <span className="flex items-center gap-1 shrink-0">
         {connected.map((s) => (
-          <DeviceDot key={s} source={s} size="xs" title={DEVICE_LABEL[s]} />
+          <span key={s} className="w-[7px] h-[7px] rounded-full" style={{ background: DEVICE_COLOR[s] }} />
         ))}
       </span>
-      <span className="text-ink-dim">{connected.length} devices</span>
-    </span>
+      <span className="truncate">
+        {single ? `${DEVICE_LABEL[single]} · connected` : `${connected.length} devices connected`}
+      </span>
+    </div>
   );
-}
-
-function shortLabel(s: DeviceSource): string {
-  return { fitbit: 'Fitbit', whoop: 'Whoop', oura: 'Oura', apple: 'Apple' }[s];
 }

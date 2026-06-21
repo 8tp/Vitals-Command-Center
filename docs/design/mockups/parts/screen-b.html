@@ -1,0 +1,839 @@
+<style>
+/* ============================================================
+   SCREEN-B — TACTICAL TELEMETRY / CRT TERMINAL (DARK)
+   Declassified mission-control aerospace HUD for "Vitals"
+   ============================================================ */
+#screen-b{
+  --bg:#0E0E0E;
+  --panel:#121212;
+  --line:#2A2A2A;
+  --line-hot:#3A3A3A;
+  --ink:#EAEAEA;
+  --dim:#8C8C8C;
+  --faint:#5A5A5A;
+  --red:#FF2A2A;
+  --green:#4AF626;
+  --mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;
+  --mono2:'IBM Plex Mono','JetBrains Mono',ui-monospace,monospace;
+  position:relative;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:1.4;
+  letter-spacing:.04em;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  padding-bottom:64px;
+}
+
+/* ---- CRT scanlines + grain (decorative, non-blocking) ---- */
+#screen-b::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:50;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.22) 3px, rgba(0,0,0,.22) 4px);
+  mix-blend-mode:multiply;
+}
+#screen-b::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:51;
+  opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ===================== TYPOGRAPHIC PRIMITIVES ===================== */
+#screen-b .up{text-transform:uppercase;letter-spacing:.1em}
+#screen-b .tag{
+  font-family:var(--mono2);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  color:var(--dim);
+}
+#screen-b .tag .br{color:var(--red)}
+#screen-b .red{color:var(--red)}
+#screen-b .green{color:var(--green)}
+#screen-b .dim{color:var(--dim)}
+#screen-b .faint{color:var(--faint)}
+#screen-b samp,#screen-b output,#screen-b data{font-family:var(--mono);font-variant-numeric:tabular-nums}
+#screen-b hr{border:0;border-top:1px solid var(--line);margin:0}
+#screen-b hr.hot{border-top:2px solid var(--red)}
+
+/* ===================== TOP COMMAND BAR ===================== */
+#screen-b .topbar{
+  position:relative;
+  z-index:40;
+  border-bottom:2px solid var(--line);
+  background:var(--bg);
+}
+#screen-b .topbar .strip{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+#screen-b .topbar .strip-l,#screen-b .topbar .strip-r{
+  display:flex;align-items:center;gap:0;
+}
+#screen-b .wordmark{
+  display:flex;align-items:baseline;gap:10px;
+  padding:14px 18px;
+  border-right:1px solid var(--line);
+}
+#screen-b .wordmark b{
+  font-family:'Archivo Black',var(--mono);
+  font-size:21px;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+#screen-b .wordmark b i{color:var(--red);font-style:normal}
+#screen-b .wordmark .rev{font-size:9px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+
+#screen-b .sysline{
+  display:flex;align-items:center;gap:8px;
+  padding:0 16px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+  border-right:1px solid var(--line);
+}
+#screen-b .led{
+  width:8px;height:8px;background:var(--green);
+  box-shadow:0 0 7px var(--green);
+  animation:b-blink 2.2s steps(1) infinite;
+}
+@keyframes b-blink{0%,72%{opacity:1}73%,100%{opacity:.25}}
+
+/* nav */
+#screen-b nav{display:flex;align-items:stretch}
+#screen-b nav a{
+  display:flex;align-items:center;gap:7px;
+  padding:0 17px;
+  text-decoration:none;
+  color:var(--dim);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  border-left:1px solid var(--line);
+  transition:background .12s,color .12s;
+}
+#screen-b nav a .idx{font-size:9px;color:var(--faint)}
+#screen-b nav a:hover{color:var(--ink);background:#181818}
+#screen-b nav a[aria-current]{
+  color:var(--bg);
+  background:var(--red);
+  font-weight:700;
+}
+#screen-b nav a[aria-current] .idx{color:var(--bg)}
+
+/* control buttons */
+#screen-b .ctl{
+  display:flex;align-items:center;gap:8px;
+  padding:0 16px;
+  background:transparent;border:0;border-left:1px solid var(--line);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  cursor:pointer;
+  transition:background .12s,color .12s;
+}
+#screen-b .ctl:hover{background:#181818}
+#screen-b .ctl.sync{color:var(--green)}
+#screen-b .ctl.sync:hover{background:#0f1a0c}
+#screen-b .ctl.gear:hover{color:var(--red)}
+#screen-b .sync-icon{width:14px;height:14px;display:block}
+#screen-b .syncing .sync-icon{animation:b-spin 1s linear infinite}
+@keyframes b-spin{to{transform:rotate(360deg)}}
+#screen-b .ctl.sync .sync-state::after{content:"READY"}
+#screen-b .ctl.sync.syncing .sync-state::after{content:"RUN…"}
+#screen-b .ctl.sync.syncing{color:var(--green)}
+
+/* second meta strip — greeting / date / device telemetry */
+#screen-b .metastrip{
+  display:grid;
+  grid-template-columns:1fr auto auto auto;
+  background:var(--line);
+  gap:1px;
+}
+#screen-b .metastrip>div{
+  background:var(--bg);
+  padding:9px 18px;
+  display:flex;align-items:baseline;gap:10px;
+  white-space:nowrap;
+}
+#screen-b .metastrip .greet{font-size:13px;letter-spacing:.04em;color:var(--ink)}
+#screen-b .metastrip .greet b{color:var(--red);font-weight:700}
+#screen-b .metastrip .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+#screen-b .metastrip .v{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+#screen-b .metastrip .dev .dot{display:inline-block;width:7px;height:7px;background:#00b0b9;margin-right:2px;transform:translateY(1px)}
+
+/* ===================== MAIN BLUEPRINT GRID ===================== */
+#screen-b .console{
+  position:relative;z-index:30;
+  display:grid;
+  grid-template-columns:1.55fr 1fr;
+  gap:1px;
+  background:var(--line);
+  border-bottom:1px solid var(--line);
+}
+#screen-b .cell{background:var(--bg);position:relative}
+#screen-b .cell-pad{padding:18px 20px 20px}
+
+/* crosshair markers at intersections */
+#screen-b .cell::before{
+  content:"+";
+  position:absolute;top:-7px;left:-6px;
+  color:var(--faint);font-size:12px;line-height:1;z-index:5;
+  pointer-events:none;
+}
+
+/* panel header bar */
+#screen-b .phead{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;
+  border-bottom:1px solid var(--line);
+  background:#0B0B0B;
+}
+#screen-b .phead .title{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+}
+#screen-b .phead .title::before{content:"[ "; color:var(--red)}
+#screen-b .phead .title::after{content:" ]";color:var(--red)}
+#screen-b .phead .coord{font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase}
+
+/* ---------- READINESS HERO ---------- */
+#screen-b .hero{display:grid;grid-template-rows:auto 1fr}
+#screen-b .hero-body{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:24px;
+  padding:22px 20px 18px;
+  align-items:center;
+}
+#screen-b .score-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#screen-b .score-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+#screen-b .score{
+  font-family:'Archivo Black',var(--mono);
+  font-size:clamp(96px,16vw,168px);
+  line-height:.78;
+  letter-spacing:-.02em;
+  color:var(--ink);
+  text-shadow:0 0 22px rgba(255,42,42,.16);
+}
+#screen-b .score .of{
+  display:block;
+  font-family:var(--mono);
+  font-size:13px;letter-spacing:.18em;
+  color:var(--faint);
+  margin-top:8px;
+  text-shadow:none;
+}
+#screen-b .state{
+  display:inline-flex;align-items:center;gap:9px;
+  border:1px solid var(--red);
+  color:var(--red);
+  padding:6px 12px;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+}
+#screen-b .state .blip{width:7px;height:7px;background:var(--red);box-shadow:0 0 7px var(--red)}
+
+/* ASCII segmented gauge */
+#screen-b .gauge{display:flex;flex-direction:column;gap:8px}
+#screen-b .gauge .grow{
+  display:grid;
+  grid-template-columns:repeat(20,1fr);
+  gap:2px;
+  height:26px;
+}
+#screen-b .gauge .seg{background:#1E1E1E}
+#screen-b .gauge .seg.on{background:var(--red)}
+#screen-b .gauge .seg.on.lo{background:#7a1414}
+#screen-b .gauge .gscale{
+  display:flex;justify-content:space-between;
+  font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;
+}
+#screen-b .gauge .note{font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+
+/* recovery trio */
+#screen-b .trio{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--line);
+  border-top:1px solid var(--line);
+}
+#screen-b .trio .t{
+  background:var(--bg);
+  padding:14px 16px 15px;
+  display:flex;flex-direction:column;gap:5px;
+}
+#screen-b .trio .t .lab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .trio .t .num{
+  display:flex;align-items:baseline;gap:5px;
+  font-size:30px;line-height:1;color:var(--ink);font-weight:500;
+}
+#screen-b .trio .t .num u{font-size:12px;color:var(--faint);text-decoration:none;letter-spacing:.06em}
+#screen-b .trio .t .delta{font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+#screen-b .trio .t .delta.up{color:var(--green)}
+#screen-b .trio .t .delta.dn{color:var(--red)}
+#screen-b .trio .t .delta.flat{color:var(--dim)}
+
+/* ---------- VITALS TABLE (dl) ---------- */
+#screen-b .vitals dl{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:var(--line);
+}
+#screen-b .vitals .row{
+  background:var(--bg);
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:13px 16px;
+  gap:10px;
+}
+#screen-b .vitals dt{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .vitals dt small{display:block;color:var(--faint);font-size:8px;letter-spacing:.12em;margin-top:3px}
+#screen-b .vitals dd{text-align:right}
+#screen-b .vitals dd .val{font-size:21px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .vitals dd .val u{font-size:11px;color:var(--faint);text-decoration:none;letter-spacing:.05em;margin-left:2px}
+#screen-b .vitals dd .sub{display:block;margin-top:4px;font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+#screen-b .vitals dd .sub b{color:var(--red);font-weight:500}
+
+/* steps mini-bar */
+#screen-b .vitals .stepbar{
+  display:flex;gap:1px;margin-top:6px;height:5px;justify-content:flex-end;
+}
+#screen-b .vitals .stepbar i{width:8px;background:#222}
+#screen-b .vitals .stepbar i.on{background:var(--red)}
+
+/* ---------- HRV TREND ---------- */
+#screen-b .hrv .chart{padding:8px 14px 6px}
+#screen-b .hrv svg{display:block;width:100%;height:auto}
+#screen-b .hrv .legend{
+  display:flex;gap:18px;padding:0 18px 14px;flex-wrap:wrap;
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+}
+#screen-b .hrv .legend span b{color:var(--ink)}
+#screen-b .hrv .legend .base::before{content:"---- ";color:var(--faint);letter-spacing:0}
+#screen-b .hrv .legend .live::before{content:"━━ ";color:var(--red);letter-spacing:0}
+
+/* ---------- SLEEP STAGES ---------- */
+#screen-b .sleep-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px}
+#screen-b .sleep .total{
+  display:flex;align-items:baseline;gap:10px;
+}
+#screen-b .sleep .total .big{font-size:34px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .sleep .total .lab{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+#screen-b .sleep .bar{
+  display:flex;height:30px;border:1px solid var(--line-hot);
+}
+#screen-b .sleep .bar .s{position:relative;overflow:hidden}
+#screen-b .sleep .bar .s.deep{background:var(--red)}
+#screen-b .sleep .bar .s.rem{background:#7a1414}
+#screen-b .sleep .bar .s.light{background:#2A2A2A}
+#screen-b .sleep .bar .s.awake{background:repeating-linear-gradient(45deg,#1a1a1a 0 4px,#000 4px 8px)}
+#screen-b .sleep .bar .s+ .s{border-left:1px solid var(--bg)}
+#screen-b .sleep .legend{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+#screen-b .sleep .legend .lrow{
+  background:var(--bg);
+  display:grid;grid-template-columns:14px 1fr auto auto;
+  align-items:center;gap:10px;
+  padding:8px 4px;
+}
+#screen-b .sleep .legend .sw{width:11px;height:11px}
+#screen-b .sleep .legend .sw.deep{background:var(--red)}
+#screen-b .sleep .legend .sw.rem{background:#7a1414}
+#screen-b .sleep .legend .sw.light{background:#2A2A2A}
+#screen-b .sleep .legend .sw.awake{background:repeating-linear-gradient(45deg,#1a1a1a 0 3px,#000 3px 6px)}
+#screen-b .sleep .legend .nm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#screen-b .sleep .legend .nm::before{content:"[ ";color:var(--faint)}
+#screen-b .sleep .legend .nm::after{content:" ]";color:var(--faint)}
+#screen-b .sleep .legend .dur{font-size:11px;color:var(--ink)}
+#screen-b .sleep .legend .pct{font-size:9px;color:var(--faint);width:38px;text-align:right}
+
+/* ---------- TODAY'S RUN (Strava) ---------- */
+#screen-b .run{grid-column:1 / -1}
+#screen-b .run-body{
+  display:grid;
+  grid-template-columns:auto repeat(4,1fr);
+  gap:1px;background:var(--line);
+}
+#screen-b .run-body>div{background:var(--bg);padding:15px 18px}
+#screen-b .run .ident{display:flex;flex-direction:column;gap:6px;min-width:200px}
+#screen-b .run .ident .src{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#fc5200;
+}
+#screen-b .run .ident .src .dot{width:7px;height:7px;background:#fc5200}
+#screen-b .run .ident .name{font-size:17px;letter-spacing:.02em;color:var(--ink);text-transform:uppercase}
+#screen-b .run .ident .ts{font-size:9px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase}
+#screen-b .run .stat{display:flex;flex-direction:column;gap:5px;justify-content:center}
+#screen-b .run .stat .lab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .run .stat .v{font-size:24px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .run .stat .v u{font-size:11px;color:var(--faint);text-decoration:none;letter-spacing:.05em}
+
+/* ===================== FOOTER TELEMETRY MARQUEE ===================== */
+#screen-b .footer{
+  position:absolute;left:0;right:0;bottom:0;z-index:40;
+  border-top:2px solid var(--line);
+  background:var(--bg);
+  display:flex;align-items:center;gap:0;
+  overflow:hidden;
+}
+#screen-b .footer .fcell{
+  padding:9px 18px;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+  border-right:1px solid var(--line);white-space:nowrap;
+}
+#screen-b .footer .fcell b{color:var(--dim)}
+#screen-b .footer .fcell.live{color:var(--green)}
+#screen-b .footer .grow{flex:1;border-right:0}
+
+/* ===================== SETTINGS OVERLAY ===================== */
+#screen-b .settings-overlay{
+  display:none;
+  position:absolute;inset:0;z-index:200;
+  background:rgba(8,8,8,.92);
+  padding:46px 22px;
+  align-items:flex-start;justify-content:center;
+  overflow:auto;
+}
+#screen-b.show-settings .settings-overlay{display:flex}
+#screen-b .panel{
+  width:100%;max-width:760px;
+  background:var(--bg);
+  border:2px solid var(--red);
+}
+#screen-b .panel .phd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:2px solid var(--red);background:#100808;
+}
+#screen-b .panel .phd .t{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+#screen-b .panel .phd .t::before{content:"// "; color:var(--red)}
+#screen-b .panel .close{
+  background:transparent;border:1px solid var(--line-hot);color:var(--ink);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;cursor:pointer;
+}
+#screen-b .panel .close:hover{border-color:var(--red);color:var(--red)}
+
+/* master switch */
+#screen-b .master{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 18px;border-bottom:1px solid var(--line);background:#0B0B0B;
+}
+#screen-b .master .ml{display:flex;flex-direction:column;gap:4px}
+#screen-b .master .ml .mt{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#screen-b .master .ml .ms{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);max-width:480px}
+
+/* toggle switch (CSS-only via checkbox) */
+#screen-b .sw-toggle{position:relative;display:inline-block;width:54px;height:24px;flex:none;cursor:pointer}
+#screen-b .sw-toggle input{position:absolute;opacity:0;width:0;height:0}
+#screen-b .sw-toggle .track{
+  position:absolute;inset:0;background:#1A1A1A;border:1px solid var(--line-hot);
+}
+#screen-b .sw-toggle .knob{
+  position:absolute;top:2px;left:2px;width:20px;height:18px;background:var(--faint);
+  transition:left .14s,background .14s;
+}
+#screen-b .sw-toggle .txt{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-size:8px;letter-spacing:.1em;color:var(--faint);
+}
+#screen-b .sw-toggle .txt.on{left:6px;opacity:0}
+#screen-b .sw-toggle .txt.off{right:5px}
+#screen-b .sw-toggle input:checked ~ .track{border-color:var(--red);background:#180808}
+#screen-b .sw-toggle input:checked ~ .knob{left:32px;background:var(--red)}
+#screen-b .sw-toggle input:checked ~ .txt.on{opacity:1;color:var(--red)}
+#screen-b .sw-toggle input:checked ~ .txt.off{opacity:0}
+
+/* integrations list */
+#screen-b .integ{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+#screen-b .integ .irow{
+  background:var(--bg);
+  display:grid;grid-template-columns:14px 1fr auto auto;
+  align-items:center;gap:16px;
+  padding:14px 18px;
+}
+#screen-b .integ .irow .bar{width:6px;height:34px}
+#screen-b .integ .irow .meta{display:flex;flex-direction:column;gap:5px}
+#screen-b .integ .irow .meta .nm{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#screen-b .integ .irow .meta .st{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+#screen-b .integ .irow .meta .st.on::before{content:"● ";color:var(--green)}
+#screen-b .integ .irow .meta .st.off::before{content:"○ ";color:var(--faint)}
+#screen-b .integ .irow.disabled .nm{color:var(--dim)}
+#screen-b .integ .irow .sync-age{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:right;width:80px}
+#screen-b .panel .note{
+  padding:12px 18px;border-top:1px solid var(--line);
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);line-height:1.6;
+}
+#screen-b .panel .note b{color:var(--red)}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:880px){
+  #screen-b .console{grid-template-columns:1fr}
+  #screen-b .run-body{grid-template-columns:1fr 1fr}
+  #screen-b nav a{padding:0 11px}
+  #screen-b .score{font-size:clamp(80px,22vw,120px)}
+}
+@media (max-width:680px){
+  #screen-b .topbar .strip{flex-wrap:wrap}
+  #screen-b nav{order:3;flex-wrap:wrap}
+  #screen-b .metastrip{grid-template-columns:1fr}
+  #screen-b .hero-body{grid-template-columns:1fr;text-align:left}
+  #screen-b .vitals dl{grid-template-columns:1fr}
+  #screen-b .run-body{grid-template-columns:1fr}
+  #screen-b .footer .fcell:nth-child(n+4){display:none}
+}
+</style>
+
+<section class="screen" id="screen-b">
+
+  <!-- ===================== TOP COMMAND BAR ===================== -->
+  <header class="topbar">
+    <div class="strip">
+      <div class="strip-l">
+        <div class="wordmark">
+          <b>VIT<i>A</i>LS</b>
+          <span class="rev">REV&nbsp;2.6</span>
+        </div>
+        <div class="sysline">
+          <span class="led" aria-hidden="true"></span>
+          &lt; STATUS: ONLINE &gt;
+        </div>
+        <nav aria-label="Primary">
+          <a href="#" aria-current="page"><span class="idx">01</span>DASHBOARD</a>
+          <a href="#"><span class="idx">02</span>SLEEP</a>
+          <a href="#"><span class="idx">03</span>ACTIVITY</a>
+          <a href="#"><span class="idx">04</span>HABITS</a>
+          <a href="#"><span class="idx">05</span>ASK&nbsp;CLAUDE</a>
+        </nav>
+      </div>
+      <div class="strip-r">
+        <button class="ctl sync" data-sync type="button" aria-label="Run sync">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>
+          </svg>
+          <span>SYNC&nbsp;<span class="sync-state"></span></span>
+        </button>
+        <button class="ctl gear" data-open-settings type="button" aria-label="Open settings">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>
+          </svg>
+          <span>CFG</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- meta strip -->
+    <div class="metastrip">
+      <div><span class="greet">GOOD MORNING, <b>HUNTER</b></span></div>
+      <div><span class="k">DATE</span><span class="v">SAT · JUN 20</span></div>
+      <div class="dev"><span class="k">UNIT</span><span class="v"><span class="dot" aria-hidden="true"></span>FITBIT-AIR</span></div>
+      <div><span class="k">T-SYNC</span><span class="v">06:14:02Z</span></div>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN CONSOLE GRID ===================== -->
+  <div class="console">
+
+    <!-- READINESS HERO -->
+    <section class="cell hero" aria-label="Morning readiness">
+      <div class="phead">
+        <span class="title">READINESS</span>
+        <span class="coord">CH-00 / 34.39N 086.36W</span>
+      </div>
+      <div class="hero-body">
+        <div class="score-wrap">
+          <span class="score-label">MORNING INDEX</span>
+          <data class="score" value="82">82<span class="of">/ 100 PTS</span></data>
+        </div>
+        <div class="gauge" role="img" aria-label="Readiness 82 of 100">
+          <div class="state"><span class="blip" aria-hidden="true"></span>PRIMED FOR TRAINING</div>
+          <div class="grow" aria-hidden="true">
+            <i class="seg on lo"></i><i class="seg on lo"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i>
+          </div>
+          <div class="gscale"><span>00</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+          <div class="note">&gt;&gt;&gt; CLEARANCE GRANTED // HIGH-LOAD WINDOW OPEN</div>
+        </div>
+      </div>
+      <!-- recovery trio -->
+      <dl class="trio">
+        <div class="t">
+          <dt class="lab">HRV</dt>
+          <dd class="num"><output>64</output><u>MS</u></dd>
+          <span class="delta up">▲ +6% VS BASE</span>
+        </div>
+        <div class="t">
+          <dt class="lab">RESTING HR</dt>
+          <dd class="num"><output>52</output><u>BPM</u></dd>
+          <span class="delta dn">▼ −3 VS BASE</span>
+        </div>
+        <div class="t">
+          <dt class="lab">SLEEP</dt>
+          <dd class="num"><output>7:24</output><u>H:M</u></dd>
+          <span class="delta up">▲ +18M VS BASE</span>
+        </div>
+      </dl>
+    </section>
+
+    <!-- VITALS TABLE -->
+    <section class="cell vitals" aria-label="Today's vitals">
+      <div class="phead">
+        <span class="title">VITALS</span>
+        <span class="coord">06×01 ARRAY</span>
+      </div>
+      <dl>
+        <div class="row">
+          <dt>SpO₂<small>BLOOD OXYGEN</small></dt>
+          <dd><span class="val">98<u>%</u></span><span class="sub">NOMINAL</span></dd>
+        </div>
+        <div class="row">
+          <dt>RESP<small>RESPIRATORY</small></dt>
+          <dd><span class="val">14.2<u>BR/M</u></span><span class="sub">NOMINAL</span></dd>
+        </div>
+        <div class="row">
+          <dt>SKIN Δ<small>TEMP DEVIATION</small></dt>
+          <dd><span class="val">−0.2<u>°</u></span><span class="sub">IN RANGE</span></dd>
+        </div>
+        <div class="row">
+          <dt>STEPS<small>TARGET 10,000</small></dt>
+          <dd>
+            <span class="val">8,431</span>
+            <span class="stepbar" aria-hidden="true">
+              <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i>
+            </span>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>CAL · OUT<small>BURNED</small></dt>
+          <dd><span class="val">2,180<u>KCAL</u></span><span class="sub">EXPENDED</span></dd>
+        </div>
+        <div class="row">
+          <dt>CAL · IN<small>EATEN</small></dt>
+          <dd><span class="val">1,940<u>KCAL</u></span><span class="sub"><b>−240</b> NET</span></dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- HRV TREND -->
+    <section class="cell hrv" aria-label="14-day HRV trend">
+      <div class="phead">
+        <span class="title">HRV / 14-DAY</span>
+        <span class="coord">UNIT MS · STEPPED</span>
+      </div>
+      <div class="chart">
+        <!-- viewBox: 14 samples, range ~52..76ms mapped. baseline 60, avg 64 -->
+        <svg viewBox="0 0 560 200" preserveAspectRatio="none" role="img" aria-label="HRV trend, 14 days, values 58 to 72 ms, baseline 60, average 64">
+          <!-- faint grid -->
+          <g stroke="#1E1E1E" stroke-width="1">
+            <line x1="0" y1="40" x2="560" y2="40"/>
+            <line x1="0" y1="80" x2="560" y2="80"/>
+            <line x1="0" y1="120" x2="560" y2="120"/>
+            <line x1="0" y1="160" x2="560" y2="160"/>
+          </g>
+          <!-- baseline 60ms (dashed) : value 60 -> y = 200 - ((60-50)/(78-50))*180 = 200-64.3 = 135.7 -->
+          <line x1="0" y1="135.7" x2="560" y2="135.7" stroke="#5A5A5A" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <!-- average 64 -> y = 200 - ((64-50)/28)*180 = 200-90 = 110 -->
+          <line x1="0" y1="110" x2="560" y2="110" stroke="#FF2A2A" stroke-width="1" stroke-dasharray="2 8" opacity=".5"/>
+          <!-- stepped line. step width = 560/14 = 40. values: 58,62,57,64,60,66,63,69,61,67,72,65,68,64 -->
+          <!-- y(v)=200-((v-50)/28)*180 -->
+          <polyline fill="none" stroke="#FF2A2A" stroke-width="2.5"
+            points="0,148.6 40,148.6 40,122.9 80,122.9 80,154.9 120,154.9 120,109.9 160,109.9 160,135.7 200,135.7 200,97.1 240,97.1 240,116.3 280,116.3 280,77.9 320,77.9 320,129.3 360,129.3 360,90.7 400,90.7 400,58.6 440,58.6 440,103.6 480,103.6 480,84.3 520,84.3 520,109.9 560,109.9"/>
+          <!-- sample dot-matrix markers at each value -->
+          <g fill="#EAEAEA">
+            <rect x="-2" y="146.6" width="4" height="4"/>
+            <rect x="38" y="120.9" width="4" height="4"/>
+            <rect x="78" y="152.9" width="4" height="4"/>
+            <rect x="118" y="107.9" width="4" height="4"/>
+            <rect x="158" y="133.7" width="4" height="4"/>
+            <rect x="198" y="95.1" width="4" height="4"/>
+            <rect x="238" y="114.3" width="4" height="4"/>
+            <rect x="278" y="75.9" width="4" height="4"/>
+            <rect x="318" y="127.3" width="4" height="4"/>
+            <rect x="358" y="88.7" width="4" height="4"/>
+            <rect x="398" y="56.6" width="4" height="4" fill="#FF2A2A"/>
+            <rect x="438" y="101.6" width="4" height="4"/>
+            <rect x="478" y="82.3" width="4" height="4"/>
+            <rect x="518" y="107.9" width="6" height="6" fill="#FF2A2A"/>
+          </g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span class="live">LATEST <b>64 MS</b></span>
+        <span>AVG <b>64</b></span>
+        <span class="base">BASELINE 60</span>
+        <span>PEAK <b>72</b></span>
+        <span>RANGE D-13 &gt; D-00</span>
+      </div>
+    </section>
+
+    <!-- SLEEP STAGES -->
+    <section class="cell sleep" aria-label="Sleep stages">
+      <div class="phead">
+        <span class="title">SLEEP ARCHITECTURE</span>
+        <span class="coord">CYCLE 22:51 → 06:15</span>
+      </div>
+      <div class="sleep-body">
+        <div class="total"><span class="big">7H 24M</span><span class="lab">TOTAL IN-BED REST</span></div>
+        <!-- segmented bar. total 444m: deep 92, rem 108, light 221, awake 23 -->
+        <div class="bar" role="img" aria-label="Sleep: deep 1h32m, REM 1h48m, light 3h41m, awake 23m" aria-hidden="false">
+          <div class="s deep" style="flex:92"></div>
+          <div class="s rem" style="flex:108"></div>
+          <div class="s light" style="flex:221"></div>
+          <div class="s awake" style="flex:23"></div>
+        </div>
+        <dl class="legend">
+          <div class="lrow"><span class="sw deep" aria-hidden="true"></span><dt class="nm">DEEP</dt><dd class="dur">1H 32M</dd><span class="pct">21%</span></div>
+          <div class="lrow"><span class="sw rem" aria-hidden="true"></span><dt class="nm">REM</dt><dd class="dur">1H 48M</dd><span class="pct">24%</span></div>
+          <div class="lrow"><span class="sw light" aria-hidden="true"></span><dt class="nm">LIGHT</dt><dd class="dur">3H 41M</dd><span class="pct">50%</span></div>
+          <div class="lrow"><span class="sw awake" aria-hidden="true"></span><dt class="nm">AWAKE</dt><dd class="dur">0H 23M</dd><span class="pct">5%</span></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- TODAY'S RUN -->
+    <section class="cell run" aria-label="Today's run">
+      <div class="phead">
+        <span class="title">FIELD LOG · RUN</span>
+        <span class="coord">SRC / STRAVA-MCP · 06:01 LOCAL</span>
+      </div>
+      <div class="run-body">
+        <div class="ident">
+          <span class="src"><span class="dot" aria-hidden="true"></span>STRAVA INGEST</span>
+          <span class="name">MORNING RUN</span>
+          <span class="ts">REC 06:01 → 06:38 · GPS LOCK OK</span>
+        </div>
+        <div class="stat"><span class="lab">DISTANCE</span><span class="v">5.02<u>KM</u></span></div>
+        <div class="stat"><span class="lab">DURATION</span><span class="v">37:13</span></div>
+        <div class="stat"><span class="lab">ENERGY</span><span class="v">400<u>CAL</u></span></div>
+        <div class="stat"><span class="lab">AVG PACE</span><span class="v">7:25<u>/KM</u></span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ===================== FOOTER TELEMETRY ===================== -->
+  <footer class="footer" aria-hidden="true">
+    <div class="fcell live">● LINK ACTIVE</div>
+    <div class="fcell">UNIT / <b>FITBIT-AIR</b></div>
+    <div class="fcell">REV <b>2.6</b></div>
+    <div class="fcell">PKT <b>0x3F1A</b></div>
+    <div class="fcell">LAT <b>34.3917N</b></div>
+    <div class="fcell">LON <b>086.3596W</b></div>
+    <div class="fcell grow">/// VITALS TELEMETRY CONSOLE — DECLASSIFIED — ALL READINGS NOMINAL ///</div>
+    <div class="fcell">CHK <b>OK</b></div>
+  </footer>
+
+  <!-- ===================== SETTINGS OVERLAY ===================== -->
+  <div class="settings-overlay" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="panel">
+      <div class="phd">
+        <span class="t">INTEGRATIONS CONFIG</span>
+        <button class="close" data-close-settings type="button">[ ESC ] CLOSE</button>
+      </div>
+
+      <!-- master auto-sync -->
+      <div class="master">
+        <div class="ml">
+          <span class="mt">AUTOMATIC SYNC</span>
+          <span class="ms">MASTER POLL. WHEN ENABLED, ACTIVE SOURCES INGEST ON SCHEDULE.</span>
+        </div>
+        <label class="sw-toggle">
+          <input type="checkbox" checked aria-label="Automatic sync master switch"/>
+          <span class="track" aria-hidden="true"></span>
+          <span class="knob" aria-hidden="true"></span>
+          <span class="txt on" aria-hidden="true">ON</span>
+          <span class="txt off" aria-hidden="true">OFF</span>
+        </label>
+      </div>
+
+      <!-- integrations -->
+      <dl class="integ">
+        <div class="irow">
+          <span class="bar" style="background:#00b0b9" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">FITBIT AIR</dt>
+            <dd class="st on">CONNECTED · SYNCED 4H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 4H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Fitbit Air"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow">
+          <span class="bar" style="background:#378add" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">APPLE WATCH ULTRA 2</dt>
+            <dd class="st on">CONNECTED · SYNCED 4H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 4H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Apple Watch Ultra 2"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow">
+          <span class="bar" style="background:#fc5200" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">STRAVA</dt>
+            <dd class="st on">CONNECTED · SYNCED 1H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 1H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Strava"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow disabled">
+          <span class="bar" style="background:#e24b4a" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">WHOOP MG</dt>
+            <dd class="st off">DISABLED · NOT POLLING</dd>
+          </div>
+          <span class="sync-age">—</span>
+          <label class="sw-toggle">
+            <input type="checkbox" aria-label="WHOOP MG"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow disabled">
+          <span class="bar" style="background:#1d9e75" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">OURA RING 4</dt>
+            <dd class="st off">DISABLED · NOT POLLING</dd>
+          </div>
+          <span class="sync-age">—</span>
+          <label class="sw-toggle">
+            <input type="checkbox" aria-label="Oura Ring 4"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+      </dl>
+
+      <p class="note">
+        &gt;&gt;&gt; SWITCHING A SOURCE <b>OFF</b> REMOVES IT FROM THE CONSOLE — IT WILL NOT REPORT AS "OFFLINE".
+        &nbsp;//&nbsp; MASTER AUTOMATIC SYNC GOVERNS ALL ACTIVE SOURCES.
+      </p>
+    </div>
+  </div>
+
+</section>

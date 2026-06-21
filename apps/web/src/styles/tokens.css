@@ -1,138 +1,168 @@
 /*
- * Vitals — design tokens
- * Concept: "Calm consumer health" — warm, soft, premium, mainstream
- * (Oura / Apple Health / Calm / Fitbit). Rounded, spacious, human.
- * Brand gradient: teal #14B8A6 -> emerald #10B981.
+ * Vitals — design tokens · "Instrument" (Soft Daylight)
+ * ------------------------------------------------------------------
+ * Data-forward daylight: cool silver-white canvas, edge-to-edge layout
+ * grouped by HAIRLINES + whitespace (not cards), bold Geist numerals,
+ * ONE locked UI accent = electric blue #2563EB. Sleep stages get their
+ * own calm multi-hue data palette (indigo / teal / sky / amber).
  *
- * Token NAMES are stable across both themes so every component re-skins for
- * free. Only the VALUES change. DEFAULT theme below = DARK (soft premium).
+ * Token NAMES are stable across both themes (components consume by name);
+ * only VALUES change. DEFAULT theme = LIGHT (this is a daylight design).
  */
 :root {
-  /* Structural surfaces — calm premium dark, NOT terminal black */
-  --base: #12161d;            /* page background */
-  --surface: #1a1f28;         /* cards / panels */
-  --surface-2: #222934;       /* raised / hover */
-  --surface-inset: #161b22;   /* wells, inputs, code */
+  /* Structural surfaces — cool silver-white daylight */
+  --base: #F6F8FA;            /* page canvas */
+  --surface: #FFFFFF;         /* rare elevated bits: icon buttons, chips, modal */
+  --surface-2: #EEF2F7;       /* zone / hover / inset block */
+  --surface-inset: #F0F4F8;   /* wells, inputs, tracks */
 
-  /* Hairlines — soft, low-contrast */
-  --hairline: rgba(160, 175, 195, 0.10);
-  --hairline-strong: rgba(160, 175, 195, 0.18);
+  /* Hairlines — the primary grouping device. Tuned to read like #E4EAF1. */
+  --hairline: rgba(31, 52, 84, 0.10);
+  --hairline-strong: rgba(31, 52, 84, 0.17);
 
-  /* Ink */
-  --ink: #eaeef3;
-  --ink-dim: #9ba7b6;
-  --ink-mute: #6b7888;
+  /* Ink — near-black cool */
+  --ink: #0E1726;
+  --ink-dim: #3A4658;
+  --ink-mute: #7A879B;
 
-  /* Brand + signal scale. Dark uses slightly brighter accents for legibility. */
-  --signal: #2dd4bf;          /* brand teal (brighter on dark) */
-  --signal-emerald: #34d399;  /* brand gradient endpoint */
-  --signal-soft: rgba(45, 212, 191, 0.14);
-  --warn: #fbbf24;            /* caution amber */
-  --warn-soft: rgba(251, 191, 36, 0.14);
-  --alert: #fb7185;           /* alert rose */
-  --alert-soft: rgba(251, 113, 133, 0.14);
-  --info: #60a5fa;            /* info blue */
-  --info-soft: rgba(96, 165, 250, 0.14);
+  /* Accent + signal scale. signal == THE electric-blue accent. */
+  --signal: #2563EB;
+  --signal-soft: rgba(37, 99, 235, 0.10);
+  --signal-emerald: #60A5FA; /* gradient pair (kept name for compat) */
+  --accent: #2563EB;
+  --accent-2: #60A5FA;
+  --accent-deep: #1D4ED8;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+  --accent-wash: rgba(37, 99, 235, 0.055);
+  --good: #0EA5A0;           /* cool teal — positive deltas */
+  --warn: #B45309;           /* amber, AA on white (text) */
+  --warn-soft: rgba(180, 83, 9, 0.10);
+  --alert: #E11D62;          /* rose, AA on white */
+  --alert-soft: rgba(225, 29, 98, 0.10);
+  --info: #2563EB;
+  --info-soft: rgba(37, 99, 235, 0.10);
 
-  /* Brand gradient handles (icon, readiness ring, accents) */
-  --brand-from: #2dd4bf;
-  --brand-to: #34d399;
+  /* Brand gradient handles (logo, readiness ring) — light→deep blue */
+  --brand-from: #3B82F6;
+  --brand-to: #1D4ED8;
 
-  /* Device identity — series colors, never the brand accent. */
-  --device-fitbit: #2dd4bf;
-  --device-fitbit-soft: rgba(45, 212, 191, 0.14);
-  --device-whoop: #fb7185;
-  --device-oura: #34d399;
-  --device-apple: #60a5fa;
+  /* Sleep-stage data palette — calm multi-hue, clearly distinguishable */
+  --sleep-deep: #4F46E5;     /* indigo */
+  --sleep-rem: #14B8A6;      /* teal */
+  --sleep-light: #60A5FA;    /* sky */
+  --sleep-awake: #E0A155;    /* muted amber */
+  --sleep-deep-soft: rgba(79, 70, 229, 0.12);
+  --sleep-rem-soft: rgba(20, 184, 166, 0.12);
+  --sleep-light-soft: rgba(96, 165, 250, 0.14);
+  --sleep-awake-soft: rgba(224, 161, 85, 0.16);
 
-  /* Fonts — ONE friendly geometric family everywhere. font-mono kept as an
-     alias so nothing breaks; it points at the sans (NO monospace anywhere). */
-  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-mono: 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* Device identity — series colors, never the brand accent */
+  --device-fitbit: #0EA5A0;
+  --device-fitbit-soft: rgba(14, 165, 160, 0.12);
+  --device-whoop: #E11D62;
+  --device-oura: #6366F1;
+  --device-apple: #2563EB;
+  --device-strava: #FC5200;
+  --device-strava-soft: rgba(252, 82, 0, 0.12);
 
-  /* Radii — large + friendly */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  /* Fonts — Geist everywhere, Geist Mono for technical labels/axes only. */
+  --font-display: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* Radii — one big consistent squircle + small for chips/inputs */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-pill: 999px;
 
-  /* Chart grid */
-  --grid-line: rgba(160, 175, 195, 0.08);
+  /* Chart chrome — read by lib/colors.ts so Recharts re-skins per theme. */
+  --grid-line: rgba(31, 52, 84, 0.06);
+  --chart-grid: rgba(31, 52, 84, 0.06);
+  --chart-axis: rgba(31, 52, 84, 0.12);
+  --chart-tick: #9DAABC;
+  --chart-tooltip-bg: #FFFFFF;
+  --chart-tooltip-border: rgba(31, 52, 84, 0.12);
+  --chart-cursor: rgba(31, 52, 84, 0.05);
+  --chart-neutral: #C2CEDD;
 
-  /* Recharts chrome — read by lib/colors.ts so charts re-skin per theme. */
-  --chart-grid: rgba(160, 175, 195, 0.08);
-  --chart-axis: rgba(160, 175, 195, 0.12);
-  --chart-tick: #9ba7b6;
-  --chart-tooltip-bg: #1a1f28;
-  --chart-tooltip-border: rgba(160, 175, 195, 0.18);
-  --chart-cursor: rgba(160, 175, 195, 0.08);
-  /* Neutral chart series (sub-goal bars, light sleep stage, etc.) */
-  --chart-neutral: #3a4452;
+  /* Ambient page wash — a faint cool light pool, very subtle. */
+  --page-glow: rgba(37, 99, 235, 0.05);
 
-  /* Ambient page wash — soft brand glow, very subtle. */
-  --page-glow: rgba(45, 212, 191, 0.06);
+  /* Elevation — soft, highly diffused, TINTED to the cool canvas (never black). */
+  --shadow-card: 0 1px 2px rgba(30, 50, 80, 0.04), 0 18px 40px -24px rgba(30, 50, 80, 0.16);
+  --shadow-card-hover: 0 2px 6px rgba(30, 50, 80, 0.06), 0 30px 56px -26px rgba(30, 50, 80, 0.24);
 
-  /* Elevation — gentle lifted surfaces, soft shadows even in dark. */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.20), 0 4px 16px rgba(0, 0, 0, 0.22);
-  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.24), 0 10px 28px rgba(0, 0, 0, 0.28);
-
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /*
- * LIGHT THEME — warm calm consumer light: soft off-white app bg, white cards
- * with soft shadows + faint hairlines, dark-slate ink, brand teal darkened
- * just enough to stay AA on white. Token NAMES identical to dark.
+ * DARK THEME — "Soft Midnight": the same Instrument language on a cool
+ * near-black slate. Electric-blue accent brightened for legibility.
+ * Token NAMES identical to light.
  */
-:root[data-theme='light'] {
-  --base: #f6f7f9;            /* page background */
-  --surface: #ffffff;         /* cards / panels */
-  --surface-2: #f1f3f6;       /* raised / hover */
-  --surface-inset: #f1f4f7;   /* wells, inputs, code */
+:root[data-theme='dark'] {
+  --base: #0B0F17;
+  --surface: #131A26;
+  --surface-2: #18212F;
+  --surface-inset: #0F1620;
 
-  --hairline: rgba(20, 30, 40, 0.07);
-  --hairline-strong: rgba(20, 30, 40, 0.14);
+  --hairline: rgba(148, 170, 201, 0.12);
+  --hairline-strong: rgba(148, 170, 201, 0.20);
 
-  --ink: #1a2330;             /* dark slate — strong AA on white */
-  --ink-dim: #5b6776;         /* secondary — AA on white */
-  --ink-mute: #8a96a6;        /* muted labels */
+  --ink: #E8EDF4;
+  --ink-dim: #A2B2C7;
+  --ink-mute: #6F7E93;
 
-  /* Brand teal darkened for AA text-on-white; gradient endpoints kept vivid
-     for fills (ring stroke, icon) which don't need text contrast. */
-  --signal: #0e9c8c;          /* legible teal on white */
-  --signal-emerald: #0f9a6f;
-  --signal-soft: rgba(14, 156, 140, 0.10);
-  --warn: #b45309;            /* amber, darkened — AA on white */
-  --warn-soft: rgba(180, 83, 9, 0.10);
-  --alert: #e11d62;           /* rose, darkened — AA on white */
-  --alert-soft: rgba(225, 29, 98, 0.10);
-  --info: #2563eb;            /* info blue, darkened — AA on white */
-  --info-soft: rgba(37, 99, 235, 0.10);
+  --signal: #3B82F6;
+  --signal-soft: rgba(59, 130, 246, 0.16);
+  --signal-emerald: #60A5FA;
+  --accent: #3B82F6;
+  --accent-2: #60A5FA;
+  --accent-deep: #2563EB;
+  --accent-soft: rgba(59, 130, 246, 0.16);
+  --accent-wash: rgba(59, 130, 246, 0.09);
+  --good: #2DD4BF;
+  --warn: #F59E0B;
+  --warn-soft: rgba(245, 158, 11, 0.16);
+  --alert: #FB7185;
+  --alert-soft: rgba(251, 113, 133, 0.16);
+  --info: #60A5FA;
+  --info-soft: rgba(96, 165, 250, 0.16);
 
-  /* Brand gradient endpoints — vivid for fills/strokes (ring, icon). */
-  --brand-from: #14b8a6;
-  --brand-to: #10b981;
+  --brand-from: #60A5FA;
+  --brand-to: #2563EB;
 
-  --device-fitbit: #0e9c8c;
-  --device-fitbit-soft: rgba(14, 156, 140, 0.10);
-  --device-whoop: #e11d62;
-  --device-oura: #0f9a6f;
-  --device-apple: #2563eb;
+  --sleep-deep: #6366F1;
+  --sleep-rem: #2DD4BF;
+  --sleep-light: #60A5FA;
+  --sleep-awake: #E0A155;
+  --sleep-deep-soft: rgba(99, 102, 241, 0.20);
+  --sleep-rem-soft: rgba(45, 212, 191, 0.18);
+  --sleep-light-soft: rgba(96, 165, 250, 0.18);
+  --sleep-awake-soft: rgba(224, 161, 85, 0.18);
 
-  --grid-line: rgba(20, 30, 40, 0.06);
-  --chart-grid: rgba(20, 30, 40, 0.06);
-  --chart-axis: rgba(20, 30, 40, 0.12);
-  --chart-tick: #8a96a6;
-  --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: rgba(20, 30, 40, 0.12);
-  --chart-cursor: rgba(20, 30, 40, 0.04);
-  --chart-neutral: #c2cad4;
+  --device-fitbit: #2DD4BF;
+  --device-fitbit-soft: rgba(45, 212, 191, 0.16);
+  --device-whoop: #FB7185;
+  --device-oura: #818CF8;
+  --device-apple: #60A5FA;
+  --device-strava: #FC5200;
+  --device-strava-soft: rgba(252, 82, 0, 0.18);
 
-  --page-glow: rgba(16, 185, 129, 0.05);
+  --grid-line: rgba(148, 170, 201, 0.08);
+  --chart-grid: rgba(148, 170, 201, 0.08);
+  --chart-axis: rgba(148, 170, 201, 0.14);
+  --chart-tick: #6F7E93;
+  --chart-tooltip-bg: #131A26;
+  --chart-tooltip-border: rgba(148, 170, 201, 0.20);
+  --chart-cursor: rgba(148, 170, 201, 0.08);
+  --chart-neutral: #2A3545;
 
-  --shadow-card: 0 1px 2px rgba(16, 32, 48, 0.04), 0 4px 14px rgba(16, 32, 48, 0.05);
-  --shadow-card-hover: 0 2px 6px rgba(16, 32, 48, 0.07), 0 10px 26px rgba(16, 32, 48, 0.07);
+  --page-glow: rgba(59, 130, 246, 0.08);
 
-  color-scheme: light;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.28), 0 18px 40px -24px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.34), 0 30px 56px -26px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
 }

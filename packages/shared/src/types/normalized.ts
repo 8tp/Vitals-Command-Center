@@ -1,4 +1,5 @@
 import type { DeviceSource } from '../devices.js';
+import type { WorkoutSource } from '../integrations.js';
 import type { ConfidenceLevel } from '../confidence.js';
 
 /** One row per date — cross-device snapshot backed by daily_summary table. */
@@ -114,7 +115,7 @@ export interface SleepSession {
 export interface Workout {
   id: string;
   date: string;
-  source: DeviceSource;
+  source: WorkoutSource;
   sport: string;
   startTime: string;
   endTime: string;

@@ -30,6 +30,8 @@ export const registerConfigRoutes: FastifyPluginAsync = async (app) => {
       whoopConfigured: !!process.env.WHOOP_CLIENT_ID,
       ouraConfigured: !!process.env.OURA_PAT,
       appleIngestConfigured: !!process.env.APPLE_INGEST_SECRET,
+      googleConfigured: !!process.env.GOOGLE_CLIENT_ID,
+      stravaConfigured: !!process.env.STRAVA_CLIENT_ID,
       mcp: {
         serverName: 'vitals-command-center',
         transport: 'stdio',

@@ -5,15 +5,22 @@ export type ResolvedTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'vcc-theme';
 
-/** Read the saved choice (defaults to system). Safe on SSR / no-storage. */
+/** Read the saved choice (defaults to light — Soft Daylight). Safe on SSR. */
 function readChoice(): ThemeChoice {
+  try {
+    // ?theme=dark|light forces a theme (screenshot/deep-link affordance).
+    const m = /[?&]theme=(dark|light)/.exec(location.search);
+    if (m) return m[1] as ThemeChoice;
+  } catch {
+    /* ignore */
+  }
   try {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v === 'light' || v === 'dark' || v === 'system') return v;
   } catch {
     /* ignore */
   }
-  return 'system';
+  return 'light';
 }
 
 function systemPrefersDark(): boolean {
@@ -35,7 +42,7 @@ export function applyTheme(resolved: ResolvedTheme): void {
   // Keep legacy `.dark` class in sync (Tailwind darkMode etc.).
   root.classList.toggle('dark', resolved === 'dark');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#12161D' : '#F6F7F9');
+  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0B0F17' : '#F6F8FA');
 }
 
 interface ThemeState {

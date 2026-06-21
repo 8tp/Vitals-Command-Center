@@ -1,0 +1,3420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vitals — redesign directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#07090d;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.switcher{position:fixed;top:0;left:0;right:0;height:52px;z-index:1000;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(8,10,14,.86);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#e7ecf2}
+.switcher .b{font-weight:800;font-size:14px;letter-spacing:-.01em;white-space:nowrap}
+.switcher .seg{display:flex;gap:3px;background:rgba(255,255,255,.06);padding:4px;border-radius:999px}
+.switcher .seg button{border:0;background:transparent;color:#aeb8c6;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer;transition:.16s;white-space:nowrap}
+.switcher .seg button:hover{color:#fff}
+.switcher .seg button.active{background:#fff;color:#0a0c10}
+.switcher .hint{margin-left:auto;font-size:12px;color:#8a96a6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage{position:fixed;inset:52px 0 0 0;overflow:auto}
+.screen{display:none;min-height:100%}
+.screen.active{display:block}
+@media (max-width:760px){.switcher .hint{display:none}}
+</style>
+</head>
+<body>
+<div class="switcher">
+  <span class="b">Vitals · directions</span>
+  <div class="seg" id="seg">
+    <button data-screen="a" class="active">Editorial Minimal</button>
+    <button data-screen="b">Tactical Telemetry</button>
+    <button data-screen="c">Ethereal Glass</button>
+    <button data-screen="d">Soft Daylight</button>
+  </div>
+  <span class="hint">Four different apps · same data · try Sync &amp; the gear → Settings</span>
+</div>
+<div class="stage">
+<style>
+/* ============================================================
+   SCREEN A — EDITORIAL MINIMAL  ("morning journal")
+   Warm monochrome · serif display · mono meta · hairline bento
+   ============================================================ */
+#screen-a{
+  --bone:#FBFBFA;
+  --paper:#FFFFFF;
+  --paper-2:#F7F6F3;
+  --ink:#2F3437;
+  --ink-soft:#4A4F52;
+  --gray:#787774;
+  --line:#EAEAEA;
+  --line-2:#E4E3DF;
+  --green-bg:#EDF3EC;  --green-fg:#346538;
+  --blue-bg:#E1F3FE;   --blue-fg:#1F6C9F;
+  --serif:'Newsreader',Georgia,serif;
+  --display:'Playfair Display',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  min-height:100%;
+  background:var(--bone);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+  overflow-x:hidden;
+}
+#screen-a *{box-sizing:border-box}
+
+/* very subtle warm light spot — no gradients on content, ambient only */
+#screen-a .ambient{
+  position:absolute;top:-180px;right:-120px;width:620px;height:620px;
+  pointer-events:none;z-index:0;
+  background:radial-gradient(closest-side,rgba(120,119,116,.05),transparent 70%);
+}
+
+/* meta / kicker — mono, uppercase, wide */
+#screen-a .kicker{
+  font-family:var(--mono);
+  font-size:10.5px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gray);
+}
+
+/* ---------- TOP BAR (text nav, no sidebar) ---------- */
+#screen-a .topbar{
+  position:relative;z-index:5;
+  border-bottom:1px solid var(--line);
+  background:rgba(251,251,250,.82);
+  backdrop-filter:blur(8px);
+}
+#screen-a .topbar-inner{
+  max-width:1180px;margin:0 auto;
+  padding:0 40px;height:64px;
+  display:flex;align-items:center;gap:36px;
+}
+#screen-a .wordmark{
+  font-family:var(--display);
+  font-weight:600;font-size:23px;
+  letter-spacing:-.03em;color:var(--ink);
+  display:flex;align-items:baseline;gap:8px;
+}
+#screen-a .wordmark .tick{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--ink);display:inline-block;transform:translateY(-3px);
+}
+#screen-a nav.mainnav{display:flex;align-items:center;gap:26px}
+#screen-a nav.mainnav a{
+  font-family:var(--sans);
+  font-size:13.5px;font-weight:500;
+  letter-spacing:-.01em;color:var(--gray);
+  text-decoration:none;position:relative;
+  padding:4px 0;transition:color .18s ease;
+}
+#screen-a nav.mainnav a:hover{color:var(--ink)}
+#screen-a nav.mainnav a.active{color:var(--ink);font-weight:600}
+#screen-a nav.mainnav a.active::after{
+  content:"";position:absolute;left:0;right:0;bottom:-3px;height:1.5px;
+  background:var(--ink);
+}
+#screen-a .top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+
+/* device indicator */
+#screen-a .device{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;
+  letter-spacing:.04em;color:var(--ink-soft);
+  padding-right:14px;border-right:1px solid var(--line);
+}
+#screen-a .device .live{
+  width:6px;height:6px;border-radius:50%;
+  background:#00b0b9;position:relative;
+}
+#screen-a .device .live::after{
+  content:"";position:absolute;inset:-3px;border-radius:50%;
+  border:1px solid rgba(0,176,185,.4);
+  animation:a-pulse 2.4s ease-out infinite;
+}
+@keyframes a-pulse{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+
+/* sync + settings — quiet icon buttons */
+#screen-a .iconbtn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-size:12.5px;font-weight:500;
+  color:var(--ink);background:var(--paper);
+  border:1px solid var(--line);border-radius:6px;
+  padding:7px 12px;cursor:pointer;
+  transition:border-color .18s ease,background .18s ease,transform .12s ease;
+}
+#screen-a .iconbtn:hover{border-color:#D8D7D3;background:var(--paper-2)}
+#screen-a .iconbtn:active{transform:scale(.98)}
+#screen-a .iconbtn svg{display:block}
+#screen-a .iconbtn.gear{padding:8px;width:34px;height:34px;justify-content:center}
+#screen-a .sync-icon{transform-origin:50% 50%;display:block}
+#screen-a .syncing .sync-icon{animation:a-spin 1s linear infinite}
+@keyframes a-spin{to{transform:rotate(360deg)}}
+
+/* ---------- DOCUMENT BODY ---------- */
+#screen-a .doc{
+  position:relative;z-index:2;
+  max-width:1180px;margin:0 auto;
+  padding:56px 40px 96px;
+}
+
+/* masthead */
+#screen-a .masthead{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:32px;padding-bottom:40px;margin-bottom:48px;
+  border-bottom:1px solid var(--line);
+  opacity:0;animation:a-rise .7s cubic-bezier(.16,1,.3,1) .05s forwards;
+}
+#screen-a .masthead h1{
+  font-family:var(--display);font-weight:500;
+  font-size:clamp(34px,5vw,52px);line-height:1.02;
+  letter-spacing:-.03em;color:var(--ink);
+}
+#screen-a .masthead h1 em{font-style:italic;font-weight:400}
+#screen-a .masthead .date-col{text-align:right;flex:none;padding-bottom:6px}
+#screen-a .masthead .date-col .d{
+  font-family:var(--serif);font-size:18px;font-style:italic;
+  color:var(--ink-soft);letter-spacing:-.01em;
+}
+#screen-a .masthead .date-col .k{margin-top:8px}
+
+/* ---------- HERO: readiness ---------- */
+#screen-a .hero{
+  display:grid;grid-template-columns:minmax(280px,360px) 1px 1fr;
+  gap:0;align-items:stretch;
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--paper);overflow:hidden;
+  margin-bottom:14px;
+  opacity:0;animation:a-rise .7s cubic-bezier(.16,1,.3,1) .14s forwards;
+}
+#screen-a .hero .readiness{
+  padding:38px 40px;display:flex;flex-direction:column;
+  justify-content:space-between;gap:26px;
+}
+#screen-a .hero .readiness .top{display:flex;align-items:center;justify-content:space-between}
+#screen-a .badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px;border-radius:999px;
+}
+#screen-a .badge.good{background:var(--green-bg);color:var(--green-fg)}
+#screen-a .badge.good .dot{width:5px;height:5px;border-radius:50%;background:var(--green-fg)}
+
+#screen-a .ring-wrap{display:flex;align-items:center;gap:26px}
+#screen-a .ring{width:108px;height:108px;flex:none;position:relative}
+#screen-a .ring svg{display:block;transform:rotate(-90deg)}
+#screen-a .ring .ring-prog{
+  stroke-dasharray:295.3;          /* 2*pi*47 */
+  stroke-dashoffset:295.3;
+  animation:a-ring 1.4s cubic-bezier(.16,1,.3,1) .5s forwards;
+}
+@keyframes a-ring{to{stroke-dashoffset:53.2}} /* 18% remaining => 82% filled */
+#screen-a .ring .ring-num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:500;font-size:11px;color:var(--gray);
+}
+#screen-a .readiness .figure{display:flex;flex-direction:column}
+#screen-a .readiness .figure .num{
+  font-family:var(--display);font-weight:500;
+  font-size:84px;line-height:.86;letter-spacing:-.04em;color:var(--ink);
+}
+#screen-a .readiness .figure .num span{
+  font-size:26px;color:var(--gray);font-weight:400;letter-spacing:-.02em;
+}
+#screen-a .readiness .figure .state{
+  font-family:var(--serif);font-size:22px;font-style:italic;
+  letter-spacing:-.01em;color:var(--ink);margin-top:14px;
+}
+#screen-a .readiness .lede{
+  font-family:var(--serif);font-size:15px;line-height:1.6;
+  color:var(--ink-soft);max-width:34ch;
+}
+
+#screen-a .hero .vrule{background:var(--line);width:1px}
+
+/* recovery trio */
+#screen-a .trio{
+  display:grid;grid-template-columns:repeat(3,1fr);
+}
+#screen-a .trio .cell{
+  padding:34px 32px;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;gap:0;
+}
+#screen-a .trio .cell:last-child{border-right:0}
+#screen-a .trio .cell .lab{margin-bottom:18px}
+#screen-a .trio .cell .val{
+  font-family:var(--display);font-weight:500;
+  font-size:40px;line-height:1;letter-spacing:-.03em;color:var(--ink);
+}
+#screen-a .trio .cell .val u{
+  text-decoration:none;font-size:16px;color:var(--gray);
+  font-weight:400;letter-spacing:0;margin-left:3px;
+}
+#screen-a .trio .cell .delta{
+  margin-top:auto;padding-top:20px;
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.02em;color:var(--ink-soft);
+}
+#screen-a .trio .cell .delta .chip{
+  display:inline-flex;align-items:center;gap:4px;
+  color:var(--green-fg);font-weight:500;
+}
+#screen-a .trio .cell .delta .chip svg{display:block}
+
+/* ---------- ASYMMETRIC BENTO ---------- */
+#screen-a .bento{
+  display:grid;
+  grid-template-columns:1.55fr 1fr;
+  gap:14px;margin-top:14px;
+}
+#screen-a .panel{
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--paper);padding:30px 32px;
+  transition:box-shadow .2s ease,border-color .2s ease;
+  opacity:0;animation:a-rise .7s cubic-bezier(.16,1,.3,1) forwards;
+}
+#screen-a .panel:hover{box-shadow:0 2px 10px rgba(47,52,55,.04);border-color:#E3E2DE}
+#screen-a .panel .phead{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:16px;margin-bottom:24px;
+}
+#screen-a .panel .phead h2{
+  font-family:var(--display);font-weight:500;
+  font-size:20px;letter-spacing:-.02em;color:var(--ink);
+}
+#screen-a .panel .phead .sub{font-family:var(--mono)}
+
+#screen-a .p-vitals{animation-delay:.20s}
+#screen-a .p-hrv{animation-delay:.26s}
+#screen-a .p-sleep{animation-delay:.32s}
+#screen-a .p-run{animation-delay:.38s}
+
+/* vitals — 3x2 editorial cells split by hairlines, not boxes */
+#screen-a .vit-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+}
+#screen-a .vit-grid .v{
+  padding:20px 22px 20px 0;
+  border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line);
+}
+#screen-a .vit-grid .v:nth-child(3n){border-right:0;padding-right:0}
+#screen-a .vit-grid .v:nth-child(3n+1){padding-left:0}
+#screen-a .vit-grid .v:nth-child(3n+2){padding-left:22px}
+#screen-a .vit-grid .v:nth-last-child(-n+3){border-bottom:0;padding-bottom:4px}
+#screen-a .vit-grid .v .vl{margin-bottom:12px;display:block}
+#screen-a .vit-grid .v .vv{
+  font-family:var(--display);font-weight:500;
+  font-size:30px;line-height:1;letter-spacing:-.03em;color:var(--ink);
+}
+#screen-a .vit-grid .v .vv u{
+  text-decoration:none;font-size:13px;color:var(--gray);
+  font-weight:400;letter-spacing:0;margin-left:3px;
+}
+#screen-a .vit-grid .v .vmeta{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;
+  color:var(--gray);margin-top:9px;
+}
+/* tiny steps progress hairline */
+#screen-a .steps-bar{
+  margin-top:11px;height:3px;background:var(--paper-2);
+  border-radius:2px;overflow:hidden;width:100%;
+  border:1px solid var(--line);
+}
+#screen-a .steps-bar i{
+  display:block;height:100%;width:0;background:var(--ink);
+  animation:a-fill 1.3s cubic-bezier(.16,1,.3,1) .6s forwards;
+}
+@keyframes a-fill{to{width:84.31%}}
+
+/* HRV trend panel */
+#screen-a .p-hrv{display:flex;flex-direction:column}
+#screen-a .hrv-stats{display:flex;gap:26px;margin-bottom:18px}
+#screen-a .hrv-stats .s .n{
+  font-family:var(--display);font-weight:500;font-size:26px;
+  letter-spacing:-.03em;color:var(--ink);line-height:1;
+}
+#screen-a .hrv-stats .s .n u{text-decoration:none;font-size:12px;color:var(--gray);font-weight:400;margin-left:2px}
+#screen-a .hrv-stats .s .l{margin-top:7px}
+#screen-a .chart{flex:1;min-height:128px;position:relative}
+#screen-a .chart svg{display:block;width:100%;height:auto;overflow:visible}
+#screen-a .chart .axis{font-family:var(--mono);font-size:8.5px;fill:var(--gray);letter-spacing:.04em}
+#screen-a .chart .baseline{stroke:var(--line-2);stroke-width:1;stroke-dasharray:3 4}
+#screen-a .chart .area{fill:rgba(47,52,55,.04)}
+#screen-a .chart .spark{
+  fill:none;stroke:var(--ink);stroke-width:1.6;
+  stroke-linejoin:round;stroke-linecap:round;
+  stroke-dasharray:640;stroke-dashoffset:640;
+  animation:a-draw 1.9s cubic-bezier(.16,1,.3,1) .55s forwards;
+}
+@keyframes a-draw{to{stroke-dashoffset:0}}
+#screen-a .chart .dot-last{fill:var(--ink)}
+#screen-a .chart .dot-halo{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+
+/* sleep stages */
+#screen-a .p-sleep .sleep-total{
+  font-family:var(--display);font-weight:500;font-size:30px;
+  letter-spacing:-.03em;color:var(--ink);line-height:1;
+}
+#screen-a .p-sleep .sleep-total u{text-decoration:none;font-size:13px;color:var(--gray);font-weight:400;margin-left:4px}
+#screen-a .sleep-bar{
+  display:flex;height:10px;border-radius:4px;overflow:hidden;
+  margin:22px 0 22px;border:1px solid var(--line);background:var(--paper-2);
+}
+#screen-a .sleep-bar span{display:block;height:100%;transform:scaleX(0);transform-origin:left;animation:a-grow .9s cubic-bezier(.16,1,.3,1) forwards}
+#screen-a .sleep-bar .deep{background:#2F3437;animation-delay:.55s}
+#screen-a .sleep-bar .rem{background:#5C6166;animation-delay:.62s}
+#screen-a .sleep-bar .light{background:#9B9E9F;animation-delay:.69s}
+#screen-a .sleep-bar .awake{background:#D7D6D2;animation-delay:.76s}
+@keyframes a-grow{to{transform:scaleX(1)}}
+#screen-a .sleep-legend{display:flex;flex-direction:column;gap:0}
+#screen-a .sleep-legend .row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 0;border-bottom:1px solid var(--line);
+}
+#screen-a .sleep-legend .row:last-child{border-bottom:0;padding-bottom:0}
+#screen-a .sleep-legend .row .sw{width:9px;height:9px;border-radius:2px;flex:none}
+#screen-a .sleep-legend .row .name{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink)}
+#screen-a .sleep-legend .row .pct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--gray);letter-spacing:.04em}
+#screen-a .sleep-legend .row .dur{font-family:var(--display);font-size:15px;color:var(--ink);min-width:62px;text-align:right;letter-spacing:-.01em}
+
+/* today's run */
+#screen-a .p-run{position:relative}
+#screen-a .p-run .strava-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:#fc5200;
+}
+#screen-a .p-run .strava-tag .sq{width:7px;height:7px;background:#fc5200;border-radius:1.5px}
+#screen-a .run-title{
+  font-family:var(--display);font-weight:500;font-size:22px;
+  letter-spacing:-.02em;color:var(--ink);margin:14px 0 4px;
+}
+#screen-a .run-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:0;margin-top:20px;
+}
+#screen-a .run-grid .rc{
+  padding:16px 18px 16px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+#screen-a .run-grid .rc:nth-child(2n){border-right:0;padding-right:0;padding-left:18px}
+#screen-a .run-grid .rc:nth-last-child(-n+2){border-bottom:0;padding-bottom:0}
+#screen-a .run-grid .rc .rl{margin-bottom:9px;display:block}
+#screen-a .run-grid .rc .rv{
+  font-family:var(--display);font-weight:500;font-size:26px;
+  letter-spacing:-.03em;color:var(--ink);line-height:1;
+}
+#screen-a .run-grid .rc .rv u{text-decoration:none;font-size:12px;color:var(--gray);font-weight:400;margin-left:2px}
+
+/* footer note */
+#screen-a .doc-foot{
+  margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  opacity:0;animation:a-rise .7s cubic-bezier(.16,1,.3,1) .46s forwards;
+}
+#screen-a .doc-foot .l{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--gray)}
+#screen-a .doc-foot .r{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
+
+/* ---------- SETTINGS OVERLAY ---------- */
+#screen-a .settings-overlay{
+  display:none;
+  position:fixed;inset:52px 0 0 0;z-index:60;
+  background:rgba(247,246,243,.72);
+  backdrop-filter:blur(6px);
+  align-items:flex-start;justify-content:center;
+  padding:56px 24px;overflow:auto;
+  animation:a-fade .3s ease both;
+}
+#screen-a.show-settings .settings-overlay{display:flex}
+@keyframes a-fade{from{opacity:0}to{opacity:1}}
+@keyframes a-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#screen-a .settings-card{
+  width:100%;max-width:680px;
+  background:var(--paper);
+  border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 12px 40px rgba(47,52,55,.05);
+  animation:a-rise .5s cubic-bezier(.16,1,.3,1) both;
+}
+#screen-a .settings-card .sc-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:20px;padding:30px 34px 24px;border-bottom:1px solid var(--line);
+}
+#screen-a .settings-card .sc-head h3{
+  font-family:var(--display);font-weight:500;font-size:26px;
+  letter-spacing:-.03em;color:var(--ink);
+}
+#screen-a .settings-card .sc-head .k{margin-top:8px}
+#screen-a .closebtn{
+  flex:none;width:34px;height:34px;border-radius:6px;
+  border:1px solid var(--line);background:var(--paper);
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink);transition:background .18s ease,border-color .18s;
+}
+#screen-a .closebtn:hover{background:var(--paper-2);border-color:#D8D7D3}
+
+/* master sync row */
+#screen-a .master{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:22px 34px;background:var(--paper-2);border-bottom:1px solid var(--line);
+}
+#screen-a .master .mt{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink)}
+#screen-a .master .ms{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--gray);margin-top:5px}
+
+/* integrations list */
+#screen-a .integrations{padding:8px 34px 14px}
+#screen-a .integ{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 0;border-bottom:1px solid var(--line);
+}
+#screen-a .integ:last-child{border-bottom:0}
+#screen-a .integ .swatch{
+  width:34px;height:34px;border-radius:8px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);
+  font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;
+}
+#screen-a .integ .meta{flex:1;min-width:0}
+#screen-a .integ .meta .n{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+#screen-a .integ .meta .s{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--gray);margin-top:5px;
+  display:flex;align-items:center;gap:8px;
+}
+#screen-a .integ .meta .s .st{display:inline-flex;align-items:center;gap:5px}
+#screen-a .integ .meta .s .st.ok{color:var(--green-fg)}
+#screen-a .integ .meta .s .st.ok .d{width:5px;height:5px;border-radius:50%;background:var(--green-fg)}
+#screen-a .integ .meta .s .st.off .d{width:5px;height:5px;border-radius:50%;background:#C9C8C4}
+#screen-a .integ .meta .s .sep{color:var(--line-2)}
+
+/* CSS-only toggle (visual state) */
+#screen-a .toggle{
+  flex:none;width:42px;height:24px;border-radius:999px;
+  border:1px solid var(--line);background:var(--paper-2);
+  position:relative;transition:background .2s ease,border-color .2s ease;
+  cursor:default;
+}
+#screen-a .toggle::after{
+  content:"";position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  border:1px solid var(--line);transition:transform .2s cubic-bezier(.16,1,.3,1);
+}
+#screen-a .toggle.on{background:var(--ink);border-color:var(--ink)}
+#screen-a .toggle.on::after{transform:translateX(18px);border-color:var(--ink)}
+
+#screen-a .sc-foot{
+  padding:18px 34px 26px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+#screen-a .sc-foot .note{
+  font-family:var(--serif);font-size:13.5px;font-style:italic;
+  line-height:1.55;color:var(--gray);
+}
+#screen-a .sc-foot svg{flex:none;margin-top:2px;color:var(--gray)}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  #screen-a .hero{grid-template-columns:1fr;}
+  #screen-a .hero .vrule{display:none}
+  #screen-a .hero .readiness{border-bottom:1px solid var(--line)}
+  #screen-a .bento{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  #screen-a nav.mainnav{display:none}
+  #screen-a .topbar-inner{padding:0 20px;gap:16px}
+  #screen-a .doc{padding:36px 20px 72px}
+  #screen-a .masthead{flex-direction:column;align-items:flex-start;gap:18px}
+  #screen-a .masthead .date-col{text-align:left}
+  #screen-a .device{display:none}
+  #screen-a .trio{grid-template-columns:1fr}
+  #screen-a .trio .cell{border-right:0;border-bottom:1px solid var(--line)}
+  #screen-a .trio .cell:last-child{border-bottom:0}
+  #screen-a .vit-grid{grid-template-columns:repeat(2,1fr)}
+  #screen-a .vit-grid .v{border-right:1px solid var(--line)!important;padding-left:0!important;padding-right:18px!important}
+  #screen-a .vit-grid .v:nth-child(2n){border-right:0!important;padding-right:0!important;padding-left:18px!important}
+}
+</style>
+
+<section class="screen" id="screen-a">
+  <div class="ambient" aria-hidden="true"></div>
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="wordmark">Vitals<span class="tick"></span></div>
+      <nav class="mainnav">
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Sleep</a>
+        <a href="#">Activity</a>
+        <a href="#">Habits</a>
+        <a href="#">Ask Claude</a>
+      </nav>
+      <div class="top-right">
+        <div class="device"><span class="live"></span>Fitbit Air</div>
+        <button class="iconbtn" data-sync aria-label="Sync now">
+          <svg class="sync-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8.5-6"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8.5 6"/><path d="M21 4v5h-5"/><path d="M3 20v-5h5"/></svg>
+          Sync
+        </button>
+        <button class="iconbtn gear" data-open-settings aria-label="Open settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ DOCUMENT ============ -->
+  <main class="doc">
+
+    <!-- masthead -->
+    <div class="masthead">
+      <h1>Good morning,<br><em>Alex</em></h1>
+      <div class="date-col">
+        <div class="d">Saturday, June 20</div>
+        <div class="kicker k">Morning Report · No.&nbsp;172</div>
+      </div>
+    </div>
+
+    <!-- HERO: readiness -->
+    <section class="hero">
+      <div class="readiness">
+        <div class="top">
+          <span class="kicker">Morning Readiness</span>
+          <span class="badge good"><span class="dot"></span>Primed</span>
+        </div>
+        <div class="ring-wrap">
+          <div class="ring">
+            <svg width="108" height="108" viewBox="0 0 108 108">
+              <circle cx="54" cy="54" r="47" fill="none" stroke="#EAEAEA" stroke-width="2"/>
+              <circle class="ring-prog" cx="54" cy="54" r="47" fill="none" stroke="#2F3437" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-num">/ 100</div>
+          </div>
+          <div class="figure">
+            <div class="num">82</div>
+            <div class="state">Primed for training.</div>
+          </div>
+        </div>
+        <p class="lede">Recovery is ahead of baseline this morning. Conditions favour a higher-intensity session — your body has the headroom for it.</p>
+      </div>
+
+      <div class="vrule" aria-hidden="true"></div>
+
+      <div class="trio">
+        <div class="cell">
+          <span class="kicker lab">Heart-rate variability</span>
+          <div class="val">64<u>ms</u></div>
+          <div class="delta">
+            <span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>+6%</span>
+            vs baseline
+          </div>
+        </div>
+        <div class="cell">
+          <span class="kicker lab">Resting heart rate</span>
+          <div class="val">52<u>bpm</u></div>
+          <div class="delta">
+            <span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7 17 17"/><path d="M17 9v8H9"/></svg>−3 bpm</span>
+            overnight
+          </div>
+        </div>
+        <div class="cell">
+          <span class="kicker lab">Last night's sleep</span>
+          <div class="val">7<u>h</u> 24<u>m</u></div>
+          <div class="delta">
+            <span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>+18 m</span>
+            vs need
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENTO ROW 1: vitals (wide) + hrv (narrow) -->
+    <div class="bento">
+      <!-- TODAY'S VITALS -->
+      <section class="panel p-vitals">
+        <div class="phead">
+          <h2>Today's vitals</h2>
+          <span class="kicker sub">06 metrics</span>
+        </div>
+        <div class="vit-grid">
+          <div class="v">
+            <span class="kicker vl">Blood oxygen</span>
+            <div class="vv">98<u>%</u></div>
+            <div class="vmeta">Within normal range</div>
+          </div>
+          <div class="v">
+            <span class="kicker vl">Respiratory rate</span>
+            <div class="vv">14.2<u>br/min</u></div>
+            <div class="vmeta">Steady overnight</div>
+          </div>
+          <div class="v">
+            <span class="kicker vl">Skin temp</span>
+            <div class="vv">−0.2<u>°</u></div>
+            <div class="vmeta">vs your baseline</div>
+          </div>
+          <div class="v">
+            <span class="kicker vl">Steps</span>
+            <div class="vv">8,431</div>
+            <div class="vmeta">Goal 10,000 · 84%</div>
+            <div class="steps-bar"><i></i></div>
+          </div>
+          <div class="v">
+            <span class="kicker vl">Calories burned</span>
+            <div class="vv">2,180<u>kcal</u></div>
+            <div class="vmeta">Active + resting</div>
+          </div>
+          <div class="v">
+            <span class="kicker vl">Calories eaten</span>
+            <div class="vv">1,940<u>kcal</u></div>
+            <div class="vmeta">−240 net balance</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HRV TREND -->
+      <section class="panel p-hrv">
+        <div class="phead">
+          <h2>HRV trend</h2>
+          <span class="kicker sub">14 days · ms</span>
+        </div>
+        <div class="hrv-stats">
+          <div class="s"><div class="n">64<u>avg</u></div><span class="kicker l">14-day</span></div>
+          <div class="s"><div class="n">60<u>base</u></div><span class="kicker l">baseline</span></div>
+        </div>
+        <div class="chart">
+          <!-- 14 pts: 58,62,57,64,60,66,63,69,61,67,72,65,68,64  range padded 52..76 -->
+          <svg viewBox="0 0 320 140" preserveAspectRatio="none" role="img" aria-label="14-day HRV trend line chart">
+            <!-- baseline (60) -->
+            <line class="baseline" x1="0" y1="93.33" x2="288" y2="93.33"/>
+            <!-- area under line -->
+            <path class="area" d="M0,113.33 L0,130 L288,130 L288,73.33 Z
+              M0,113.33 22.15,86.67 44.3,120 66.46,73.33 88.62,100 110.77,60 132.92,80 155.08,40 177.23,93.33 199.38,66.67 221.54,33.33 243.69,80 265.85,53.33 288,73.33"/>
+            <!-- spark line -->
+            <polyline class="spark" points="0,113.33 22.15,86.67 44.3,120 66.46,73.33 88.62,100 110.77,60 132.92,80 155.08,40 177.23,93.33 199.38,66.67 221.54,33.33 243.69,80 265.85,53.33 288,73.33"/>
+            <!-- last-point marker -->
+            <circle class="dot-halo" cx="288" cy="73.33" r="5"/>
+            <circle class="dot-last" cx="288" cy="73.33" r="2.4"/>
+            <!-- axis labels -->
+            <text class="axis" x="0" y="138">14d ago</text>
+            <text class="axis" x="288" y="138" text-anchor="end">today · 64</text>
+          </svg>
+        </div>
+      </section>
+    </div>
+
+    <!-- BENTO ROW 2: sleep (narrow) + run (wide), reversed weighting -->
+    <div class="bento" style="grid-template-columns:1fr 1.55fr">
+      <!-- SLEEP STAGES -->
+      <section class="panel p-sleep">
+        <div class="phead">
+          <h2>Sleep stages</h2>
+          <span class="kicker sub">Last night</span>
+        </div>
+        <div class="sleep-total">7h 24m<u>total</u></div>
+        <div class="sleep-bar" aria-hidden="true">
+          <!-- proportions of 444 min: deep 92, rem 108, light 221, awake 23 -->
+          <span class="deep" style="flex:92"></span>
+          <span class="rem" style="flex:108"></span>
+          <span class="light" style="flex:221"></span>
+          <span class="awake" style="flex:23"></span>
+        </div>
+        <div class="sleep-legend">
+          <div class="row"><span class="sw" style="background:#2F3437"></span><span class="name">Deep</span><span class="pct">21%</span><span class="dur">1h 32m</span></div>
+          <div class="row"><span class="sw" style="background:#5C6166"></span><span class="name">REM</span><span class="pct">24%</span><span class="dur">1h 48m</span></div>
+          <div class="row"><span class="sw" style="background:#9B9E9F"></span><span class="name">Light</span><span class="pct">50%</span><span class="dur">3h 41m</span></div>
+          <div class="row"><span class="sw" style="background:#D7D6D2"></span><span class="name">Awake</span><span class="pct">5%</span><span class="dur">23m</span></div>
+        </div>
+      </section>
+
+      <!-- TODAY'S RUN -->
+      <section class="panel p-run">
+        <div class="phead">
+          <span class="strava-tag"><span class="sq"></span>Strava · Today's run</span>
+          <span class="kicker sub">07:48 AM</span>
+        </div>
+        <h3 class="run-title">Morning Run</h3>
+        <p class="lede" style="font-family:var(--serif);font-size:14px;line-height:1.6;color:var(--ink-soft);max-width:44ch">An easy aerobic effort logged from your Apple Watch — pace held steady throughout, well inside your conversational zone.</p>
+        <div class="run-grid">
+          <div class="rc">
+            <span class="kicker rl">Distance</span>
+            <div class="rv">5.02<u>km</u></div>
+          </div>
+          <div class="rc">
+            <span class="kicker rl">Moving time</span>
+            <div class="rv">37:13</div>
+          </div>
+          <div class="rc">
+            <span class="kicker rl">Avg pace</span>
+            <div class="rv">7:25<u>/km</u></div>
+          </div>
+          <div class="rc">
+            <span class="kicker rl">Energy</span>
+            <div class="rv">400<u>cal</u></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- footer note -->
+    <div class="doc-foot">
+      <span class="l">Compiled from Fitbit Air &amp; Strava at 07:52.</span>
+      <span class="r">Vitals · Editorial</span>
+    </div>
+
+  </main>
+
+  <!-- ============ SETTINGS OVERLAY ============ -->
+  <div class="settings-overlay">
+    <div class="settings-card">
+      <div class="sc-head">
+        <div>
+          <h3>Settings</h3>
+          <div class="kicker k">Integrations &amp; sync</div>
+        </div>
+        <button class="closebtn" data-close-settings aria-label="Close settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- master auto-sync -->
+      <div class="master">
+        <div>
+          <div class="mt">Automatic sync</div>
+          <div class="ms">Pull new readings from all connected sources on schedule</div>
+        </div>
+        <div class="toggle on" role="switch" aria-checked="true" aria-label="Automatic sync"></div>
+      </div>
+
+      <!-- integrations -->
+      <div class="integrations">
+        <!-- Fitbit Air -->
+        <div class="integ">
+          <span class="swatch" style="background:#00b0b9">F</span>
+          <div class="meta">
+            <div class="n">Fitbit Air</div>
+            <div class="s"><span class="st ok"><span class="d"></span>Connected</span><span class="sep">·</span><span>Every 4h</span></div>
+          </div>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Fitbit Air"></div>
+        </div>
+        <!-- Apple Watch -->
+        <div class="integ">
+          <span class="swatch" style="background:#378add">A</span>
+          <div class="meta">
+            <div class="n">Apple Watch Ultra 2</div>
+            <div class="s"><span class="st ok"><span class="d"></span>Connected</span><span class="sep">·</span><span>Every 4h</span></div>
+          </div>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Apple Watch Ultra 2"></div>
+        </div>
+        <!-- Strava -->
+        <div class="integ">
+          <span class="swatch" style="background:#fc5200">S</span>
+          <div class="meta">
+            <div class="n">Strava</div>
+            <div class="s"><span class="st ok"><span class="d"></span>Connected</span><span class="sep">·</span><span>Every 1h</span></div>
+          </div>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Strava"></div>
+        </div>
+        <!-- WHOOP -->
+        <div class="integ">
+          <span class="swatch" style="background:#e24b4a">W</span>
+          <div class="meta">
+            <div class="n">WHOOP MG</div>
+            <div class="s"><span class="st off"><span class="d"></span>Off</span><span class="sep">·</span><span>Not syncing</span></div>
+          </div>
+          <div class="toggle" role="switch" aria-checked="false" aria-label="WHOOP MG"></div>
+        </div>
+        <!-- Oura -->
+        <div class="integ">
+          <span class="swatch" style="background:#1d9e75">O</span>
+          <div class="meta">
+            <div class="n">Oura Ring 4</div>
+            <div class="s"><span class="st off"><span class="d"></span>Off</span><span class="sep">·</span><span>Not syncing</span></div>
+          </div>
+          <div class="toggle" role="switch" aria-checked="false" aria-label="Oura Ring 4"></div>
+        </div>
+      </div>
+
+      <div class="sc-foot">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span class="note">Turning an integration off removes it entirely — it stops syncing and will no longer be reported as "offline".</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+<style>
+/* ============================================================
+   SCREEN-B — TACTICAL TELEMETRY / CRT TERMINAL (DARK)
+   Declassified mission-control aerospace HUD for "Vitals"
+   ============================================================ */
+#screen-b{
+  --bg:#0E0E0E;
+  --panel:#121212;
+  --line:#2A2A2A;
+  --line-hot:#3A3A3A;
+  --ink:#EAEAEA;
+  --dim:#8C8C8C;
+  --faint:#5A5A5A;
+  --red:#FF2A2A;
+  --green:#4AF626;
+  --mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;
+  --mono2:'IBM Plex Mono','JetBrains Mono',ui-monospace,monospace;
+  position:relative;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:1.4;
+  letter-spacing:.04em;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  padding-bottom:64px;
+}
+
+/* ---- CRT scanlines + grain (decorative, non-blocking) ---- */
+#screen-b::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:50;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.22) 3px, rgba(0,0,0,.22) 4px);
+  mix-blend-mode:multiply;
+}
+#screen-b::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:51;
+  opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ===================== TYPOGRAPHIC PRIMITIVES ===================== */
+#screen-b .up{text-transform:uppercase;letter-spacing:.1em}
+#screen-b .tag{
+  font-family:var(--mono2);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  color:var(--dim);
+}
+#screen-b .tag .br{color:var(--red)}
+#screen-b .red{color:var(--red)}
+#screen-b .green{color:var(--green)}
+#screen-b .dim{color:var(--dim)}
+#screen-b .faint{color:var(--faint)}
+#screen-b samp,#screen-b output,#screen-b data{font-family:var(--mono);font-variant-numeric:tabular-nums}
+#screen-b hr{border:0;border-top:1px solid var(--line);margin:0}
+#screen-b hr.hot{border-top:2px solid var(--red)}
+
+/* ===================== TOP COMMAND BAR ===================== */
+#screen-b .topbar{
+  position:relative;
+  z-index:40;
+  border-bottom:2px solid var(--line);
+  background:var(--bg);
+}
+#screen-b .topbar .strip{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+#screen-b .topbar .strip-l,#screen-b .topbar .strip-r{
+  display:flex;align-items:center;gap:0;
+}
+#screen-b .wordmark{
+  display:flex;align-items:baseline;gap:10px;
+  padding:14px 18px;
+  border-right:1px solid var(--line);
+}
+#screen-b .wordmark b{
+  font-family:'Archivo Black',var(--mono);
+  font-size:21px;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+#screen-b .wordmark b i{color:var(--red);font-style:normal}
+#screen-b .wordmark .rev{font-size:9px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+
+#screen-b .sysline{
+  display:flex;align-items:center;gap:8px;
+  padding:0 16px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+  border-right:1px solid var(--line);
+}
+#screen-b .led{
+  width:8px;height:8px;background:var(--green);
+  box-shadow:0 0 7px var(--green);
+  animation:b-blink 2.2s steps(1) infinite;
+}
+@keyframes b-blink{0%,72%{opacity:1}73%,100%{opacity:.25}}
+
+/* nav */
+#screen-b nav{display:flex;align-items:stretch}
+#screen-b nav a{
+  display:flex;align-items:center;gap:7px;
+  padding:0 17px;
+  text-decoration:none;
+  color:var(--dim);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  border-left:1px solid var(--line);
+  transition:background .12s,color .12s;
+}
+#screen-b nav a .idx{font-size:9px;color:var(--faint)}
+#screen-b nav a:hover{color:var(--ink);background:#181818}
+#screen-b nav a[aria-current]{
+  color:var(--bg);
+  background:var(--red);
+  font-weight:700;
+}
+#screen-b nav a[aria-current] .idx{color:var(--bg)}
+
+/* control buttons */
+#screen-b .ctl{
+  display:flex;align-items:center;gap:8px;
+  padding:0 16px;
+  background:transparent;border:0;border-left:1px solid var(--line);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  cursor:pointer;
+  transition:background .12s,color .12s;
+}
+#screen-b .ctl:hover{background:#181818}
+#screen-b .ctl.sync{color:var(--green)}
+#screen-b .ctl.sync:hover{background:#0f1a0c}
+#screen-b .ctl.gear:hover{color:var(--red)}
+#screen-b .sync-icon{width:14px;height:14px;display:block}
+#screen-b .syncing .sync-icon{animation:b-spin 1s linear infinite}
+@keyframes b-spin{to{transform:rotate(360deg)}}
+#screen-b .ctl.sync .sync-state::after{content:"READY"}
+#screen-b .ctl.sync.syncing .sync-state::after{content:"RUN…"}
+#screen-b .ctl.sync.syncing{color:var(--green)}
+
+/* second meta strip — greeting / date / device telemetry */
+#screen-b .metastrip{
+  display:grid;
+  grid-template-columns:1fr auto auto auto;
+  background:var(--line);
+  gap:1px;
+}
+#screen-b .metastrip>div{
+  background:var(--bg);
+  padding:9px 18px;
+  display:flex;align-items:baseline;gap:10px;
+  white-space:nowrap;
+}
+#screen-b .metastrip .greet{font-size:13px;letter-spacing:.04em;color:var(--ink)}
+#screen-b .metastrip .greet b{color:var(--red);font-weight:700}
+#screen-b .metastrip .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+#screen-b .metastrip .v{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+#screen-b .metastrip .dev .dot{display:inline-block;width:7px;height:7px;background:#00b0b9;margin-right:2px;transform:translateY(1px)}
+
+/* ===================== MAIN BLUEPRINT GRID ===================== */
+#screen-b .console{
+  position:relative;z-index:30;
+  display:grid;
+  grid-template-columns:1.55fr 1fr;
+  gap:1px;
+  background:var(--line);
+  border-bottom:1px solid var(--line);
+}
+#screen-b .cell{background:var(--bg);position:relative}
+#screen-b .cell-pad{padding:18px 20px 20px}
+
+/* crosshair markers at intersections */
+#screen-b .cell::before{
+  content:"+";
+  position:absolute;top:-7px;left:-6px;
+  color:var(--faint);font-size:12px;line-height:1;z-index:5;
+  pointer-events:none;
+}
+
+/* panel header bar */
+#screen-b .phead{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;
+  border-bottom:1px solid var(--line);
+  background:#0B0B0B;
+}
+#screen-b .phead .title{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+}
+#screen-b .phead .title::before{content:"[ "; color:var(--red)}
+#screen-b .phead .title::after{content:" ]";color:var(--red)}
+#screen-b .phead .coord{font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase}
+
+/* ---------- READINESS HERO ---------- */
+#screen-b .hero{display:grid;grid-template-rows:auto 1fr}
+#screen-b .hero-body{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:24px;
+  padding:22px 20px 18px;
+  align-items:center;
+}
+#screen-b .score-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#screen-b .score-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+#screen-b .score{
+  font-family:'Archivo Black',var(--mono);
+  font-size:clamp(96px,16vw,168px);
+  line-height:.78;
+  letter-spacing:-.02em;
+  color:var(--ink);
+  text-shadow:0 0 22px rgba(255,42,42,.16);
+}
+#screen-b .score .of{
+  display:block;
+  font-family:var(--mono);
+  font-size:13px;letter-spacing:.18em;
+  color:var(--faint);
+  margin-top:8px;
+  text-shadow:none;
+}
+#screen-b .state{
+  display:inline-flex;align-items:center;gap:9px;
+  border:1px solid var(--red);
+  color:var(--red);
+  padding:6px 12px;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+}
+#screen-b .state .blip{width:7px;height:7px;background:var(--red);box-shadow:0 0 7px var(--red)}
+
+/* ASCII segmented gauge */
+#screen-b .gauge{display:flex;flex-direction:column;gap:8px}
+#screen-b .gauge .grow{
+  display:grid;
+  grid-template-columns:repeat(20,1fr);
+  gap:2px;
+  height:26px;
+}
+#screen-b .gauge .seg{background:#1E1E1E}
+#screen-b .gauge .seg.on{background:var(--red)}
+#screen-b .gauge .seg.on.lo{background:#7a1414}
+#screen-b .gauge .gscale{
+  display:flex;justify-content:space-between;
+  font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;
+}
+#screen-b .gauge .note{font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+
+/* recovery trio */
+#screen-b .trio{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--line);
+  border-top:1px solid var(--line);
+}
+#screen-b .trio .t{
+  background:var(--bg);
+  padding:14px 16px 15px;
+  display:flex;flex-direction:column;gap:5px;
+}
+#screen-b .trio .t .lab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .trio .t .num{
+  display:flex;align-items:baseline;gap:5px;
+  font-size:30px;line-height:1;color:var(--ink);font-weight:500;
+}
+#screen-b .trio .t .num u{font-size:12px;color:var(--faint);text-decoration:none;letter-spacing:.06em}
+#screen-b .trio .t .delta{font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+#screen-b .trio .t .delta.up{color:var(--green)}
+#screen-b .trio .t .delta.dn{color:var(--red)}
+#screen-b .trio .t .delta.flat{color:var(--dim)}
+
+/* ---------- VITALS TABLE (dl) ---------- */
+#screen-b .vitals dl{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:var(--line);
+}
+#screen-b .vitals .row{
+  background:var(--bg);
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:13px 16px;
+  gap:10px;
+}
+#screen-b .vitals dt{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .vitals dt small{display:block;color:var(--faint);font-size:8px;letter-spacing:.12em;margin-top:3px}
+#screen-b .vitals dd{text-align:right}
+#screen-b .vitals dd .val{font-size:21px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .vitals dd .val u{font-size:11px;color:var(--faint);text-decoration:none;letter-spacing:.05em;margin-left:2px}
+#screen-b .vitals dd .sub{display:block;margin-top:4px;font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+#screen-b .vitals dd .sub b{color:var(--red);font-weight:500}
+
+/* steps mini-bar */
+#screen-b .vitals .stepbar{
+  display:flex;gap:1px;margin-top:6px;height:5px;justify-content:flex-end;
+}
+#screen-b .vitals .stepbar i{width:8px;background:#222}
+#screen-b .vitals .stepbar i.on{background:var(--red)}
+
+/* ---------- HRV TREND ---------- */
+#screen-b .hrv .chart{padding:8px 14px 6px}
+#screen-b .hrv svg{display:block;width:100%;height:auto}
+#screen-b .hrv .legend{
+  display:flex;gap:18px;padding:0 18px 14px;flex-wrap:wrap;
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+}
+#screen-b .hrv .legend span b{color:var(--ink)}
+#screen-b .hrv .legend .base::before{content:"---- ";color:var(--faint);letter-spacing:0}
+#screen-b .hrv .legend .live::before{content:"━━ ";color:var(--red);letter-spacing:0}
+
+/* ---------- SLEEP STAGES ---------- */
+#screen-b .sleep-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px}
+#screen-b .sleep .total{
+  display:flex;align-items:baseline;gap:10px;
+}
+#screen-b .sleep .total .big{font-size:34px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .sleep .total .lab{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+#screen-b .sleep .bar{
+  display:flex;height:30px;border:1px solid var(--line-hot);
+}
+#screen-b .sleep .bar .s{position:relative;overflow:hidden}
+#screen-b .sleep .bar .s.deep{background:var(--red)}
+#screen-b .sleep .bar .s.rem{background:#7a1414}
+#screen-b .sleep .bar .s.light{background:#2A2A2A}
+#screen-b .sleep .bar .s.awake{background:repeating-linear-gradient(45deg,#1a1a1a 0 4px,#000 4px 8px)}
+#screen-b .sleep .bar .s+ .s{border-left:1px solid var(--bg)}
+#screen-b .sleep .legend{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+#screen-b .sleep .legend .lrow{
+  background:var(--bg);
+  display:grid;grid-template-columns:14px 1fr auto auto;
+  align-items:center;gap:10px;
+  padding:8px 4px;
+}
+#screen-b .sleep .legend .sw{width:11px;height:11px}
+#screen-b .sleep .legend .sw.deep{background:var(--red)}
+#screen-b .sleep .legend .sw.rem{background:#7a1414}
+#screen-b .sleep .legend .sw.light{background:#2A2A2A}
+#screen-b .sleep .legend .sw.awake{background:repeating-linear-gradient(45deg,#1a1a1a 0 3px,#000 3px 6px)}
+#screen-b .sleep .legend .nm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#screen-b .sleep .legend .nm::before{content:"[ ";color:var(--faint)}
+#screen-b .sleep .legend .nm::after{content:" ]";color:var(--faint)}
+#screen-b .sleep .legend .dur{font-size:11px;color:var(--ink)}
+#screen-b .sleep .legend .pct{font-size:9px;color:var(--faint);width:38px;text-align:right}
+
+/* ---------- TODAY'S RUN (Strava) ---------- */
+#screen-b .run{grid-column:1 / -1}
+#screen-b .run-body{
+  display:grid;
+  grid-template-columns:auto repeat(4,1fr);
+  gap:1px;background:var(--line);
+}
+#screen-b .run-body>div{background:var(--bg);padding:15px 18px}
+#screen-b .run .ident{display:flex;flex-direction:column;gap:6px;min-width:200px}
+#screen-b .run .ident .src{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#fc5200;
+}
+#screen-b .run .ident .src .dot{width:7px;height:7px;background:#fc5200}
+#screen-b .run .ident .name{font-size:17px;letter-spacing:.02em;color:var(--ink);text-transform:uppercase}
+#screen-b .run .ident .ts{font-size:9px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase}
+#screen-b .run .stat{display:flex;flex-direction:column;gap:5px;justify-content:center}
+#screen-b .run .stat .lab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+#screen-b .run .stat .v{font-size:24px;line-height:1;color:var(--ink);font-weight:500}
+#screen-b .run .stat .v u{font-size:11px;color:var(--faint);text-decoration:none;letter-spacing:.05em}
+
+/* ===================== FOOTER TELEMETRY MARQUEE ===================== */
+#screen-b .footer{
+  position:absolute;left:0;right:0;bottom:0;z-index:40;
+  border-top:2px solid var(--line);
+  background:var(--bg);
+  display:flex;align-items:center;gap:0;
+  overflow:hidden;
+}
+#screen-b .footer .fcell{
+  padding:9px 18px;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+  border-right:1px solid var(--line);white-space:nowrap;
+}
+#screen-b .footer .fcell b{color:var(--dim)}
+#screen-b .footer .fcell.live{color:var(--green)}
+#screen-b .footer .grow{flex:1;border-right:0}
+
+/* ===================== SETTINGS OVERLAY ===================== */
+#screen-b .settings-overlay{
+  display:none;
+  position:absolute;inset:0;z-index:200;
+  background:rgba(8,8,8,.92);
+  padding:46px 22px;
+  align-items:flex-start;justify-content:center;
+  overflow:auto;
+}
+#screen-b.show-settings .settings-overlay{display:flex}
+#screen-b .panel{
+  width:100%;max-width:760px;
+  background:var(--bg);
+  border:2px solid var(--red);
+}
+#screen-b .panel .phd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:2px solid var(--red);background:#100808;
+}
+#screen-b .panel .phd .t{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+#screen-b .panel .phd .t::before{content:"// "; color:var(--red)}
+#screen-b .panel .close{
+  background:transparent;border:1px solid var(--line-hot);color:var(--ink);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;cursor:pointer;
+}
+#screen-b .panel .close:hover{border-color:var(--red);color:var(--red)}
+
+/* master switch */
+#screen-b .master{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 18px;border-bottom:1px solid var(--line);background:#0B0B0B;
+}
+#screen-b .master .ml{display:flex;flex-direction:column;gap:4px}
+#screen-b .master .ml .mt{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#screen-b .master .ml .ms{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);max-width:480px}
+
+/* toggle switch (CSS-only via checkbox) */
+#screen-b .sw-toggle{position:relative;display:inline-block;width:54px;height:24px;flex:none;cursor:pointer}
+#screen-b .sw-toggle input{position:absolute;opacity:0;width:0;height:0}
+#screen-b .sw-toggle .track{
+  position:absolute;inset:0;background:#1A1A1A;border:1px solid var(--line-hot);
+}
+#screen-b .sw-toggle .knob{
+  position:absolute;top:2px;left:2px;width:20px;height:18px;background:var(--faint);
+  transition:left .14s,background .14s;
+}
+#screen-b .sw-toggle .txt{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-size:8px;letter-spacing:.1em;color:var(--faint);
+}
+#screen-b .sw-toggle .txt.on{left:6px;opacity:0}
+#screen-b .sw-toggle .txt.off{right:5px}
+#screen-b .sw-toggle input:checked ~ .track{border-color:var(--red);background:#180808}
+#screen-b .sw-toggle input:checked ~ .knob{left:32px;background:var(--red)}
+#screen-b .sw-toggle input:checked ~ .txt.on{opacity:1;color:var(--red)}
+#screen-b .sw-toggle input:checked ~ .txt.off{opacity:0}
+
+/* integrations list */
+#screen-b .integ{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+#screen-b .integ .irow{
+  background:var(--bg);
+  display:grid;grid-template-columns:14px 1fr auto auto;
+  align-items:center;gap:16px;
+  padding:14px 18px;
+}
+#screen-b .integ .irow .bar{width:6px;height:34px}
+#screen-b .integ .irow .meta{display:flex;flex-direction:column;gap:5px}
+#screen-b .integ .irow .meta .nm{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#screen-b .integ .irow .meta .st{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+#screen-b .integ .irow .meta .st.on::before{content:"● ";color:var(--green)}
+#screen-b .integ .irow .meta .st.off::before{content:"○ ";color:var(--faint)}
+#screen-b .integ .irow.disabled .nm{color:var(--dim)}
+#screen-b .integ .irow .sync-age{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:right;width:80px}
+#screen-b .panel .note{
+  padding:12px 18px;border-top:1px solid var(--line);
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);line-height:1.6;
+}
+#screen-b .panel .note b{color:var(--red)}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:880px){
+  #screen-b .console{grid-template-columns:1fr}
+  #screen-b .run-body{grid-template-columns:1fr 1fr}
+  #screen-b nav a{padding:0 11px}
+  #screen-b .score{font-size:clamp(80px,22vw,120px)}
+}
+@media (max-width:680px){
+  #screen-b .topbar .strip{flex-wrap:wrap}
+  #screen-b nav{order:3;flex-wrap:wrap}
+  #screen-b .metastrip{grid-template-columns:1fr}
+  #screen-b .hero-body{grid-template-columns:1fr;text-align:left}
+  #screen-b .vitals dl{grid-template-columns:1fr}
+  #screen-b .run-body{grid-template-columns:1fr}
+  #screen-b .footer .fcell:nth-child(n+4){display:none}
+}
+</style>
+
+<section class="screen" id="screen-b">
+
+  <!-- ===================== TOP COMMAND BAR ===================== -->
+  <header class="topbar">
+    <div class="strip">
+      <div class="strip-l">
+        <div class="wordmark">
+          <b>VIT<i>A</i>LS</b>
+          <span class="rev">REV&nbsp;2.6</span>
+        </div>
+        <div class="sysline">
+          <span class="led" aria-hidden="true"></span>
+          &lt; STATUS: ONLINE &gt;
+        </div>
+        <nav aria-label="Primary">
+          <a href="#" aria-current="page"><span class="idx">01</span>DASHBOARD</a>
+          <a href="#"><span class="idx">02</span>SLEEP</a>
+          <a href="#"><span class="idx">03</span>ACTIVITY</a>
+          <a href="#"><span class="idx">04</span>HABITS</a>
+          <a href="#"><span class="idx">05</span>ASK&nbsp;CLAUDE</a>
+        </nav>
+      </div>
+      <div class="strip-r">
+        <button class="ctl sync" data-sync type="button" aria-label="Run sync">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>
+          </svg>
+          <span>SYNC&nbsp;<span class="sync-state"></span></span>
+        </button>
+        <button class="ctl gear" data-open-settings type="button" aria-label="Open settings">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>
+          </svg>
+          <span>CFG</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- meta strip -->
+    <div class="metastrip">
+      <div><span class="greet">GOOD MORNING, <b>HUNTER</b></span></div>
+      <div><span class="k">DATE</span><span class="v">SAT · JUN 20</span></div>
+      <div class="dev"><span class="k">UNIT</span><span class="v"><span class="dot" aria-hidden="true"></span>FITBIT-AIR</span></div>
+      <div><span class="k">T-SYNC</span><span class="v">06:14:02Z</span></div>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN CONSOLE GRID ===================== -->
+  <div class="console">
+
+    <!-- READINESS HERO -->
+    <section class="cell hero" aria-label="Morning readiness">
+      <div class="phead">
+        <span class="title">READINESS</span>
+        <span class="coord">CH-00 / 34.39N 086.36W</span>
+      </div>
+      <div class="hero-body">
+        <div class="score-wrap">
+          <span class="score-label">MORNING INDEX</span>
+          <data class="score" value="82">82<span class="of">/ 100 PTS</span></data>
+        </div>
+        <div class="gauge" role="img" aria-label="Readiness 82 of 100">
+          <div class="state"><span class="blip" aria-hidden="true"></span>PRIMED FOR TRAINING</div>
+          <div class="grow" aria-hidden="true">
+            <i class="seg on lo"></i><i class="seg on lo"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg on"></i><i class="seg on"></i><i class="seg on"></i><i class="seg on"></i>
+            <i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i>
+          </div>
+          <div class="gscale"><span>00</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+          <div class="note">&gt;&gt;&gt; CLEARANCE GRANTED // HIGH-LOAD WINDOW OPEN</div>
+        </div>
+      </div>
+      <!-- recovery trio -->
+      <dl class="trio">
+        <div class="t">
+          <dt class="lab">HRV</dt>
+          <dd class="num"><output>64</output><u>MS</u></dd>
+          <span class="delta up">▲ +6% VS BASE</span>
+        </div>
+        <div class="t">
+          <dt class="lab">RESTING HR</dt>
+          <dd class="num"><output>52</output><u>BPM</u></dd>
+          <span class="delta dn">▼ −3 VS BASE</span>
+        </div>
+        <div class="t">
+          <dt class="lab">SLEEP</dt>
+          <dd class="num"><output>7:24</output><u>H:M</u></dd>
+          <span class="delta up">▲ +18M VS BASE</span>
+        </div>
+      </dl>
+    </section>
+
+    <!-- VITALS TABLE -->
+    <section class="cell vitals" aria-label="Today's vitals">
+      <div class="phead">
+        <span class="title">VITALS</span>
+        <span class="coord">06×01 ARRAY</span>
+      </div>
+      <dl>
+        <div class="row">
+          <dt>SpO₂<small>BLOOD OXYGEN</small></dt>
+          <dd><span class="val">98<u>%</u></span><span class="sub">NOMINAL</span></dd>
+        </div>
+        <div class="row">
+          <dt>RESP<small>RESPIRATORY</small></dt>
+          <dd><span class="val">14.2<u>BR/M</u></span><span class="sub">NOMINAL</span></dd>
+        </div>
+        <div class="row">
+          <dt>SKIN Δ<small>TEMP DEVIATION</small></dt>
+          <dd><span class="val">−0.2<u>°</u></span><span class="sub">IN RANGE</span></dd>
+        </div>
+        <div class="row">
+          <dt>STEPS<small>TARGET 10,000</small></dt>
+          <dd>
+            <span class="val">8,431</span>
+            <span class="stepbar" aria-hidden="true">
+              <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i>
+            </span>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>CAL · OUT<small>BURNED</small></dt>
+          <dd><span class="val">2,180<u>KCAL</u></span><span class="sub">EXPENDED</span></dd>
+        </div>
+        <div class="row">
+          <dt>CAL · IN<small>EATEN</small></dt>
+          <dd><span class="val">1,940<u>KCAL</u></span><span class="sub"><b>−240</b> NET</span></dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- HRV TREND -->
+    <section class="cell hrv" aria-label="14-day HRV trend">
+      <div class="phead">
+        <span class="title">HRV / 14-DAY</span>
+        <span class="coord">UNIT MS · STEPPED</span>
+      </div>
+      <div class="chart">
+        <!-- viewBox: 14 samples, range ~52..76ms mapped. baseline 60, avg 64 -->
+        <svg viewBox="0 0 560 200" preserveAspectRatio="none" role="img" aria-label="HRV trend, 14 days, values 58 to 72 ms, baseline 60, average 64">
+          <!-- faint grid -->
+          <g stroke="#1E1E1E" stroke-width="1">
+            <line x1="0" y1="40" x2="560" y2="40"/>
+            <line x1="0" y1="80" x2="560" y2="80"/>
+            <line x1="0" y1="120" x2="560" y2="120"/>
+            <line x1="0" y1="160" x2="560" y2="160"/>
+          </g>
+          <!-- baseline 60ms (dashed) : value 60 -> y = 200 - ((60-50)/(78-50))*180 = 200-64.3 = 135.7 -->
+          <line x1="0" y1="135.7" x2="560" y2="135.7" stroke="#5A5A5A" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <!-- average 64 -> y = 200 - ((64-50)/28)*180 = 200-90 = 110 -->
+          <line x1="0" y1="110" x2="560" y2="110" stroke="#FF2A2A" stroke-width="1" stroke-dasharray="2 8" opacity=".5"/>
+          <!-- stepped line. step width = 560/14 = 40. values: 58,62,57,64,60,66,63,69,61,67,72,65,68,64 -->
+          <!-- y(v)=200-((v-50)/28)*180 -->
+          <polyline fill="none" stroke="#FF2A2A" stroke-width="2.5"
+            points="0,148.6 40,148.6 40,122.9 80,122.9 80,154.9 120,154.9 120,109.9 160,109.9 160,135.7 200,135.7 200,97.1 240,97.1 240,116.3 280,116.3 280,77.9 320,77.9 320,129.3 360,129.3 360,90.7 400,90.7 400,58.6 440,58.6 440,103.6 480,103.6 480,84.3 520,84.3 520,109.9 560,109.9"/>
+          <!-- sample dot-matrix markers at each value -->
+          <g fill="#EAEAEA">
+            <rect x="-2" y="146.6" width="4" height="4"/>
+            <rect x="38" y="120.9" width="4" height="4"/>
+            <rect x="78" y="152.9" width="4" height="4"/>
+            <rect x="118" y="107.9" width="4" height="4"/>
+            <rect x="158" y="133.7" width="4" height="4"/>
+            <rect x="198" y="95.1" width="4" height="4"/>
+            <rect x="238" y="114.3" width="4" height="4"/>
+            <rect x="278" y="75.9" width="4" height="4"/>
+            <rect x="318" y="127.3" width="4" height="4"/>
+            <rect x="358" y="88.7" width="4" height="4"/>
+            <rect x="398" y="56.6" width="4" height="4" fill="#FF2A2A"/>
+            <rect x="438" y="101.6" width="4" height="4"/>
+            <rect x="478" y="82.3" width="4" height="4"/>
+            <rect x="518" y="107.9" width="6" height="6" fill="#FF2A2A"/>
+          </g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span class="live">LATEST <b>64 MS</b></span>
+        <span>AVG <b>64</b></span>
+        <span class="base">BASELINE 60</span>
+        <span>PEAK <b>72</b></span>
+        <span>RANGE D-13 &gt; D-00</span>
+      </div>
+    </section>
+
+    <!-- SLEEP STAGES -->
+    <section class="cell sleep" aria-label="Sleep stages">
+      <div class="phead">
+        <span class="title">SLEEP ARCHITECTURE</span>
+        <span class="coord">CYCLE 22:51 → 06:15</span>
+      </div>
+      <div class="sleep-body">
+        <div class="total"><span class="big">7H 24M</span><span class="lab">TOTAL IN-BED REST</span></div>
+        <!-- segmented bar. total 444m: deep 92, rem 108, light 221, awake 23 -->
+        <div class="bar" role="img" aria-label="Sleep: deep 1h32m, REM 1h48m, light 3h41m, awake 23m" aria-hidden="false">
+          <div class="s deep" style="flex:92"></div>
+          <div class="s rem" style="flex:108"></div>
+          <div class="s light" style="flex:221"></div>
+          <div class="s awake" style="flex:23"></div>
+        </div>
+        <dl class="legend">
+          <div class="lrow"><span class="sw deep" aria-hidden="true"></span><dt class="nm">DEEP</dt><dd class="dur">1H 32M</dd><span class="pct">21%</span></div>
+          <div class="lrow"><span class="sw rem" aria-hidden="true"></span><dt class="nm">REM</dt><dd class="dur">1H 48M</dd><span class="pct">24%</span></div>
+          <div class="lrow"><span class="sw light" aria-hidden="true"></span><dt class="nm">LIGHT</dt><dd class="dur">3H 41M</dd><span class="pct">50%</span></div>
+          <div class="lrow"><span class="sw awake" aria-hidden="true"></span><dt class="nm">AWAKE</dt><dd class="dur">0H 23M</dd><span class="pct">5%</span></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- TODAY'S RUN -->
+    <section class="cell run" aria-label="Today's run">
+      <div class="phead">
+        <span class="title">FIELD LOG · RUN</span>
+        <span class="coord">SRC / STRAVA-MCP · 06:01 LOCAL</span>
+      </div>
+      <div class="run-body">
+        <div class="ident">
+          <span class="src"><span class="dot" aria-hidden="true"></span>STRAVA INGEST</span>
+          <span class="name">MORNING RUN</span>
+          <span class="ts">REC 06:01 → 06:38 · GPS LOCK OK</span>
+        </div>
+        <div class="stat"><span class="lab">DISTANCE</span><span class="v">5.02<u>KM</u></span></div>
+        <div class="stat"><span class="lab">DURATION</span><span class="v">37:13</span></div>
+        <div class="stat"><span class="lab">ENERGY</span><span class="v">400<u>CAL</u></span></div>
+        <div class="stat"><span class="lab">AVG PACE</span><span class="v">7:25<u>/KM</u></span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ===================== FOOTER TELEMETRY ===================== -->
+  <footer class="footer" aria-hidden="true">
+    <div class="fcell live">● LINK ACTIVE</div>
+    <div class="fcell">UNIT / <b>FITBIT-AIR</b></div>
+    <div class="fcell">REV <b>2.6</b></div>
+    <div class="fcell">PKT <b>0x3F1A</b></div>
+    <div class="fcell">LAT <b>34.3917N</b></div>
+    <div class="fcell">LON <b>086.3596W</b></div>
+    <div class="fcell grow">/// VITALS TELEMETRY CONSOLE — DECLASSIFIED — ALL READINGS NOMINAL ///</div>
+    <div class="fcell">CHK <b>OK</b></div>
+  </footer>
+
+  <!-- ===================== SETTINGS OVERLAY ===================== -->
+  <div class="settings-overlay" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="panel">
+      <div class="phd">
+        <span class="t">INTEGRATIONS CONFIG</span>
+        <button class="close" data-close-settings type="button">[ ESC ] CLOSE</button>
+      </div>
+
+      <!-- master auto-sync -->
+      <div class="master">
+        <div class="ml">
+          <span class="mt">AUTOMATIC SYNC</span>
+          <span class="ms">MASTER POLL. WHEN ENABLED, ACTIVE SOURCES INGEST ON SCHEDULE.</span>
+        </div>
+        <label class="sw-toggle">
+          <input type="checkbox" checked aria-label="Automatic sync master switch"/>
+          <span class="track" aria-hidden="true"></span>
+          <span class="knob" aria-hidden="true"></span>
+          <span class="txt on" aria-hidden="true">ON</span>
+          <span class="txt off" aria-hidden="true">OFF</span>
+        </label>
+      </div>
+
+      <!-- integrations -->
+      <dl class="integ">
+        <div class="irow">
+          <span class="bar" style="background:#00b0b9" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">FITBIT AIR</dt>
+            <dd class="st on">CONNECTED · SYNCED 4H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 4H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Fitbit Air"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow">
+          <span class="bar" style="background:#378add" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">APPLE WATCH ULTRA 2</dt>
+            <dd class="st on">CONNECTED · SYNCED 4H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 4H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Apple Watch Ultra 2"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow">
+          <span class="bar" style="background:#fc5200" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">STRAVA</dt>
+            <dd class="st on">CONNECTED · SYNCED 1H AGO</dd>
+          </div>
+          <span class="sync-age">EVERY 1H</span>
+          <label class="sw-toggle">
+            <input type="checkbox" checked aria-label="Strava"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow disabled">
+          <span class="bar" style="background:#e24b4a" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">WHOOP MG</dt>
+            <dd class="st off">DISABLED · NOT POLLING</dd>
+          </div>
+          <span class="sync-age">—</span>
+          <label class="sw-toggle">
+            <input type="checkbox" aria-label="WHOOP MG"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+
+        <div class="irow disabled">
+          <span class="bar" style="background:#1d9e75" aria-hidden="true"></span>
+          <div class="meta">
+            <dt class="nm">OURA RING 4</dt>
+            <dd class="st off">DISABLED · NOT POLLING</dd>
+          </div>
+          <span class="sync-age">—</span>
+          <label class="sw-toggle">
+            <input type="checkbox" aria-label="Oura Ring 4"/>
+            <span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span>
+            <span class="txt on" aria-hidden="true">ON</span><span class="txt off" aria-hidden="true">OFF</span>
+          </label>
+        </div>
+      </dl>
+
+      <p class="note">
+        &gt;&gt;&gt; SWITCHING A SOURCE <b>OFF</b> REMOVES IT FROM THE CONSOLE — IT WILL NOT REPORT AS "OFFLINE".
+        &nbsp;//&nbsp; MASTER AUTOMATIC SYNC GOVERNS ALL ACTIVE SOURCES.
+      </p>
+    </div>
+  </div>
+
+</section>
+<style>
+/* ============================================================
+   SCREEN C — ETHEREAL GLASS · Vitals
+   Vibe: Ethereal Glass · Layout: Asymmetrical Bento
+   All selectors scoped to #screen-c. Keyframes prefixed c-.
+   ============================================================ */
+#screen-c{
+  --c-ease:cubic-bezier(0.32,0.72,0,1);
+  --c-bg:#050505;
+  --c-ink:#f4f7f6;
+  --c-mut:#8b938f;
+  --c-faint:#5c6360;
+  --c-acc:#34e0b0;          /* single accent — emerald/teal */
+  --c-acc-deep:#0e9c7c;
+  --c-glass:rgba(255,255,255,.045);
+  --c-glass-core:rgba(14,17,16,.55);
+  --c-hair:rgba(255,255,255,.10);
+  --c-hair-soft:rgba(255,255,255,.06);
+  --c-inset:inset 0 1px 0 rgba(255,255,255,.12);
+  --c-r-out:28px;
+  --c-r-in:20px;
+  position:relative;
+  min-height:100%;
+  width:100%;
+  color:var(--c-ink);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:
+    radial-gradient(620px 440px at 12% -6%, rgba(52,224,176,.16), transparent 60%),
+    radial-gradient(720px 560px at 96% 8%, rgba(20,140,120,.14), transparent 62%),
+    radial-gradient(900px 700px at 78% 112%, rgba(40,180,150,.10), transparent 60%),
+    radial-gradient(540px 520px at 30% 78%, rgba(16,110,96,.08), transparent 64%),
+    var(--c-bg);
+  letter-spacing:-.01em;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+/* faint film/vignette so orbs feel atmospheric, not flat */
+#screen-c::before{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(120% 90% at 50% -10%, transparent 55%, rgba(0,0,0,.55) 100%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;
+  opacity:.5;
+}
+
+#screen-c *{box-sizing:border-box}
+
+#screen-c .wrap{
+  position:relative;
+  z-index:1;
+  max-width:1240px;
+  margin:0 auto;
+  padding:30px 30px 96px;
+}
+
+/* shared entry motion */
+#screen-c .rise{
+  opacity:0;
+  transform:translateY(26px);
+  filter:blur(10px);
+  animation:c-rise .95s var(--c-ease) forwards;
+}
+#screen-c .d1{animation-delay:.05s}
+#screen-c .d2{animation-delay:.12s}
+#screen-c .d3{animation-delay:.19s}
+#screen-c .d4{animation-delay:.26s}
+#screen-c .d5{animation-delay:.33s}
+#screen-c .d6{animation-delay:.40s}
+#screen-c .d7{animation-delay:.47s}
+@keyframes c-rise{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+
+#screen-c .eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font:600 9.5px/1 'Space Grotesk','Plus Jakarta Sans',sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  color:var(--c-mut);
+  padding:6px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--c-hair-soft);
+}
+#screen-c .eyebrow .dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--c-acc);
+  box-shadow:0 0 9px 1px rgba(52,224,176,.85);
+}
+
+/* ============================================================
+   DOUBLE-BEZEL primitives (outer shell + inner core)
+   ============================================================ */
+#screen-c .bezel{
+  position:relative;
+  background:var(--c-glass);
+  border:1px solid var(--c-hair);
+  border-radius:var(--c-r-out);
+  padding:7px;
+  -webkit-backdrop-filter:blur(26px) saturate(120%);
+  backdrop-filter:blur(26px) saturate(120%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 30px 70px -34px rgba(0,0,0,.9);
+  transition:transform .8s var(--c-ease), border-color .6s var(--c-ease);
+  will-change:transform;
+}
+#screen-c .core{
+  position:relative;
+  border-radius:var(--c-r-in);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012) 40%),
+    var(--c-glass-core);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:22px;
+  height:100%;
+  overflow:hidden;
+}
+#screen-c .lift:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18)}
+
+/* ============================================================
+   1 · FLOATING GLASS NAV PILL
+   ============================================================ */
+#screen-c .topline{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:22px;margin-bottom:24px;flex-wrap:wrap;
+}
+#screen-c .greet h1{
+  font-family:'Sora',sans-serif;
+  font-weight:600;
+  font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:-.035em;
+  line-height:1.02;
+  background:linear-gradient(180deg,#ffffff,#aeb6b2);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+#screen-c .greet .date{
+  margin-top:9px;
+  font-size:12.5px;color:var(--c-mut);letter-spacing:.04em;
+}
+
+#screen-c .nav{
+  display:flex;align-items:center;gap:6px;
+  padding:7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--c-hair);
+  -webkit-backdrop-filter:blur(30px) saturate(130%);
+  backdrop-filter:blur(30px) saturate(130%);
+  box-shadow:var(--c-inset), 0 24px 50px -28px rgba(0,0,0,.85);
+}
+#screen-c .brand{
+  display:flex;align-items:center;gap:9px;
+  padding:0 12px 0 8px;
+  font-family:'Sora',sans-serif;font-weight:700;
+  font-size:15px;letter-spacing:-.02em;
+  white-space:nowrap;
+}
+#screen-c .brand .glyph{
+  width:26px;height:26px;border-radius:9px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg, var(--c-acc), var(--c-acc-deep));
+  box-shadow:0 0 16px -2px rgba(52,224,176,.7), var(--c-inset);
+}
+#screen-c .brand .glyph svg{width:15px;height:15px;display:block}
+#screen-c .navsep{width:1px;height:20px;background:var(--c-hair);margin:0 2px}
+
+#screen-c .navlinks{display:flex;align-items:center;gap:2px}
+#screen-c .navlink{
+  font:600 12.5px/1 'Space Grotesk','Plus Jakarta Sans',sans-serif;
+  letter-spacing:-.01em;
+  color:var(--c-mut);
+  padding:9px 13px;border-radius:999px;
+  cursor:pointer;white-space:nowrap;
+  transition:color .5s var(--c-ease), background .5s var(--c-ease);
+}
+#screen-c .navlink:hover{color:var(--c-ink);background:rgba(255,255,255,.05)}
+#screen-c .navlink.active{
+  color:#04140f;
+  background:linear-gradient(180deg, #ffffff, #d6f6ec);
+  box-shadow:var(--c-inset);
+}
+
+/* device indicator chip */
+#screen-c .device{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 13px;border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--c-hair-soft);
+  font:600 11.5px/1 'Space Grotesk',sans-serif;
+  color:#cfd6d2;white-space:nowrap;
+}
+#screen-c .device .pulse{
+  position:relative;width:7px;height:7px;border-radius:50%;
+  background:#00b0b9;box-shadow:0 0 0 0 rgba(0,176,185,.6);
+  animation:c-pulse 2.4s var(--c-ease) infinite;
+}
+@keyframes c-pulse{
+  0%{box-shadow:0 0 0 0 rgba(0,176,185,.55)}
+  70%{box-shadow:0 0 0 7px rgba(0,176,185,0)}
+  100%{box-shadow:0 0 0 0 rgba(0,176,185,0)}
+}
+
+/* SYNC — button-in-button pill */
+#screen-c .sync{
+  display:inline-flex;align-items:center;gap:11px;
+  padding:7px 7px 7px 17px;
+  border:0;cursor:pointer;
+  border-radius:999px;
+  font:600 12.5px/1 'Space Grotesk',sans-serif;
+  letter-spacing:-.01em;
+  color:#04130e;
+  background:linear-gradient(180deg,#5df0c6,#1fc79c);
+  box-shadow:var(--c-inset), 0 12px 30px -10px rgba(40,210,165,.6);
+  transition:transform .55s var(--c-ease), box-shadow .55s var(--c-ease), filter .5s var(--c-ease);
+}
+#screen-c .sync:hover{transform:translateY(-1px);box-shadow:var(--c-inset),0 16px 36px -10px rgba(40,210,165,.75);filter:brightness(1.04)}
+#screen-c .sync:active{transform:scale(.975)}
+#screen-c .sync .knob{
+  width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(4,19,14,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .55s var(--c-ease);
+}
+#screen-c .sync:hover .knob{transform:translate(2px,-1px) scale(1.06)}
+#screen-c .sync .knob svg{width:14px;height:14px;display:block}
+#screen-c .syncing .sync-icon{animation:c-spin 1s linear infinite;transform-origin:50% 50%}
+@keyframes c-spin{to{transform:rotate(360deg)}}
+
+/* settings gear */
+#screen-c .gear{
+  width:42px;height:42px;flex:0 0 auto;
+  border:1px solid var(--c-hair-soft);
+  border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.04);
+  color:#cfd6d2;
+  transition:transform .6s var(--c-ease), color .5s var(--c-ease), background .5s var(--c-ease);
+}
+#screen-c .gear:hover{transform:rotate(35deg);color:#fff;background:rgba(255,255,255,.08)}
+#screen-c .gear svg{width:19px;height:19px;display:block}
+
+/* nav row sits in a flex line; greeting + nav */
+#screen-c .navrow{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;flex-wrap:wrap;margin-bottom:30px;
+}
+#screen-c .navtools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+/* ============================================================
+   ASYMMETRICAL BENTO GRID
+   ============================================================ */
+#screen-c .bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:18px;
+  align-items:stretch;
+}
+#screen-c .col-hero{grid-column:span 7}
+#screen-c .col-trend{grid-column:span 5}
+#screen-c .col-4{grid-column:span 4}
+#screen-c .col-3{grid-column:span 3}
+#screen-c .col-5{grid-column:span 5}
+#screen-c .col-7{grid-column:span 7}
+#screen-c .col-6{grid-column:span 6}
+
+/* ---- READINESS HERO ---- */
+#screen-c .hero .core{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+#screen-c .ringwrap{position:relative;flex:0 0 auto;width:188px;height:188px;display:grid;place-items:center}
+#screen-c .ringwrap svg{width:188px;height:188px;transform:rotate(-90deg);display:block;filter:drop-shadow(0 0 12px rgba(52,224,176,.4))}
+#screen-c .ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:11}
+#screen-c .ring-prog{
+  fill:none;stroke:url(#c-ringgrad);stroke-width:11;stroke-linecap:round;
+  stroke-dasharray:471;
+  stroke-dashoffset:471;
+  animation:c-ring 1.7s var(--c-ease) .35s forwards;
+}
+@keyframes c-ring{to{stroke-dashoffset:84.8}} /* 82% of 471 */
+#screen-c .ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+}
+#screen-c .ring-center .num{
+  font-family:'Sora',sans-serif;font-weight:700;
+  font-size:54px;letter-spacing:-.05em;line-height:.9;
+  background:linear-gradient(180deg,#ffffff,#79e8c7);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+#screen-c .ring-center .den{font:600 12px/1 'Space Grotesk',sans-serif;color:var(--c-faint);margin-top:6px;letter-spacing:.04em}
+
+#screen-c .hero-meta{flex:1 1 230px;min-width:200px}
+#screen-c .hero-meta h2{
+  font-family:'Sora',sans-serif;font-weight:600;font-size:25px;
+  letter-spacing:-.03em;margin:14px 0 6px;line-height:1.05;
+}
+#screen-c .hero-meta .sub{font-size:13px;color:var(--c-mut);line-height:1.55;max-width:30ch}
+
+/* recovery trio inside hero */
+#screen-c .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+#screen-c .trio .t{
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:12px 12px 13px;
+}
+#screen-c .trio .lbl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--c-faint)}
+#screen-c .trio .val{font-family:'Sora',sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;margin-top:9px}
+#screen-c .trio .val small{font-size:11px;color:var(--c-mut);font-weight:500;margin-left:2px}
+#screen-c .trio .delta{font:600 10.5px/1 'JetBrains Mono',monospace;margin-top:7px;display:inline-flex;align-items:center;gap:3px}
+#screen-c .up{color:var(--c-acc)}
+#screen-c .down{color:#6fd0ff}
+
+/* ---- HRV TREND ---- */
+#screen-c .trend .core{display:flex;flex-direction:column;height:100%}
+#screen-c .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+#screen-c .card-head .t-title{font-family:'Sora',sans-serif;font-weight:600;font-size:16px;letter-spacing:-.02em;margin-top:10px}
+#screen-c .card-head .t-sub{font:600 10px/1 'JetBrains Mono',monospace;color:var(--c-mut);margin-top:7px;letter-spacing:.02em}
+#screen-c .chartbox{position:relative;flex:1;min-height:118px;margin-top:auto}
+#screen-c .chartbox svg{width:100%;height:100%;display:block;overflow:visible}
+#screen-c .chart-base{stroke:rgba(255,255,255,.14);stroke-width:1;stroke-dasharray:3 5}
+#screen-c .chart-line{
+  fill:none;stroke:url(#c-linegrad);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 1px 8px rgba(52,224,176,.55));
+  stroke-dasharray:760;stroke-dashoffset:760;
+  animation:c-draw 2s var(--c-ease) .5s forwards;
+}
+@keyframes c-draw{to{stroke-dashoffset:0}}
+#screen-c .chart-dot{fill:#bff7e6;filter:drop-shadow(0 0 6px rgba(52,224,176,.9));opacity:0;animation:c-fade .6s var(--c-ease) 2.1s forwards}
+@keyframes c-fade{to{opacity:1}}
+#screen-c .trend-foot{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+#screen-c .trend-foot .f{font:600 10px/1 'Space Grotesk',sans-serif;color:var(--c-faint);letter-spacing:.04em}
+#screen-c .trend-foot .f b{color:var(--c-ink);font-family:'Sora',sans-serif;font-size:14px;margin-left:5px;letter-spacing:-.02em}
+
+/* ---- VITALS BENTO TILES ---- */
+#screen-c .vit-eyebrow{margin:34px 0 16px;display:flex;align-items:center;gap:12px}
+#screen-c .vit-eyebrow .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--c-hair),transparent)}
+
+#screen-c .tile .core{display:flex;flex-direction:column;justify-content:space-between;min-height:118px}
+#screen-c .tile .tl-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#screen-c .tile .tl-lbl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--c-faint)}
+#screen-c .tile .tl-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(52,224,176,.10);border:1px solid rgba(52,224,176,.22);color:var(--c-acc)}
+#screen-c .tile .tl-ic svg{width:15px;height:15px;display:block}
+#screen-c .tile .tl-val{font-family:'Sora',sans-serif;font-weight:600;font-size:30px;letter-spacing:-.04em;line-height:1;margin-top:16px}
+#screen-c .tile .tl-val small{font-size:13px;color:var(--c-mut);font-weight:500;letter-spacing:-.01em}
+#screen-c .tile .tl-meta{font:500 11px/1 'Space Grotesk',sans-serif;color:var(--c-mut);margin-top:8px}
+
+/* steps progress within its tile */
+#screen-c .steps-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:12px;box-shadow:inset 0 1px 0 rgba(0,0,0,.4)}
+#screen-c .steps-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--c-acc-deep),var(--c-acc));box-shadow:0 0 12px rgba(52,224,176,.6);width:0;animation:c-steps 1.6s var(--c-ease) .6s forwards}
+@keyframes c-steps{to{width:84.31%}}
+
+/* calorie dual mini */
+#screen-c .cal-rows{display:flex;flex-direction:column;gap:11px;margin-top:14px}
+#screen-c .cal-rows .cr{display:flex;align-items:center;gap:10px}
+#screen-c .cal-rows .cr .ck{width:7px;height:7px;border-radius:2px}
+#screen-c .cal-rows .cr .cn{font-family:'Sora',sans-serif;font-weight:600;font-size:21px;letter-spacing:-.03em}
+#screen-c .cal-rows .cr .cl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--c-faint);margin-left:auto}
+
+/* ---- SLEEP STAGES ---- */
+#screen-c .sleep .core{display:flex;flex-direction:column;height:100%}
+#screen-c .sleep-total{font-family:'Sora',sans-serif;font-weight:600;font-size:30px;letter-spacing:-.04em;margin-top:12px}
+#screen-c .sleep-total small{font-size:12px;color:var(--c-mut);font-weight:500;margin-left:4px}
+#screen-c .stagebar{display:flex;height:13px;border-radius:999px;overflow:hidden;margin:18px 0 16px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5), var(--c-inset);background:rgba(255,255,255,.05)}
+#screen-c .stagebar i{display:block;height:100%;opacity:0;transform:scaleX(.2);transform-origin:left;animation:c-grow .9s var(--c-ease) forwards}
+#screen-c .stagebar i:nth-child(1){animation-delay:.55s}
+#screen-c .stagebar i:nth-child(2){animation-delay:.68s}
+#screen-c .stagebar i:nth-child(3){animation-delay:.81s}
+#screen-c .stagebar i:nth-child(4){animation-delay:.94s}
+@keyframes c-grow{to{opacity:1;transform:scaleX(1)}}
+#screen-c .sg-deep{background:linear-gradient(180deg,#1f7d9e,#155a73)}
+#screen-c .sg-rem{background:linear-gradient(180deg,#34e0b0,#13a585)}
+#screen-c .sg-light{background:linear-gradient(180deg,#6c7cf5,#4453c9)}
+#screen-c .sg-awake{background:linear-gradient(180deg,#3a4046,#262b30)}
+#screen-c .sleep-legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:auto}
+#screen-c .sleep-legend .sl{display:flex;align-items:center;gap:9px}
+#screen-c .sleep-legend .sl .sk{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+#screen-c .sleep-legend .sl .sn{font:600 11px/1 'Space Grotesk',sans-serif;color:var(--c-mut)}
+#screen-c .sleep-legend .sl .sv{margin-left:auto;font-family:'Sora',sans-serif;font-weight:600;font-size:13px;letter-spacing:-.02em}
+
+/* ---- TODAY'S RUN ---- */
+#screen-c .run .core{display:flex;flex-direction:column;height:100%}
+#screen-c .run-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+#screen-c .run-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:rgba(252,82,0,.12);border:1px solid rgba(252,82,0,.3);font:600 10px/1 'Space Grotesk',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ff8651}
+#screen-c .run-badge .sk{width:6px;height:6px;border-radius:50%;background:#fc5200;box-shadow:0 0 8px #fc5200}
+#screen-c .run-name{font-family:'Sora',sans-serif;font-weight:600;font-size:23px;letter-spacing:-.03em;margin:18px 0 4px}
+#screen-c .run-dist{font:600 12px/1 'JetBrains Mono',monospace;color:var(--c-mut);letter-spacing:.02em}
+#screen-c .run-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:auto;padding-top:20px}
+#screen-c .run-stats .rs{border-left:1px solid var(--c-hair-soft);padding-left:13px}
+#screen-c .run-stats .rs:first-child{border-left:0;padding-left:0}
+#screen-c .run-stats .rsv{font-family:'Sora',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.03em}
+#screen-c .run-stats .rsv small{font-size:11px;color:var(--c-mut);font-weight:500}
+#screen-c .run-stats .rsl{font:600 9px/1 'Space Grotesk',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--c-faint);margin-top:7px}
+
+/* ============================================================
+   7 · SETTINGS OVERLAY (big glass modal)
+   ============================================================ */
+#screen-c .settings-overlay{display:none}
+#screen-c.show-settings .settings-overlay{
+  display:flex;
+  position:fixed;inset:0;z-index:900;
+  align-items:center;justify-content:center;
+  padding:28px;
+  background:rgba(3,5,4,.62);
+  -webkit-backdrop-filter:blur(22px) saturate(120%);
+  backdrop-filter:blur(22px) saturate(120%);
+  animation:c-overlay .5s var(--c-ease);
+}
+@keyframes c-overlay{from{opacity:0}to{opacity:1}}
+#screen-c .settings-overlay .scrim{position:absolute;inset:0;cursor:pointer}
+#screen-c .modal{
+  position:relative;z-index:1;
+  width:min(620px,100%);
+  max-height:88vh;overflow:auto;
+  border-radius:32px;
+  padding:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--c-hair);
+  -webkit-backdrop-filter:blur(34px) saturate(140%);
+  backdrop-filter:blur(34px) saturate(140%);
+  box-shadow:var(--c-inset), 0 50px 120px -40px rgba(0,0,0,.95);
+  animation:c-modal .6s var(--c-ease);
+}
+@keyframes c-modal{from{opacity:0;transform:translateY(22px) scale(.97);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+#screen-c .modal-core{
+  border-radius:24px;
+  background:
+    radial-gradient(420px 240px at 100% 0%, rgba(52,224,176,.10), transparent 60%),
+    var(--c-glass-core);
+  border:1px solid var(--c-hair-soft);
+  box-shadow:var(--c-inset);
+  padding:28px;
+}
+#screen-c .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+#screen-c .modal-head h3{font-family:'Sora',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.03em;margin-top:12px}
+#screen-c .modal-head p{font-size:12.5px;color:var(--c-mut);margin-top:9px;max-width:42ch;line-height:1.5}
+#screen-c .x{
+  width:38px;height:38px;flex:0 0 auto;border:1px solid var(--c-hair-soft);border-radius:50%;
+  background:rgba(255,255,255,.04);color:#cfd6d2;cursor:pointer;display:grid;place-items:center;
+  transition:transform .5s var(--c-ease), background .5s var(--c-ease), color .5s var(--c-ease);
+}
+#screen-c .x:hover{transform:rotate(90deg);background:rgba(255,255,255,.09);color:#fff}
+#screen-c .x svg{width:16px;height:16px;display:block}
+
+/* master sync row */
+#screen-c .master{
+  display:flex;align-items:center;gap:14px;
+  margin:20px 0 18px;padding:7px;
+  border-radius:18px;background:rgba(52,224,176,.06);border:1px solid rgba(52,224,176,.18);
+}
+#screen-c .master .mcore{
+  flex:1;display:flex;align-items:center;gap:13px;
+  padding:13px 15px;border-radius:13px;
+  background:rgba(255,255,255,.03);box-shadow:var(--c-inset);
+}
+#screen-c .master .micon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,var(--c-acc),var(--c-acc-deep));color:#04130e;box-shadow:var(--c-inset)}
+#screen-c .master .micon svg{width:17px;height:17px;display:block}
+#screen-c .master .mt{font-family:'Sora',sans-serif;font-weight:600;font-size:14px;letter-spacing:-.02em}
+#screen-c .master .ms{font:500 11px/1.4 'Space Grotesk',sans-serif;color:var(--c-mut);margin-top:4px}
+
+/* integration rows — double-bezel each */
+#screen-c .intlist{display:flex;flex-direction:column;gap:11px}
+#screen-c .introw{
+  padding:6px;border-radius:18px;
+  background:rgba(255,255,255,.035);border:1px solid var(--c-hair-soft);
+  transition:border-color .5s var(--c-ease), transform .5s var(--c-ease);
+}
+#screen-c .introw:hover{border-color:rgba(255,255,255,.16);transform:translateY(-1px)}
+#screen-c .introw .ircore{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 14px;border-radius:13px;
+  background:var(--c-glass-core);box-shadow:var(--c-inset);
+}
+#screen-c .introw .iric{width:38px;height:38px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;box-shadow:var(--c-inset);border:1px solid rgba(255,255,255,.12)}
+#screen-c .introw .iric svg{width:19px;height:19px;display:block}
+#screen-c .introw .irname{font-family:'Sora',sans-serif;font-weight:600;font-size:14.5px;letter-spacing:-.02em}
+#screen-c .introw .irmeta{font:600 10px/1 'JetBrains Mono',monospace;color:var(--c-faint);margin-top:6px;letter-spacing:.02em;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#screen-c .introw .irmeta .ok{color:var(--c-acc)}
+#screen-c .introw .irmeta .offt{color:var(--c-faint)}
+#screen-c .introw .irbody{flex:1;min-width:0}
+
+/* glass toggle */
+#screen-c .toggle{
+  width:48px;height:27px;flex:0 0 auto;border-radius:999px;position:relative;
+  background:rgba(255,255,255,.08);border:1px solid var(--c-hair-soft);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+  transition:background .5s var(--c-ease);
+}
+#screen-c .toggle::after{
+  content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
+  background:linear-gradient(180deg,#fff,#cdd4d0);
+  box-shadow:0 2px 5px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.8);
+  transition:transform .55s var(--c-ease);
+}
+#screen-c .toggle.on{background:linear-gradient(180deg,var(--c-acc),var(--c-acc-deep));border-color:transparent;box-shadow:inset 0 1px 2px rgba(0,0,0,.3),0 0 14px rgba(52,224,176,.5)}
+#screen-c .toggle.on::after{transform:translateX(21px)}
+
+#screen-c .modal-note{
+  margin-top:18px;padding:13px 15px;border-radius:13px;
+  background:rgba(255,255,255,.03);border:1px solid var(--c-hair-soft);
+  font-size:11.5px;color:var(--c-mut);line-height:1.55;
+  display:flex;gap:10px;align-items:flex-start;
+}
+#screen-c .modal-note svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;color:var(--c-acc)}
+
+/* ============================================================
+   RESPONSIVE — bento collapses to single column < 768
+   ============================================================ */
+@media (max-width:980px){
+  #screen-c .col-hero,#screen-c .col-trend{grid-column:span 12}
+  #screen-c .col-4,#screen-c .col-3{grid-column:span 6}
+  #screen-c .col-5,#screen-c .col-7,#screen-c .col-6{grid-column:span 12}
+}
+@media (max-width:768px){
+  #screen-c .wrap{padding:20px 16px 72px}
+  #screen-c .navrow{flex-direction:column;align-items:stretch}
+  #screen-c .nav{overflow-x:auto;flex-wrap:nowrap}
+  #screen-c .navlinks{flex-wrap:nowrap}
+  #screen-c .col-4,#screen-c .col-3,#screen-c .col-5,#screen-c .col-7,#screen-c .col-6{grid-column:span 12}
+  #screen-c .trio{grid-template-columns:1fr}
+  #screen-c .sleep-legend{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  #screen-c *{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}
+  #screen-c .rise{opacity:1;transform:none;filter:none}
+}
+</style>
+
+<section class="screen" id="screen-c">
+  <!-- inline SVG defs (gradients) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="c-ringgrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7df0d0"/>
+        <stop offset="0.55" stop-color="#34e0b0"/>
+        <stop offset="1" stop-color="#0e9c7c"/>
+      </linearGradient>
+      <linearGradient id="c-linegrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#1fc79c"/>
+        <stop offset="1" stop-color="#7df0d0"/>
+      </linearGradient>
+      <linearGradient id="c-areagrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(52,224,176,.42)"/>
+        <stop offset="1" stop-color="rgba(52,224,176,0)"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wrap">
+
+    <!-- ===== NAV ROW ===== -->
+    <div class="navrow rise d1">
+      <div class="greet">
+        <h1>Good morning, Alex</h1>
+        <div class="date">Saturday, June 20</div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <div class="brand">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 13h3.2l1.8-5 3 11 2.4-8 1.6 2h3.4" stroke="#04140f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Vitals
+        </div>
+        <span class="navsep"></span>
+        <div class="navlinks">
+          <span class="navlink active">Dashboard</span>
+          <span class="navlink">Sleep</span>
+          <span class="navlink">Activity</span>
+          <span class="navlink">Habits</span>
+          <span class="navlink">Ask Claude</span>
+        </div>
+      </nav>
+      <div class="navtools">
+        <span class="device"><span class="pulse"></span>Fitbit Air</span>
+        <button class="sync" data-sync type="button">
+          Sync
+          <span class="knob"><svg class="sync-icon" viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14.3-4.6M4 13a8 8 0 0 0 14.3 4.6" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4v3.2h3.2M20 20v-3.2h-3.2" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+        <button class="gear" data-open-settings type="button" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 3.5 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 3.5l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 20.5 7l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== BENTO ===== -->
+    <div class="bento">
+
+      <!-- HERO -->
+      <div class="hero col-hero bezel lift rise d2">
+        <div class="core">
+          <div class="ringwrap">
+            <svg viewBox="0 0 188 188" aria-hidden="true">
+              <circle class="ring-track" cx="94" cy="94" r="75"/>
+              <circle class="ring-prog" cx="94" cy="94" r="75"/>
+            </svg>
+            <div class="ring-center">
+              <div class="num">82</div>
+              <div class="den">/ 100</div>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <span class="eyebrow"><span class="dot"></span>Morning Readiness</span>
+            <h2>Primed for training</h2>
+            <p class="sub">Recovery is trending above baseline. Your body is ready for a high-intensity session today.</p>
+            <div class="trio">
+              <div class="t">
+                <div class="lbl">HRV</div>
+                <div class="val">64<small>ms</small></div>
+                <div class="delta up">▲ 6%</div>
+              </div>
+              <div class="t">
+                <div class="lbl">Resting HR</div>
+                <div class="val">52<small>bpm</small></div>
+                <div class="delta down">▼ 3</div>
+              </div>
+              <div class="t">
+                <div class="lbl">Sleep</div>
+                <div class="val">7h 24m</div>
+                <div class="delta up">▲ 18m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HRV TREND -->
+      <div class="trend col-trend bezel lift rise d3">
+        <div class="core">
+          <div class="card-head">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>14-Day HRV</span>
+              <div class="t-title">Heart rate variability</div>
+            </div>
+            <div class="t-sub">AVG 64 · BASE 60</div>
+          </div>
+          <div class="chartbox">
+            <svg viewBox="0 0 300 130" preserveAspectRatio="none" aria-hidden="true">
+              <!-- baseline (60ms) -->
+              <line class="chart-base" x1="0" y1="78" x2="300" y2="78"/>
+              <!-- area + line for: 58,62,57,64,60,66,63,69,61,67,72,65,68,64 (min56 max74 -> y) -->
+              <path d="M0,98 C7,98 14,82 23,82 C30,82 39,108 46,108 C53,108 62,72 69,72 C76,72 85,90 92,90 C99,90 108,62 115,62 C122,62 131,80 138,80 C145,80 154,44 161,44 C168,44 177,98 184,98 C191,98 200,62 207,62 C214,62 223,17 230,17 C237,17 246,80 253,80 C260,80 269,53 276,53 C283,53 293,72 300,72 L300,130 L0,130 Z" fill="url(#c-areagrad)" opacity=".9"/>
+              <path class="chart-line" d="M0,98 C7,98 14,82 23,82 C30,82 39,108 46,108 C53,108 62,72 69,72 C76,72 85,90 92,90 C99,90 108,62 115,62 C122,62 131,80 138,80 C145,80 154,44 161,44 C168,44 177,98 184,98 C191,98 200,62 207,62 C214,62 223,17 230,17 C237,17 246,80 253,80 C260,80 269,53 276,53 C283,53 293,72 300,72"/>
+              <circle class="chart-dot" cx="300" cy="72" r="3.4"/>
+            </svg>
+          </div>
+          <div class="trend-foot">
+            <span class="f">Latest<b>64 ms</b></span>
+            <span class="f">Peak<b>72 ms</b></span>
+            <span class="f">Range<b>57–72</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TODAY'S VITALS eyebrow ===== -->
+    <div class="vit-eyebrow rise d3">
+      <span class="eyebrow"><span class="dot"></span>Today's Vitals</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="bento">
+      <!-- SpO2 -->
+      <div class="tile col-3 bezel lift rise d4">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">SpO₂</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5C12 3.5 6 9.5 6 14a6 6 0 0 0 12 0c0-4.5-6-10.5-6-10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">98<small>%</small></div>
+            <div class="tl-meta">Blood oxygen · normal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Respiratory -->
+      <div class="tile col-3 bezel lift rise d4">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Respiratory</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h3l2-4 3 8 2-6 1.6 2H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">14.2<small> br/min</small></div>
+            <div class="tl-meta">Steady overnight</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skin temp -->
+      <div class="tile col-3 bezel lift rise d5">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Skin Temp</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">−0.2<small>°</small></div>
+            <div class="tl-meta">From your baseline</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps (wider) -->
+      <div class="tile col-3 bezel lift rise d5">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Steps</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4c1.5 0 2.5 1.3 2.5 3.5S10.5 13 10.5 15c0 1.5.8 2.5 2 2.5M15.5 7c1.2 0 2 1 2 2.6 0 1.4-.8 3.4-.8 4.9 0 1.2.6 2 1.6 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div>
+            <div class="tl-val">8,431</div>
+            <div class="steps-bar"><span class="steps-fill"></span></div>
+            <div class="tl-meta">84% of 10,000 goal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calories (dual, wider) -->
+      <div class="tile col-6 bezel lift rise d6">
+        <div class="core">
+          <div class="tl-top">
+            <span class="tl-lbl">Energy Balance</span>
+            <span class="tl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div class="cal-rows">
+            <div class="cr"><span class="ck" style="background:#34e0b0;box-shadow:0 0 8px rgba(52,224,176,.7)"></span><span class="cn">2,180</span><span class="cl">Burned</span></div>
+            <div class="cr"><span class="ck" style="background:#6c7cf5;box-shadow:0 0 8px rgba(108,124,245,.6)"></span><span class="cn">1,940</span><span class="cl">Eaten</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLEEP STAGES (wider) -->
+      <div class="sleep col-6 bezel lift rise d6">
+        <div class="core">
+          <div class="card-head">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>Sleep Stages</span>
+              <div class="sleep-total">7h 24m<small>last night</small></div>
+            </div>
+          </div>
+          <div class="stagebar" aria-hidden="true">
+            <i class="sg-deep"   style="width:20.7%"></i>
+            <i class="sg-rem"    style="width:24.3%"></i>
+            <i class="sg-light"  style="width:49.8%"></i>
+            <i class="sg-awake"  style="width:5.2%"></i>
+          </div>
+          <div class="sleep-legend">
+            <div class="sl"><span class="sk sg-deep"></span><span class="sn">Deep</span><span class="sv">1h 32m</span></div>
+            <div class="sl"><span class="sk sg-rem"></span><span class="sn">REM</span><span class="sv">1h 48m</span></div>
+            <div class="sl"><span class="sk sg-light"></span><span class="sn">Light</span><span class="sv">3h 41m</span></div>
+            <div class="sl"><span class="sk sg-awake"></span><span class="sn">Awake</span><span class="sv">23m</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODAY'S RUN (full width) -->
+      <div class="run col-6 bezel lift rise d7">
+        <div class="core">
+          <div class="run-top">
+            <div>
+              <span class="run-badge"><span class="sk"></span>Strava · Today's Run</span>
+              <div class="run-name">Morning Run</div>
+              <div class="run-dist">5.02 km</div>
+            </div>
+            <span class="tl-ic" style="width:42px;height:42px;border-radius:13px"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19l5.5-11 4 7.5 2-3.5L20 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+          <div class="run-stats">
+            <div class="rs"><div class="rsv">37:13</div><div class="rsl">Duration</div></div>
+            <div class="rs"><div class="rsv">400<small> cal</small></div><div class="rsl">Energy</div></div>
+            <div class="rs"><div class="rsv">7:25<small>/km</small></div><div class="rsl">Avg Pace</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI nudge companion to balance run row -->
+      <div class="run col-6 bezel lift rise d7">
+        <div class="core">
+          <div class="run-top">
+            <div>
+              <span class="eyebrow"><span class="dot"></span>Claude's Read</span>
+              <div class="run-name">Green light to push</div>
+            </div>
+            <span class="tl-ic" style="width:42px;height:42px;border-radius:13px"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg></span>
+          </div>
+          <p class="sub" style="margin-top:16px;color:var(--c-mut);font-size:13px;line-height:1.6;max-width:46ch">HRV is up 6% and resting HR dropped to 52. After that easy 5K, your system has headroom — a tempo or intervals block would land well this afternoon.</p>
+        </div>
+      </div>
+
+    </div><!-- /bento -->
+  </div><!-- /wrap -->
+
+  <!-- ===== SETTINGS OVERLAY ===== -->
+  <div class="settings-overlay">
+    <div class="scrim" data-close-settings></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="modal-core">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow"><span class="dot"></span>Settings</span>
+            <h3>Connected integrations</h3>
+            <p>Manage which sources feed Vitals. Sync runs automatically in the background.</p>
+          </div>
+          <button class="x" data-close-settings type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <!-- master auto-sync -->
+        <div class="master">
+          <div class="mcore">
+            <span class="micon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14.3-4.6M4 13a8 8 0 0 0 14.3 4.6" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4v3.2h3.2M20 20v-3.2h-3.2" stroke="#04130e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div style="flex:1">
+              <div class="mt">Automatic sync</div>
+              <div class="ms">Pull fresh data from every connected source on a schedule.</div>
+            </div>
+            <span class="toggle on" role="switch" aria-checked="true"></span>
+          </div>
+        </div>
+
+        <!-- integration rows -->
+        <div class="intlist">
+
+          <!-- Fitbit Air -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(0,176,185,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="1.7" fill="#00b0b9"/><circle cx="12" cy="6" r="1.7" fill="#00b0b9"/><circle cx="18" cy="6" r="1.7" fill="#00b0b9"/><circle cx="6" cy="12" r="1.7" fill="#00b0b9"/><circle cx="12" cy="12" r="2.4" fill="#00b0b9"/><circle cx="18" cy="12" r="1.7" fill="#00b0b9"/><circle cx="12" cy="18" r="1.7" fill="#00b0b9"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Fitbit Air</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 4h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- Apple Watch Ultra 2 -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(55,138,221,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="7" y="5.5" width="10" height="13" rx="3.4" stroke="#378add" stroke-width="1.6"/><path d="M9 5.5l.5-2h5l.5 2M9 18.5l.5 2h5l.5-2" stroke="#378add" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Apple Watch Ultra 2</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 4h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- Strava -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(252,82,0,.16)">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M10 3 4 15h3.6L10 10l2.4 5H16L10 3Z" fill="#fc5200"/><path d="M14.4 15 16 18l1.6-3H20l-3.6 6-3.6-6h2.6Z" fill="#fc5200" opacity=".7"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Strava</div>
+                <div class="irmeta"><span class="ok">● Connected</span><span>·</span><span>synced 1h ago</span></div>
+              </div>
+              <span class="toggle on" role="switch" aria-checked="true"></span>
+            </div>
+          </div>
+
+          <!-- WHOOP MG (off) -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(226,75,74,.14)">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 14c3 0 3-4 6-4s3 4 6 4M5 18c2.6 0 2.6-3 5-3" stroke="#e24b4a" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">WHOOP MG</div>
+                <div class="irmeta"><span class="offt">○ Off</span><span>·</span><span>won't appear as offline</span></div>
+              </div>
+              <span class="toggle" role="switch" aria-checked="false"></span>
+            </div>
+          </div>
+
+          <!-- Oura Ring 4 (off) -->
+          <div class="introw">
+            <div class="ircore">
+              <span class="iric" style="background:rgba(29,158,117,.14)">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#1d9e75" stroke-width="2.4"/></svg>
+              </span>
+              <div class="irbody">
+                <div class="irname">Oura Ring 4</div>
+                <div class="irmeta"><span class="offt">○ Off</span><span>·</span><span>won't appear as offline</span></div>
+              </div>
+              <span class="toggle" role="switch" aria-checked="false"></span>
+            </div>
+          </div>
+
+        </div><!-- /intlist -->
+
+        <div class="modal-note">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5M12 7.5v.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Turning a source off removes it from your dashboard entirely — it won't be flagged as “offline.” Re-enable any time to resume syncing.</span>
+        </div>
+
+      </div><!-- /modal-core -->
+    </div><!-- /modal -->
+  </div><!-- /settings-overlay -->
+
+</section>
+<style>
+/* ============================================================
+   SCREEN D — "Soft Daylight"  (Soft Structuralism, LIGHT)
+   Cool silver-white canvas · bold grotesk · asymmetrical bento
+   One locked accent: electric blue #2563EB
+   Every selector scoped to #screen-d
+   ============================================================ */
+
+#screen-d{
+  --d-canvas:#F4F6F8;
+  --d-canvas-2:#FAFBFC;
+  --d-surface:#FFFFFF;
+  --d-tray:#EDF1F5;          /* outer double-bezel shell */
+  --d-ink:#0E1726;           /* near-black cool */
+  --d-ink-2:#384556;         /* secondary text */
+  --d-ink-3:#7C8AA0;         /* muted labels */
+  --d-line:#E4EAF1;          /* whisper hairline (sparse) */
+  --d-accent:#2563EB;        /* THE one accent — electric blue */
+  --d-accent-2:#60A5FA;      /* gradient pair */
+  --d-accent-deep:#1D4ED8;
+  --d-accent-soft:rgba(37,99,235,.10);
+  --d-accent-wash:rgba(37,99,235,.055);
+  --d-good:#0EA5A0;          /* cool teal for positive deltas */
+  --d-warn:#E0883B;
+  --d-r:22px;                /* single consistent squircle radius */
+  --d-r-sm:14px;
+  --d-r-tray:28px;
+  /* soft, highly diffused shadows TINTED to the cool background hue */
+  --d-soft:0 1px 2px rgba(30,50,80,.04), 0 18px 40px -22px rgba(30,50,80,.18);
+  --d-soft-lg:0 2px 4px rgba(30,50,80,.05), 0 34px 64px -28px rgba(30,50,80,.26);
+  --d-soft-hover:0 4px 8px rgba(30,50,80,.06), 0 44px 80px -26px rgba(30,50,80,.30);
+  --d-inset:inset 0 1px 0 rgba(255,255,255,.9);
+  --d-ease:cubic-bezier(0.16,1,0.3,1);
+
+  position:relative;
+  min-height:100%;
+  width:100%;
+  color:var(--d-ink);
+  font-family:'Sora','Plus Jakarta Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-0.01em;
+  /* cool daylight canvas with two faint diffused light pools */
+  background:
+    radial-gradient(1100px 620px at 84% -8%, rgba(37,99,235,.07), transparent 60%),
+    radial-gradient(900px 560px at -6% 108%, rgba(96,165,250,.08), transparent 58%),
+    linear-gradient(180deg,var(--d-canvas-2),var(--d-canvas) 42%);
+}
+
+#screen-d *{box-sizing:border-box}
+#screen-d ::selection{background:var(--d-accent-soft);color:var(--d-accent-deep)}
+
+#screen-d .d-wrap{
+  max-width:1280px;
+  margin:0 auto;
+  padding:30px 34px 56px;
+}
+@media (max-width:900px){ #screen-d .d-wrap{padding:22px 16px 44px} }
+
+/* ---------- entry motion ---------- */
+@keyframes d-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes d-spin{to{transform:rotate(360deg)}}
+@keyframes d-ring{from{stroke-dashoffset:565}to{stroke-dashoffset:101.7}}
+@keyframes d-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
+#screen-d .d-anim{opacity:0;animation:d-rise .8s var(--d-ease) both}
+#screen-d .d-d1{animation-delay:.05s}
+#screen-d .d-d2{animation-delay:.12s}
+#screen-d .d-d3{animation-delay:.19s}
+#screen-d .d-d4{animation-delay:.26s}
+#screen-d .d-d5{animation-delay:.33s}
+#screen-d .d-d6{animation-delay:.40s}
+#screen-d .d-d7{animation-delay:.47s}
+
+/* =================================================================
+   TOP BAR — floating island, detached from the top
+   ================================================================= */
+#screen-d .d-topbar{
+  display:flex;align-items:center;gap:22px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  border-radius:999px;
+  padding:11px 14px 11px 20px;
+  box-shadow:var(--d-soft);
+  position:relative;
+}
+#screen-d .d-topbar::after{ /* hairline highlight on the rim */
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.5);
+  pointer-events:none;
+}
+#screen-d .d-brand{display:flex;align-items:center;gap:11px;padding-right:6px}
+#screen-d .d-logo{
+  width:34px;height:34px;border-radius:11px;flex:none;
+  background:linear-gradient(140deg,var(--d-accent),var(--d-accent-deep));
+  display:grid;place-items:center;color:#fff;
+  box-shadow:0 6px 16px -6px rgba(37,99,235,.6), inset 0 1px 0 rgba(255,255,255,.4);
+}
+#screen-d .d-word{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:19px;letter-spacing:-.03em;color:var(--d-ink);
+}
+
+#screen-d .d-nav{display:flex;gap:2px;background:var(--d-tray);padding:4px;border-radius:999px;box-shadow:inset 0 1px 2px rgba(30,50,80,.06)}
+#screen-d .d-nav a{
+  font-size:13px;font-weight:600;color:var(--d-ink-3);
+  padding:8px 15px;border-radius:999px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:color .3s var(--d-ease), background .3s var(--d-ease), box-shadow .3s var(--d-ease);
+  white-space:nowrap;
+}
+#screen-d .d-nav a svg{width:15px;height:15px}
+#screen-d .d-nav a:hover{color:var(--d-ink)}
+#screen-d .d-nav a.active{
+  color:var(--d-accent-deep);background:var(--d-surface);
+  box-shadow:0 2px 6px -2px rgba(30,50,80,.18), inset 0 0 0 1px rgba(37,99,235,.10);
+}
+
+#screen-d .d-top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+#screen-d .d-device{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--d-surface);border-radius:999px;padding:7px 13px 7px 11px;
+  font-size:12.5px;font-weight:600;color:var(--d-ink-2);
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 5px -3px rgba(30,50,80,.2);
+  white-space:nowrap;
+}
+#screen-d .d-device .d-live{position:relative;width:8px;height:8px;flex:none}
+#screen-d .d-device .d-live i{
+  position:absolute;inset:0;border-radius:50%;background:#00b0b9;
+  box-shadow:0 0 0 3px rgba(0,176,185,.18);
+}
+#screen-d .d-device .d-live i::before{
+  content:"";position:absolute;inset:0;border-radius:50%;background:#00b0b9;
+  animation:d-pulse 2.4s var(--d-ease) infinite;
+}
+
+#screen-d .d-icon-btn{
+  width:40px;height:40px;border-radius:50%;flex:none;
+  background:var(--d-surface);border:0;cursor:pointer;color:var(--d-ink-2);
+  display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 6px -3px rgba(30,50,80,.22);
+  transition:transform .3s var(--d-ease), box-shadow .3s var(--d-ease), color .2s;
+}
+#screen-d .d-icon-btn svg{width:18px;height:18px}
+#screen-d .d-icon-btn:hover{color:var(--d-accent);transform:translateY(-1px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.22), 0 8px 18px -8px rgba(37,99,235,.4)}
+#screen-d .d-icon-btn:active{transform:translateY(0) scale(.96)}
+#screen-d .d-sync.syncing{color:var(--d-accent)}
+#screen-d .syncing .sync-icon{animation:d-spin 1s linear infinite}
+
+/* greeting block under the bar */
+#screen-d .d-greet{margin:30px 4px 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+#screen-d .d-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--d-ink-3);margin-bottom:14px;
+}
+#screen-d .d-eyebrow b{width:5px;height:5px;border-radius:50%;background:var(--d-accent);box-shadow:0 0 0 3px var(--d-accent-soft)}
+#screen-d .d-h1{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:clamp(34px,5vw,56px);line-height:.98;letter-spacing:-.045em;color:var(--d-ink);
+}
+#screen-d .d-h1 .d-faint{color:var(--d-ink-3)}
+#screen-d .d-date{
+  text-align:right;font-size:13px;font-weight:600;color:var(--d-ink-2);
+  line-height:1.5;
+}
+#screen-d .d-date small{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+
+/* =================================================================
+   BENTO GRID — asymmetrical, generous gaps, single radius
+   ================================================================= */
+#screen-d .d-bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:18px;
+}
+#screen-d .d-card{
+  background:var(--d-surface);
+  border-radius:var(--d-r);
+  padding:22px;
+  box-shadow:var(--d-soft);
+  position:relative;
+  transition:transform .55s var(--d-ease), box-shadow .55s var(--d-ease);
+}
+#screen-d .d-card::after{ /* faint inner highlight, concentric */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--d-inset), inset 0 0 0 1px rgba(228,234,241,.6);
+}
+#screen-d .d-card.d-float:hover{transform:translateY(-5px);box-shadow:var(--d-soft-hover)}
+
+#screen-d .d-card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+#screen-d .d-kicker{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--d-ink-3);
+  display:inline-flex;align-items:center;gap:8px;
+}
+#screen-d .d-kicker svg{width:13px;height:13px;color:var(--d-accent);opacity:.9}
+
+/* span helpers */
+#screen-d .d-c4{grid-column:span 4}
+#screen-d .d-c5{grid-column:span 5}
+#screen-d .d-c6{grid-column:span 6}
+#screen-d .d-c7{grid-column:span 7}
+#screen-d .d-c8{grid-column:span 8}
+#screen-d .d-c12{grid-column:span 12}
+
+/* =================================================================
+   HERO — readiness ring, double-bezel floating tray
+   ================================================================= */
+#screen-d .d-hero{
+  grid-column:span 7;
+  background:var(--d-tray);
+  border-radius:var(--d-r-tray);
+  padding:9px;                 /* outer shell of double-bezel */
+  box-shadow:var(--d-soft-lg);
+  position:relative;
+}
+#screen-d .d-hero::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,255,255,.6);
+}
+#screen-d .d-hero-core{       /* inner core */
+  position:relative;
+  background:
+    radial-gradient(120% 120% at 88% 6%, rgba(37,99,235,.07), transparent 52%),
+    linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  border-radius:calc(var(--d-r-tray) - 9px);
+  padding:30px 32px;
+  box-shadow:var(--d-inset);
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:34px;align-items:center;
+}
+#screen-d .d-ring-wrap{position:relative;width:208px;height:208px;flex:none}
+#screen-d .d-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+#screen-d .d-ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+#screen-d .d-ring-score{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:62px;line-height:1;letter-spacing:-.05em;color:var(--d-ink);
+  font-variant-numeric:tabular-nums;
+}
+#screen-d .d-ring-score em{font-size:20px;font-style:normal;color:var(--d-ink-3);font-weight:600;letter-spacing:-.02em}
+#screen-d .d-ring-label{margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-ring-track{stroke:#E6ECF3}
+#screen-d .d-ring-prog{stroke:url(#d-ringgrad);stroke-linecap:round;animation:d-ring 1.5s var(--d-ease) .35s both}
+
+#screen-d .d-hero-meta{display:flex;flex-direction:column}
+#screen-d .d-hero-eye{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;margin-bottom:12px;display:inline-flex;align-items:center;gap:8px}
+#screen-d .d-hero-eye b{width:5px;height:5px;border-radius:50%;background:var(--d-accent);box-shadow:0 0 0 3px var(--d-accent-soft)}
+#screen-d .d-hero-state{
+  font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;
+  font-size:clamp(26px,2.7vw,34px);line-height:1.02;letter-spacing:-.035em;color:var(--d-ink);
+}
+#screen-d .d-hero-state .d-hl{
+  background:linear-gradient(120deg,var(--d-accent),var(--d-accent-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#screen-d .d-hero-sub{margin-top:10px;font-size:13.5px;line-height:1.55;color:var(--d-ink-2);max-width:34ch}
+
+/* recovery trio inside hero */
+#screen-d .d-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+#screen-d .d-trio-it{
+  background:var(--d-canvas-2);border-radius:var(--d-r-sm);padding:13px 14px;
+  box-shadow:inset 0 0 0 1px var(--d-line);
+  transition:transform .4s var(--d-ease), box-shadow .4s var(--d-ease);
+}
+#screen-d .d-trio-it:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.18), 0 10px 22px -14px rgba(30,50,80,.4)}
+#screen-d .d-trio-k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-trio-v{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.03em;margin-top:6px;color:var(--d-ink);font-variant-numeric:tabular-nums}
+#screen-d .d-trio-v small{font-size:12px;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-delta{display:inline-flex;align-items:center;gap:3px;margin-top:5px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+#screen-d .d-delta svg{width:11px;height:11px}
+#screen-d .d-up{color:var(--d-good)}
+#screen-d .d-down{color:var(--d-accent)}
+
+/* =================================================================
+   HRV TREND (right of hero, tall)
+   ================================================================= */
+#screen-d .d-trend{grid-column:span 5;display:flex;flex-direction:column}
+#screen-d .d-trend-top{display:flex;align-items:baseline;gap:12px;margin-top:2px}
+#screen-d .d-trend-big{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:40px;letter-spacing:-.04em;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-trend-big small{font-size:15px;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-trend-tags{margin-left:auto;display:flex;gap:7px}
+#screen-d .d-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.08em;
+  padding:4px 9px;border-radius:999px;color:var(--d-ink-2);
+  background:var(--d-canvas-2);box-shadow:inset 0 0 0 1px var(--d-line);
+  display:inline-flex;align-items:center;gap:5px;
+}
+#screen-d .d-tag i{width:7px;height:2px;border-radius:2px}
+#screen-d .d-tag .d-sw-base{width:9px;height:0;border-top:1.5px dashed #B9C5D6}
+#screen-d .d-tag .d-sw-line{background:var(--d-accent)}
+#screen-d .d-chart{flex:1;margin-top:18px;position:relative;min-height:150px}
+#screen-d .d-chart svg{width:100%;height:100%;display:block;overflow:visible}
+#screen-d .d-chart-foot{display:flex;justify-content:space-between;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--d-ink-3);text-transform:uppercase;font-weight:600}
+
+/* =================================================================
+   VITALS — six varied bento tiles
+   ================================================================= */
+#screen-d .d-vitals{grid-column:span 7;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+#screen-d .d-vt{
+  background:var(--d-surface);border-radius:var(--d-r);padding:18px;position:relative;
+  box-shadow:var(--d-soft);
+  transition:transform .55s var(--d-ease), box-shadow .55s var(--d-ease);
+  overflow:hidden;
+}
+#screen-d .d-vt::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:var(--d-inset), inset 0 0 0 1px rgba(228,234,241,.6)}
+#screen-d .d-vt:hover{transform:translateY(-5px);box-shadow:var(--d-soft-hover)}
+#screen-d .d-vt-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;display:flex;align-items:center;justify-content:space-between}
+#screen-d .d-vt-k svg{width:15px;height:15px;color:var(--d-accent);opacity:.85}
+#screen-d .d-vt-v{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.035em;margin-top:16px;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-vt-v small{font-size:13px;color:var(--d-ink-3);font-weight:600;letter-spacing:-.01em}
+#screen-d .d-vt-sub{margin-top:7px;font-size:11.5px;color:var(--d-ink-3);font-weight:500}
+/* steps tile gets a mini progress */
+#screen-d .d-steps-bar{margin-top:13px;height:7px;border-radius:999px;background:#E9EEF4;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.04)}
+#screen-d .d-steps-bar i{display:block;height:100%;width:84.3%;border-radius:999px;background:linear-gradient(90deg,var(--d-accent),var(--d-accent-2))}
+/* calories paired mini-bars */
+#screen-d .d-cal-row{display:flex;gap:7px;margin-top:14px}
+#screen-d .d-cal-col{flex:1}
+#screen-d .d-cal-col span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-cal-col b{display:block;font-family:'Space Grotesk',sans-serif;font-size:19px;letter-spacing:-.03em;color:var(--d-ink);margin-top:3px;font-variant-numeric:tabular-nums}
+#screen-d .d-cal-burn b{color:var(--d-accent-deep)}
+
+/* =================================================================
+   SLEEP STAGES
+   ================================================================= */
+#screen-d .d-sleep{grid-column:span 5;display:flex;flex-direction:column}
+#screen-d .d-sleep-total{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:34px;letter-spacing:-.04em;margin-top:2px;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-sleep-total small{font-size:13px;color:var(--d-good);font-weight:700}
+#screen-d .d-ribbon{display:flex;gap:4px;height:16px;margin-top:20px;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.05)}
+#screen-d .d-ribbon i{height:100%;border-radius:5px}
+#screen-d .d-seg-deep{background:linear-gradient(180deg,#1D4ED8,#1E40AF)}
+#screen-d .d-seg-rem{background:linear-gradient(180deg,var(--d-accent),var(--d-accent-deep))}
+#screen-d .d-seg-light{background:linear-gradient(180deg,#93C5FD,#60A5FA)}
+#screen-d .d-seg-awake{background:#D3DCE7}
+#screen-d .d-sleep-legend{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:20px}
+#screen-d .d-lg{display:flex;align-items:center;gap:10px}
+#screen-d .d-lg i{width:11px;height:11px;border-radius:4px;flex:none}
+#screen-d .d-lg .d-lg-t{font-size:12px;font-weight:600;color:var(--d-ink-2)}
+#screen-d .d-lg .d-lg-v{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--d-ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* =================================================================
+   STRAVA RUN  (wide footer card)
+   ================================================================= */
+#screen-d .d-run{
+  grid-column:span 12;
+  background:
+    radial-gradient(140% 180% at 100% 0%, rgba(252,82,0,.10), transparent 46%),
+    linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+}
+#screen-d .d-run-badge{
+  width:60px;height:60px;border-radius:18px;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,#fc5200,#e24400);
+  box-shadow:0 10px 22px -10px rgba(252,82,0,.7), inset 0 1px 0 rgba(255,255,255,.35);
+}
+#screen-d .d-run-badge svg{width:30px;height:30px}
+#screen-d .d-run-id{min-width:160px}
+#screen-d .d-run-id .d-run-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;display:flex;align-items:center;gap:7px}
+#screen-d .d-run-id .d-run-t{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.035em;margin-top:6px;color:var(--d-ink)}
+#screen-d .d-run-stats{margin-left:auto;display:flex;gap:30px;flex-wrap:wrap}
+#screen-d .d-rs{}
+#screen-d .d-rs span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-rs b{display:block;font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:25px;letter-spacing:-.04em;color:var(--d-ink);margin-top:5px;font-variant-numeric:tabular-nums}
+#screen-d .d-rs b small{font-size:13px;color:var(--d-ink-3);font-weight:600}
+
+/* =================================================================
+   SETTINGS OVERLAY — clean light modal
+   ================================================================= */
+#screen-d .settings-overlay{display:none}
+#screen-d.show-settings .settings-overlay{
+  display:flex;position:fixed;inset:0;z-index:200;
+  align-items:center;justify-content:center;padding:28px;
+  background:rgba(30,50,80,.30);
+  backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
+  animation:d-rise .4s var(--d-ease) both;
+}
+#screen-d .d-modal{
+  width:min(560px,100%);max-height:88vh;overflow:auto;
+  background:var(--d-tray);border-radius:var(--d-r-tray);padding:9px;
+  box-shadow:0 50px 100px -30px rgba(30,50,80,.5);
+  position:relative;
+}
+#screen-d .d-modal::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,255,255,.6)}
+#screen-d .d-modal-core{
+  background:linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  border-radius:calc(var(--d-r-tray) - 9px);
+  padding:26px 26px 22px;box-shadow:var(--d-inset);
+}
+#screen-d .d-modal-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+#screen-d .d-modal-h .d-mt{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.04em;color:var(--d-ink)}
+#screen-d .d-modal-h .d-ms{font-size:12.5px;color:var(--d-ink-3);margin-top:5px;line-height:1.5;max-width:42ch}
+#screen-d .d-close{
+  width:38px;height:38px;border-radius:50%;flex:none;border:0;cursor:pointer;color:var(--d-ink-2);
+  background:var(--d-canvas-2);display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--d-line);transition:transform .3s var(--d-ease), color .2s, box-shadow .3s var(--d-ease);
+}
+#screen-d .d-close svg{width:16px;height:16px}
+#screen-d .d-close:hover{color:var(--d-accent);transform:rotate(90deg);box-shadow:inset 0 0 0 1px rgba(37,99,235,.25)}
+
+/* master auto-sync row */
+#screen-d .d-master{
+  display:flex;align-items:center;gap:14px;margin:20px 0 8px;
+  background:var(--d-accent-wash);border-radius:var(--d-r-sm);padding:15px 16px;
+  box-shadow:inset 0 0 0 1px rgba(37,99,235,.14);
+}
+#screen-d .d-master .d-m-ico{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,var(--d-accent),var(--d-accent-deep));box-shadow:0 6px 14px -6px rgba(37,99,235,.6)}
+#screen-d .d-master .d-m-ico svg{width:18px;height:18px}
+#screen-d .d-master .d-m-t{font-weight:700;font-size:14px;color:var(--d-ink);letter-spacing:-.01em}
+#screen-d .d-master .d-m-s{font-size:11.5px;color:var(--d-ink-2);margin-top:2px}
+
+#screen-d .d-int-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;margin:18px 2px 10px}
+#screen-d .d-int{display:flex;flex-direction:column;gap:9px}
+#screen-d .d-int-row{
+  display:flex;align-items:center;gap:13px;
+  background:var(--d-surface);border-radius:var(--d-r-sm);padding:12px 14px;
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 6px -4px rgba(30,50,80,.18);
+  transition:transform .35s var(--d-ease), box-shadow .35s var(--d-ease);
+}
+#screen-d .d-int-row:hover{transform:translateX(2px)}
+#screen-d .d-int-row.d-off{opacity:.62}
+#screen-d .d-int-dot{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff}
+#screen-d .d-int-dot svg{width:17px;height:17px}
+#screen-d .d-int-meta{min-width:0}
+#screen-d .d-int-name{font-weight:700;font-size:13.5px;color:var(--d-ink);letter-spacing:-.01em}
+#screen-d .d-int-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--d-ink-3);margin-top:3px;display:inline-flex;align-items:center;gap:6px}
+#screen-d .d-int-sub .d-st{display:inline-flex;align-items:center;gap:5px;color:var(--d-good);font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+#screen-d .d-int-sub .d-st i{width:6px;height:6px;border-radius:50%;background:var(--d-good)}
+#screen-d .d-int-sub .d-st.d-off-t{color:var(--d-ink-3)}
+#screen-d .d-int-sub .d-st.d-off-t i{background:#C2CCD9}
+
+/* accent toggles */
+#screen-d .d-tg{margin-left:auto;flex:none;width:46px;height:27px;border-radius:999px;background:#D6DEE8;position:relative;cursor:pointer;transition:background .35s var(--d-ease);box-shadow:inset 0 0 0 1px rgba(30,50,80,.06)}
+#screen-d .d-tg::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(30,50,80,.3);transition:transform .35s var(--d-ease)}
+#screen-d .d-tg.d-on{background:linear-gradient(120deg,var(--d-accent),var(--d-accent-deep))}
+#screen-d .d-tg.d-on::after{transform:translateX(19px)}
+
+/* =================================================================
+   RESPONSIVE — aggressive single-column collapse below 900px
+   ================================================================= */
+@media (max-width:1040px){
+  #screen-d .d-hero,#screen-d .d-trend,#screen-d .d-vitals,#screen-d .d-sleep{grid-column:span 12}
+  #screen-d .d-hero-core{grid-template-columns:1fr;justify-items:center;text-align:center;gap:24px}
+  #screen-d .d-hero-meta{align-items:center}
+  #screen-d .d-trio{width:100%}
+}
+@media (max-width:900px){
+  #screen-d .d-nav{display:none}
+  #screen-d .d-run-stats{gap:20px}
+}
+@media (max-width:680px){
+  #screen-d .d-bento{gap:14px}
+  #screen-d .d-vitals{grid-template-columns:1fr 1fr;gap:14px}
+  #screen-d .d-topbar{flex-wrap:wrap;border-radius:24px;padding:14px}
+  #screen-d .d-top-right{width:100%;margin-left:0;justify-content:flex-start}
+  #screen-d .d-greet{margin-top:22px}
+  #screen-d .d-run{gap:18px}
+  #screen-d .d-run-stats{width:100%;margin-left:0;justify-content:space-between;gap:14px}
+}
+@media (max-width:460px){
+  #screen-d .d-vitals{grid-template-columns:1fr}
+  #screen-d .d-sleep-legend{grid-template-columns:1fr}
+}
+</style>
+
+<section class="screen" id="screen-d">
+  <div class="d-wrap">
+
+    <!-- ============ TOP BAR (floating island) ============ -->
+    <header class="d-topbar d-anim d-d1">
+      <div class="d-brand">
+        <div class="d-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg>
+        </div>
+        <span class="d-word">Vitals</span>
+      </div>
+
+      <nav class="d-nav" aria-label="Primary">
+        <a href="#" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>
+          Dashboard
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+          Sleep
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>
+          Activity
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Habits
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 0 9 3.6 9 8s-4 8-9 8a10 10 0 0 1-3.3-.5L3 21l1.4-4.2A7.3 7.3 0 0 1 3 11c0-4.4 4-8 9-8Z"/></svg>
+          Ask Claude
+        </a>
+      </nav>
+
+      <div class="d-top-right">
+        <span class="d-device">
+          <span class="d-live"><i></i></span>
+          Fitbit Air
+        </span>
+        <button class="d-icon-btn d-sync" data-sync aria-label="Sync now">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg>
+        </button>
+        <button class="d-icon-btn" data-open-settings aria-label="Open settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ GREETING ============ -->
+    <div class="d-greet d-anim d-d2">
+      <div>
+        <span class="d-eyebrow"><b></b>Morning briefing</span>
+        <h1 class="d-h1">Good morning,<br><span class="d-faint">Alex.</span></h1>
+      </div>
+      <div class="d-date">
+        Saturday, June 20
+        <small>Day 171 / 2026</small>
+      </div>
+    </div>
+
+    <!-- ============ BENTO GRID ============ -->
+    <div class="d-bento">
+
+      <!-- HERO: readiness ring (double-bezel tray) -->
+      <section class="d-hero d-anim d-d3">
+        <div class="d-hero-core">
+          <div class="d-ring-wrap">
+            <svg viewBox="0 0 208 208" aria-label="Readiness 82 of 100">
+              <defs>
+                <linearGradient id="d-ringgrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#60A5FA"/>
+                  <stop offset="0.55" stop-color="#2563EB"/>
+                  <stop offset="1" stop-color="#1D4ED8"/>
+                </linearGradient>
+              </defs>
+              <circle class="d-ring-track" cx="104" cy="104" r="90" fill="none" stroke-width="15"/>
+              <circle class="d-ring-prog" cx="104" cy="104" r="90" fill="none" stroke-width="15"
+                stroke-dasharray="565.5" stroke-dashoffset="101.7"/>
+            </svg>
+            <div class="d-ring-center">
+              <div class="d-ring-score">82<em>/100</em></div>
+              <div class="d-ring-label">Readiness</div>
+            </div>
+          </div>
+
+          <div class="d-hero-meta">
+            <span class="d-hero-eye"><b></b>Morning readiness</span>
+            <div class="d-hero-state">Primed for<br><span class="d-hl">training.</span></div>
+            <p class="d-hero-sub">Recovery markers are trending up across the board. A solid window for a quality session today.</p>
+
+            <div class="d-trio">
+              <div class="d-trio-it">
+                <div class="d-trio-k">HRV</div>
+                <div class="d-trio-v">64<small> ms</small></div>
+                <div class="d-delta d-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+6%</div>
+              </div>
+              <div class="d-trio-it">
+                <div class="d-trio-k">Rest HR</div>
+                <div class="d-trio-v">52<small> bpm</small></div>
+                <div class="d-delta d-down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>−3</div>
+              </div>
+              <div class="d-trio-it">
+                <div class="d-trio-k">Sleep</div>
+                <div class="d-trio-v">7h 24m</div>
+                <div class="d-delta d-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+18m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HRV TREND -->
+      <section class="d-card d-float d-trend d-anim d-d4">
+        <div class="d-card-h">
+          <span class="d-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 5-8 4 5"/></svg>
+            14-day HRV
+          </span>
+        </div>
+        <div class="d-trend-top">
+          <div class="d-trend-big">64<small> ms avg</small></div>
+          <div class="d-trend-tags">
+            <span class="d-tag"><i class="d-sw-line"></i>HRV</span>
+            <span class="d-tag"><i class="d-sw-base"></i>Base 60</span>
+          </div>
+        </div>
+        <div class="d-chart">
+          <svg viewBox="0 0 360 150" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="d-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2563EB" stop-opacity=".22"/>
+                <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- baseline (60ms) -->
+            <line x1="0" y1="93.75" x2="360" y2="93.75" stroke="#B9C5D6" stroke-width="1.2" stroke-dasharray="4 5"/>
+            <!-- area fill: 14 pts, vals 58,62,57,64,60,66,63,69,61,67,72,65,68,64 mapped 50..76 -> y 131..18 -->
+            <path d="M0,116.5 L27.7,99.2 L55.4,120.8 L83.1,90.5 L110.8,107.7 L138.5,81.9 L166.2,94.9 L193.8,68.9 L221.5,103.4 L249.2,77.6 L276.9,55.9 L304.6,86.2 L332.3,73.2 L360,90.5 L360,150 L0,150 Z" fill="url(#d-area)"/>
+            <path d="M0,116.5 L27.7,99.2 L55.4,120.8 L83.1,90.5 L110.8,107.7 L138.5,81.9 L166.2,94.9 L193.8,68.9 L221.5,103.4 L249.2,77.6 L276.9,55.9 L304.6,86.2 L332.3,73.2 L360,90.5"
+              fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- latest point marker -->
+            <circle cx="360" cy="90.5" r="4.2" fill="#fff" stroke="#2563EB" stroke-width="2.6"/>
+          </svg>
+        </div>
+        <div class="d-chart-foot"><span>Jun 7</span><span>Jun 13</span><span>Jun 20</span></div>
+      </section>
+
+      <!-- VITALS: 6 varied tiles -->
+      <section class="d-vitals d-anim d-d5">
+        <article class="d-vt">
+          <div class="d-vt-k">SpO₂
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>
+          </div>
+          <div class="d-vt-v">98<small>%</small></div>
+          <div class="d-vt-sub">Blood oxygen · stable</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Respiratory
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-4 3 8 2-6 2 4 4-2"/></svg>
+          </div>
+          <div class="d-vt-v">14.2<small> br/min</small></div>
+          <div class="d-vt-sub">Overnight average</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Skin temp
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z"/></svg>
+          </div>
+          <div class="d-vt-v">−0.2<small> °</small></div>
+          <div class="d-vt-sub">vs baseline</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Steps
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-1.5 2-2 4-1.5 6.5.5 2 2 3 2 5.5a3 3 0 0 1-6 .3"/><path d="M9.5 19.5c0 .8-.7 1.5-1.7 1.5S6 20.3 6 19.3c0-1.4.6-2.3.6-2.3"/></svg>
+          </div>
+          <div class="d-vt-v">8,431</div>
+          <div class="d-steps-bar"><i></i></div>
+          <div class="d-vt-sub">84% of 10,000 goal</div>
+        </article>
+
+        <article class="d-vt" style="grid-column:span 2">
+          <div class="d-vt-k">Calories
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1.5 3 3.5 3 6a7.5 7.5 0 0 1-15 0c0-3 1.5-5 3.5-7 0 2 1 3 2 3 .8 0 1.5-.7 1.5-1.5 0-2.5-2.5-3.5-3-7Z"/></svg>
+          </div>
+          <div class="d-cal-row">
+            <div class="d-cal-col d-cal-burn"><span>Burned</span><b>2,180</b></div>
+            <div class="d-cal-col"><span>Eaten</span><b>1,940</b></div>
+            <div class="d-cal-col"><span>Net</span><b>+240</b></div>
+          </div>
+          <div class="d-vt-sub" style="margin-top:11px">Energy balance running a slight deficit</div>
+        </article>
+      </section>
+
+      <!-- SLEEP STAGES -->
+      <section class="d-card d-float d-sleep d-anim d-d6">
+        <div class="d-card-h">
+          <span class="d-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+            Sleep stages
+          </span>
+        </div>
+        <div class="d-sleep-total">7h 24m<small> &nbsp;+18m</small></div>
+        <div class="d-ribbon" aria-hidden="true">
+          <i class="d-seg-deep" style="width:20.7%"></i>
+          <i class="d-seg-rem" style="width:24.3%"></i>
+          <i class="d-seg-light" style="width:49.8%"></i>
+          <i class="d-seg-awake" style="width:5.2%"></i>
+        </div>
+        <div class="d-sleep-legend">
+          <div class="d-lg"><i class="d-seg-deep"></i><span class="d-lg-t">Deep</span><span class="d-lg-v">1h 32m</span></div>
+          <div class="d-lg"><i class="d-seg-rem"></i><span class="d-lg-t">REM</span><span class="d-lg-v">1h 48m</span></div>
+          <div class="d-lg"><i class="d-seg-light"></i><span class="d-lg-t">Light</span><span class="d-lg-v">3h 41m</span></div>
+          <div class="d-lg"><i class="d-seg-awake"></i><span class="d-lg-t">Awake</span><span class="d-lg-v">23m</span></div>
+        </div>
+      </section>
+
+      <!-- STRAVA RUN -->
+      <section class="d-card d-float d-run d-anim d-d7">
+        <div class="d-run-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg>
+        </div>
+        <div class="d-run-id">
+          <div class="d-run-k">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;color:#fc5200"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>
+            Today · Strava
+          </div>
+          <div class="d-run-t">Morning Run</div>
+        </div>
+        <div class="d-run-stats">
+          <div class="d-rs"><span>Distance</span><b>5.02<small> km</small></b></div>
+          <div class="d-rs"><span>Time</span><b>37:13</b></div>
+          <div class="d-rs"><span>Pace</span><b>7:25<small> /km</small></b></div>
+          <div class="d-rs"><span>Calories</span><b>400</b></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS OVERLAY ============ -->
+  <div class="settings-overlay">
+    <div class="d-modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="d-modal-core">
+        <div class="d-modal-h">
+          <div>
+            <div class="d-mt">Integrations</div>
+            <p class="d-ms">Connected sources sync automatically. Turning one off stops it from ever showing as “offline.”</p>
+          </div>
+          <button class="d-close" data-close-settings aria-label="Close settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- master auto-sync -->
+        <div class="d-master">
+          <div class="d-m-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg>
+          </div>
+          <div>
+            <div class="d-m-t">Automatic sync</div>
+            <div class="d-m-s">Pull from all active sources on a schedule</div>
+          </div>
+          <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Automatic sync"></span>
+        </div>
+
+        <div class="d-int-label">Sources</div>
+        <div class="d-int">
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#00b0b9,#008a91)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Fitbit Air</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 4h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Fitbit Air"></span>
+          </div>
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#378add,#2563EB)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="4"/><path d="M9 9l1.5 3L12 7l1.5 4L15 9"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Apple Watch Ultra 2</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 4h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Apple Watch Ultra 2"></span>
+          </div>
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#fc5200,#e24400)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Strava</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 1h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Strava"></span>
+          </div>
+
+          <div class="d-int-row d-off">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#e24b4a,#c23a39)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">WHOOP MG</div>
+              <div class="d-int-sub"><span class="d-st d-off-t"><i></i>Off</span> · hidden from dashboard</div>
+            </div>
+            <span class="d-tg" role="switch" aria-checked="false" aria-label="WHOOP MG"></span>
+          </div>
+
+          <div class="d-int-row d-off">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#1d9e75,#16805f)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Oura Ring 4</div>
+              <div class="d-int-sub"><span class="d-st d-off-t"><i></i>Off</span> · hidden from dashboard</div>
+            </div>
+            <span class="d-tg" role="switch" aria-checked="false" aria-label="Oura Ring 4"></span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+<script>
+(function(){
+  var seg=document.getElementById('seg');
+  var screens=document.querySelectorAll('.screen');
+  function show(id){
+    screens.forEach(function(s){s.classList.toggle('active', s.id==='screen-'+id);});
+    seg.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.dataset.screen===id);});
+    var st=document.querySelector('.stage'); if(st) st.scrollTop=0;
+  }
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(b)show(b.dataset.screen);});
+  document.addEventListener('click',function(e){
+    var s=e.target.closest('[data-sync]');
+    if(s){if(!s.classList.contains('syncing')){s.classList.add('syncing');setTimeout(function(){s.classList.remove('syncing');},1800);}return;}
+    var o=e.target.closest('[data-open-settings]');
+    if(o){var sc=o.closest('.screen');if(sc)sc.classList.add('show-settings');return;}
+    var c=e.target.closest('[data-close-settings]');
+    if(c){var sc2=c.closest('.screen');if(sc2)sc2.classList.remove('show-settings');return;}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')screens.forEach(function(s){s.classList.remove('show-settings');});});
+  // initialize (supports deep-linking via #a/#b/#c/#d)
+  var def=(location.hash||'').replace('#','');
+  show(['a','b','c','d'].indexOf(def)>=0?def:'a');
+})();
+</script>
+</body>
+</html>

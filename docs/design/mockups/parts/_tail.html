@@ -1,0 +1,27 @@
+</div>
+<script>
+(function(){
+  var seg=document.getElementById('seg');
+  var screens=document.querySelectorAll('.screen');
+  function show(id){
+    screens.forEach(function(s){s.classList.toggle('active', s.id==='screen-'+id);});
+    seg.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.dataset.screen===id);});
+    var st=document.querySelector('.stage'); if(st) st.scrollTop=0;
+  }
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(b)show(b.dataset.screen);});
+  document.addEventListener('click',function(e){
+    var s=e.target.closest('[data-sync]');
+    if(s){if(!s.classList.contains('syncing')){s.classList.add('syncing');setTimeout(function(){s.classList.remove('syncing');},1800);}return;}
+    var o=e.target.closest('[data-open-settings]');
+    if(o){var sc=o.closest('.screen');if(sc)sc.classList.add('show-settings');return;}
+    var c=e.target.closest('[data-close-settings]');
+    if(c){var sc2=c.closest('.screen');if(sc2)sc2.classList.remove('show-settings');return;}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')screens.forEach(function(s){s.classList.remove('show-settings');});});
+  // initialize (supports deep-linking via #a/#b/#c/#d)
+  var def=(location.hash||'').replace('#','');
+  show(['a','b','c','d'].indexOf(def)>=0?def:'a');
+})();
+</script>
+</body>
+</html>

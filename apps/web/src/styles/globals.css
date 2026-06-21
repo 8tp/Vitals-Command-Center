@@ -12,23 +12,19 @@
     background: var(--base);
     color: var(--ink);
     font-family: var(--font-body);
+    letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   /* Calm cross-fade when the theme flips (skipped under reduced-motion). */
   @media (prefers-reduced-motion: no-preference) {
-    body,
-    .card,
-    .panel,
-    .panel-inset,
-    .instrument {
-      transition: background-color 0.25s ease, border-color 0.25s ease,
-        box-shadow 0.25s ease, color 0.25s ease;
+    body {
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
   }
 
-  /* Soft ambient brand wash so flat surfaces feel warm, not void. */
+  /* Faint cool light pool so the flat canvas has depth, not void. */
   body::before {
     content: '';
     position: fixed;
@@ -36,102 +32,106 @@
     pointer-events: none;
     z-index: 0;
     background:
-      radial-gradient(120% 80% at 50% -10%, var(--page-glow), transparent 65%);
+      radial-gradient(1100px 620px at 86% -8%, var(--page-glow), transparent 60%),
+      radial-gradient(900px 560px at -6% 108%, var(--page-glow), transparent 58%);
   }
   #root {
     position: relative;
     z-index: 1;
   }
 
-  /* Visible, friendly focus ring everywhere */
+  /* Crisp accent focus ring everywhere. */
   :focus-visible {
-    outline: 2px solid var(--signal);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 8px;
   }
 
-  /* Numerics: aligned via tabular-nums, but in the friendly sans (NO mono). */
+  /* Tabular numerals for every metric — the instrument default. */
   .num {
-    font-family: var(--font-body);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* ---- Small label: sentence case, friendly, normal tracking ---- */
+  /* ---- Small instrument label: restrained uppercase, Geist (NOT mono) ---- */
   .label-micro {
     font-family: var(--font-body);
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: 12px;
-    line-height: 1.35;
-    color: var(--ink-dim);
+    font-size: 10.5px;
+    line-height: 1.3;
     font-weight: 600;
+    letter-spacing: 0.085em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  /* Technical mono caption (timestamps, axes, units in meta rows). */
+  .meta-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--ink-mute);
   }
   .section-heading {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
-  /* ---- Card: the base soft, rounded, shadowed surface ---- */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
-    position: relative;
-  }
-
-  /* Aliases retained for the contract — all map to the soft card. */
+  /* ---- Surfaces ----
+     Instrument leans on hairlines + whitespace, NOT boxes. These remain only
+     for the rare element that earns elevation (icon buttons, chips, modal,
+     the readiness hero). Flat + soft tinted shadow; never a heavy bordered card. */
+  .card,
   .panel {
     background: var(--surface);
-    border: 1px solid var(--hairline);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     position: relative;
   }
   .panel-inset {
     background: var(--surface-inset);
-    border: 1px solid var(--hairline);
     border-radius: var(--radius-md);
   }
-
-  /* ---- Instrument (legacy name): now a soft interactive card ---- */
+  /* Legacy alias — now a flat hairline-grouped block, no border/shadow. */
   .instrument {
-    background: var(--surface);
-    border: 1px solid var(--hairline);
+    background: transparent;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease,
-      transform 0.2s ease;
-  }
-  .instrument:hover {
-    border-color: var(--hairline-strong);
-    box-shadow: var(--shadow-card-hover);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .instrument:hover {
-      transform: translateY(-1px);
-    }
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.45s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
-  /* ---- Pill / chip: rounded, sentence case, friendly ---- */
+  /* ---- Hairline divider helpers (the primary grouping device) ---- */
+  .rule-t {
+    border-top: 1px solid var(--hairline);
+  }
+  .rule-b {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  /* ---- Pill / chip ---- */
   .pill {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-2xs font-semibold;
     border-radius: var(--radius-pill);
     letter-spacing: 0;
     text-transform: none;
     font-family: var(--font-body);
   }
-
-  /* Interactive pills used as real buttons get a comfortable touch target
-     on small screens; collapses back to compact density at md+. */
+  .chip {
+    @apply inline-flex items-center gap-2 px-3.5 py-1.5 text-[12.5px] font-medium;
+    color: var(--ink-dim);
+    background: var(--surface);
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    transition: color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .chip:hover {
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent-soft);
+    transform: translateY(-1px);
+  }
   .pill-tap {
     @apply min-h-[44px] px-4;
   }
-  /* Square-ish variant for dense rows (1–5 scale) so 5 targets still fit at 390px. */
   .pill-tap-sq {
     @apply min-h-[44px] min-w-[40px] justify-center;
   }
@@ -144,55 +144,108 @@
     }
   }
 
-  /* ---- Primary CTA: the ONE brand-gradient button ---- */
+  /* ---- Buttons ---- */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-white;
     border-radius: var(--radius-pill);
-    background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
-    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.28);
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    box-shadow: 0 8px 18px -8px rgba(37, 99, 235, 0.55);
     transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   }
   .btn-primary:hover {
     filter: brightness(1.05);
-    box-shadow: 0 6px 20px rgba(20, 184, 166, 0.34);
+    box-shadow: 0 10px 24px -8px rgba(37, 99, 235, 0.6);
+    transform: translateY(-1px);
   }
   @media (prefers-reduced-motion: no-preference) {
     .btn-primary:active {
-      transform: translateY(1px);
+      transform: translateY(0) scale(0.98);
     }
   }
-
-  /* ---- Secondary / quiet button ---- */
   .btn-soft {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-ink;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-semibold;
+    color: var(--ink-dim);
     border-radius: var(--radius-pill);
-    background: var(--surface-2);
-    border: 1px solid var(--hairline);
-    transition: border-color 0.2s ease, background 0.2s ease;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    transition: color 0.2s ease, box-shadow 0.2s ease;
   }
   .btn-soft:hover {
-    border-color: var(--hairline-strong);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  }
+  /* Round icon button — the rare elevated control (sync, settings). */
+  .icon-btn {
+    @apply grid place-items-center w-10 h-10 rounded-full shrink-0;
+    color: var(--ink-dim);
     background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--hairline), 0 2px 6px -3px rgba(30, 50, 80, 0.22);
+    transition: color 0.2s ease, box-shadow 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)), transform 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .icon-btn:hover {
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px var(--accent-soft), 0 8px 18px -8px rgba(37, 99, 235, 0.4);
+  }
+  .icon-btn:active {
+    transform: translateY(0) scale(0.96);
   }
 
-  /* ---- Device dot ---- */
-  .device-dot {
-    @apply inline-block rounded-full;
-    width: 7px;
-    height: 7px;
+  /* ---- Toggle switch (settings modal) ---- */
+  .toggle {
+    @apply relative inline-block shrink-0 cursor-pointer;
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    transition: background 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(30, 50, 80, 0.3);
+    transition: transform 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .toggle.on {
+    background: linear-gradient(120deg, var(--accent), var(--accent-deep));
+  }
+  .toggle.on::after {
+    transform: translateX(18px);
   }
 
-  /* ---- Track + fill (confidence, mini-progress) — soft + rounded ---- */
+  /* ---- Sleep-stage fills (ribbon, legend swatches, hypnogram) ---- */
+  .seg-deep {
+    background: linear-gradient(180deg, var(--sleep-deep), color-mix(in srgb, var(--sleep-deep) 80%, #000));
+  }
+  .seg-rem {
+    background: linear-gradient(180deg, var(--sleep-rem), color-mix(in srgb, var(--sleep-rem) 82%, #000));
+  }
+  .seg-light {
+    background: linear-gradient(180deg, var(--sleep-light), color-mix(in srgb, var(--sleep-light) 86%, #000));
+  }
+  .seg-awake {
+    background: var(--sleep-awake);
+  }
+
+  /* ---- Track + fill (confidence, mini-progress) ---- */
   .track {
     @apply w-full overflow-hidden;
     border-radius: var(--radius-pill);
-    height: 8px;
+    height: 6px;
     background: var(--surface-inset);
   }
   .track-fill {
     @apply h-full;
     border-radius: var(--radius-pill);
-    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .scrollbar-thin {
@@ -210,13 +263,12 @@
 }
 
 @layer utilities {
-  /* Hairline rule used as soft dividers */
   .rule {
     border-color: var(--hairline);
   }
-  /* Brand gradient text (wordmark accent, etc.) */
+  /* Brand/accent gradient text (wordmark, highlighted words) */
   .text-gradient-brand {
-    background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -224,13 +276,47 @@
   }
 }
 
-/* ---- Motion: gentle, smooth, reduced-motion respected ---- */
+/* Deterministic screenshot mode (?still): settle all entry/loop motion. */
+.still .animate-fade-rise {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+.still .ring-anim {
+  animation: none !important;
+  stroke-dashoffset: var(--ring-target) !important;
+}
+.still .animate-spin-slow {
+  animation: none !important;
+}
+
+/* Keyframes for the ring/arc sweep are referenced by raw CSS (.ring-anim /
+   .arc-anim), so define them here — Tailwind only emits keyframes that a
+   utility `animation-*` class references. */
+@keyframes ring-sweep {
+  from {
+    stroke-dashoffset: var(--ring-len);
+  }
+  to {
+    stroke-dashoffset: var(--ring-target);
+  }
+}
+@keyframes arc-sweep {
+  from {
+    stroke-dashoffset: var(--arc-len);
+  }
+  to {
+    stroke-dashoffset: var(--arc-target);
+  }
+}
+
+/* ---- Motion: readiness ring sweep + reduced-motion ---- */
 @media (prefers-reduced-motion: no-preference) {
   .arc-anim {
-    animation: arc-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: arc-sweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
   }
   .ring-anim {
-    animation: ring-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: ring-sweep 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
   }
 }
 @media (prefers-reduced-motion: reduce) {

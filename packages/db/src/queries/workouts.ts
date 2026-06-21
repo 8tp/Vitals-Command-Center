@@ -1,10 +1,10 @@
 import type { Database } from 'better-sqlite3';
-import type { DeviceSource, Workout } from '@vcc/shared';
+import type { Workout, WorkoutSource } from '@vcc/shared';
 
 interface WorkoutRow {
   id: string;
   date: string;
-  source: DeviceSource;
+  source: WorkoutSource;
   sport: string | null;
   start_time: string | null;
   end_time: string | null;

@@ -26,8 +26,8 @@ export default defineConfig({
         name: 'Vitals Command Center',
         short_name: 'Vitals',
         description: 'A calm, private health command center — unify your wearables, daily readiness, and an AI brief.',
-        theme_color: '#12161D',
-        background_color: '#12161D',
+        theme_color: '#F6F8FA',
+        background_color: '#F6F8FA',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
@@ -52,7 +52,9 @@ export default defineConfig({
     }),
   ],
   server: {
+    host: true, // bind 0.0.0.0 so the tailnet (not just localhost) can reach it
     port: 5173,
+    allowedHosts: ['.ts.net'], // allow MagicDNS hosts (e.g. your-host.your-tailnet.ts.net)
     proxy: {
       '/api': { target: 'http://localhost:3001', changeOrigin: true },
     },

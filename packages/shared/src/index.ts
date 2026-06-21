@@ -1,4 +1,5 @@
 export * from './devices.js';
+export * from './integrations.js';
 export * from './confidence.js';
 export * from './profile.js';
 export * from './types/normalized.js';

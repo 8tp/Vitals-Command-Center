@@ -7,6 +7,7 @@ import type { DeviceSource } from '@vcc/shared';
 import { WhoopClient, type WhoopFetchResult } from '../services/whoop.js';
 import { OuraClient, type OuraFetchResult } from '../services/oura.js';
 import { AppleHealthParser, type AppleFetchResult } from '../services/apple-health.js';
+import { StravaClient } from '../services/strava.js';
 import {
   FitbitClient,
   parseBridgeSources,
@@ -38,6 +39,14 @@ export interface SyncResult {
 const EMPTY_WHOOP: WhoopFetchResult = { daily: [], sleepSessions: [], workouts: [] };
 const EMPTY_OURA: OuraFetchResult = { daily: [], sleepSessions: [], workouts: [] };
 const EMPTY_APPLE: AppleFetchResult = { daily: [], sleepSessions: [], workouts: [] };
+
+// Strava is a workouts-only source (no daily vitals, no sleep).
+interface StravaFetchResult {
+  daily: never[];
+  sleepSessions: SleepSession[];
+  workouts: Workout[];
+}
+const EMPTY_STRAVA: StravaFetchResult = { daily: [], sleepSessions: [], workouts: [] };
 
 // Flattened Google Health bridge result: per-source daily rows (still in the
 // FitbitDailyRow shape) plus already-normalized sleep sessions tagged by source.
@@ -119,6 +128,19 @@ export async function runSync(
       }
     });
 
+    // Strava — activity/workout source (Apple Watch runs etc.). Gated on BOTH
+    // creds being present AND the integration being enabled in Settings. Pulls
+    // activities started since the sync range start (converted to epoch seconds).
+    const strava = await pullSource('strava', db, log, async () => {
+      if (!process.env.STRAVA_CLIENT_ID) return EMPTY_STRAVA;
+      if (!queries.settings.getIntegrationSetting(db, 'strava').enabled) return EMPTY_STRAVA;
+      const client = new StravaClient(undefined, log.child({ module: 'strava' }));
+      if (!client.hasTokens()) return EMPTY_STRAVA;
+      const afterEpochSeconds = Math.floor(Date.parse(`${start}T00:00:00Z`) / 1000);
+      const workouts = await client.listActivities(afterEpochSeconds);
+      return { daily: [] as never[], sleepSessions: [] as SleepSession[], workouts };
+    });
+
     // Per-device daily rows: bridge owns its sources; native fills the rest.
     // For whoop/oura/apple the bridge emits FitbitDailyRow-shaped rows, so map
     // them into the target device's row shape. The bridge and native paths are
@@ -139,6 +161,7 @@ export async function runSync(
       ...whoop.workouts,
       ...oura.workouts,
       ...apple.workouts,
+      ...strava.workouts,
     ]);
 
     const result: SyncResult = {
@@ -279,7 +302,7 @@ async function pullSource<
     workouts: unknown[];
   },
 >(
-  source: 'whoop' | 'oura' | 'apple' | 'fitbit',
+  source: 'whoop' | 'oura' | 'apple' | 'fitbit' | 'strava',
   db: Database,
   log: FastifyBaseLogger,
   fn: () => Promise<T>,

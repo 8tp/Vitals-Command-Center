@@ -6,7 +6,7 @@ export const NAV = [
   { to: '/sleep', label: 'Sleep', short: 'Sleep', icon: 'sleep' },
   { to: '/workouts', label: 'Activity', short: 'Activity', icon: 'activity' },
   { to: '/habits', label: 'Habits', short: 'Habits', icon: 'habits' },
-  { to: '/ask', label: 'Ask Claude', short: 'Ask', icon: 'sparkle' },
+  { to: '/ask', label: 'Ask AI', short: 'Ask AI', icon: 'ask' },
 ] as const satisfies ReadonlyArray<{
   to: string;
   label: string;

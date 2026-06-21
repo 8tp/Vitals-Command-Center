@@ -1,0 +1,798 @@
+<style>
+/* ============================================================
+   SCREEN D — "Soft Daylight"  (Soft Structuralism, LIGHT)
+   Cool silver-white canvas · bold grotesk · asymmetrical bento
+   One locked accent: electric blue #2563EB
+   Every selector scoped to #screen-d
+   ============================================================ */
+
+#screen-d{
+  --d-canvas:#F4F6F8;
+  --d-canvas-2:#FAFBFC;
+  --d-surface:#FFFFFF;
+  --d-tray:#EDF1F5;          /* outer double-bezel shell */
+  --d-ink:#0E1726;           /* near-black cool */
+  --d-ink-2:#384556;         /* secondary text */
+  --d-ink-3:#7C8AA0;         /* muted labels */
+  --d-line:#E4EAF1;          /* whisper hairline (sparse) */
+  --d-accent:#2563EB;        /* THE one accent — electric blue */
+  --d-accent-2:#60A5FA;      /* gradient pair */
+  --d-accent-deep:#1D4ED8;
+  --d-accent-soft:rgba(37,99,235,.10);
+  --d-accent-wash:rgba(37,99,235,.055);
+  --d-good:#0EA5A0;          /* cool teal for positive deltas */
+  --d-warn:#E0883B;
+  --d-r:22px;                /* single consistent squircle radius */
+  --d-r-sm:14px;
+  --d-r-tray:28px;
+  /* soft, highly diffused shadows TINTED to the cool background hue */
+  --d-soft:0 1px 2px rgba(30,50,80,.04), 0 18px 40px -22px rgba(30,50,80,.18);
+  --d-soft-lg:0 2px 4px rgba(30,50,80,.05), 0 34px 64px -28px rgba(30,50,80,.26);
+  --d-soft-hover:0 4px 8px rgba(30,50,80,.06), 0 44px 80px -26px rgba(30,50,80,.30);
+  --d-inset:inset 0 1px 0 rgba(255,255,255,.9);
+  --d-ease:cubic-bezier(0.16,1,0.3,1);
+
+  position:relative;
+  min-height:100%;
+  width:100%;
+  color:var(--d-ink);
+  font-family:'Sora','Plus Jakarta Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-0.01em;
+  /* cool daylight canvas with two faint diffused light pools */
+  background:
+    radial-gradient(1100px 620px at 84% -8%, rgba(37,99,235,.07), transparent 60%),
+    radial-gradient(900px 560px at -6% 108%, rgba(96,165,250,.08), transparent 58%),
+    linear-gradient(180deg,var(--d-canvas-2),var(--d-canvas) 42%);
+}
+
+#screen-d *{box-sizing:border-box}
+#screen-d ::selection{background:var(--d-accent-soft);color:var(--d-accent-deep)}
+
+#screen-d .d-wrap{
+  max-width:1280px;
+  margin:0 auto;
+  padding:30px 34px 56px;
+}
+@media (max-width:900px){ #screen-d .d-wrap{padding:22px 16px 44px} }
+
+/* ---------- entry motion ---------- */
+@keyframes d-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes d-spin{to{transform:rotate(360deg)}}
+@keyframes d-ring{from{stroke-dashoffset:565}to{stroke-dashoffset:101.7}}
+@keyframes d-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
+#screen-d .d-anim{opacity:0;animation:d-rise .8s var(--d-ease) both}
+#screen-d .d-d1{animation-delay:.05s}
+#screen-d .d-d2{animation-delay:.12s}
+#screen-d .d-d3{animation-delay:.19s}
+#screen-d .d-d4{animation-delay:.26s}
+#screen-d .d-d5{animation-delay:.33s}
+#screen-d .d-d6{animation-delay:.40s}
+#screen-d .d-d7{animation-delay:.47s}
+
+/* =================================================================
+   TOP BAR — floating island, detached from the top
+   ================================================================= */
+#screen-d .d-topbar{
+  display:flex;align-items:center;gap:22px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  border-radius:999px;
+  padding:11px 14px 11px 20px;
+  box-shadow:var(--d-soft);
+  position:relative;
+}
+#screen-d .d-topbar::after{ /* hairline highlight on the rim */
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.5);
+  pointer-events:none;
+}
+#screen-d .d-brand{display:flex;align-items:center;gap:11px;padding-right:6px}
+#screen-d .d-logo{
+  width:34px;height:34px;border-radius:11px;flex:none;
+  background:linear-gradient(140deg,var(--d-accent),var(--d-accent-deep));
+  display:grid;place-items:center;color:#fff;
+  box-shadow:0 6px 16px -6px rgba(37,99,235,.6), inset 0 1px 0 rgba(255,255,255,.4);
+}
+#screen-d .d-word{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:19px;letter-spacing:-.03em;color:var(--d-ink);
+}
+
+#screen-d .d-nav{display:flex;gap:2px;background:var(--d-tray);padding:4px;border-radius:999px;box-shadow:inset 0 1px 2px rgba(30,50,80,.06)}
+#screen-d .d-nav a{
+  font-size:13px;font-weight:600;color:var(--d-ink-3);
+  padding:8px 15px;border-radius:999px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:color .3s var(--d-ease), background .3s var(--d-ease), box-shadow .3s var(--d-ease);
+  white-space:nowrap;
+}
+#screen-d .d-nav a svg{width:15px;height:15px}
+#screen-d .d-nav a:hover{color:var(--d-ink)}
+#screen-d .d-nav a.active{
+  color:var(--d-accent-deep);background:var(--d-surface);
+  box-shadow:0 2px 6px -2px rgba(30,50,80,.18), inset 0 0 0 1px rgba(37,99,235,.10);
+}
+
+#screen-d .d-top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+#screen-d .d-device{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--d-surface);border-radius:999px;padding:7px 13px 7px 11px;
+  font-size:12.5px;font-weight:600;color:var(--d-ink-2);
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 5px -3px rgba(30,50,80,.2);
+  white-space:nowrap;
+}
+#screen-d .d-device .d-live{position:relative;width:8px;height:8px;flex:none}
+#screen-d .d-device .d-live i{
+  position:absolute;inset:0;border-radius:50%;background:#00b0b9;
+  box-shadow:0 0 0 3px rgba(0,176,185,.18);
+}
+#screen-d .d-device .d-live i::before{
+  content:"";position:absolute;inset:0;border-radius:50%;background:#00b0b9;
+  animation:d-pulse 2.4s var(--d-ease) infinite;
+}
+
+#screen-d .d-icon-btn{
+  width:40px;height:40px;border-radius:50%;flex:none;
+  background:var(--d-surface);border:0;cursor:pointer;color:var(--d-ink-2);
+  display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 6px -3px rgba(30,50,80,.22);
+  transition:transform .3s var(--d-ease), box-shadow .3s var(--d-ease), color .2s;
+}
+#screen-d .d-icon-btn svg{width:18px;height:18px}
+#screen-d .d-icon-btn:hover{color:var(--d-accent);transform:translateY(-1px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.22), 0 8px 18px -8px rgba(37,99,235,.4)}
+#screen-d .d-icon-btn:active{transform:translateY(0) scale(.96)}
+#screen-d .d-sync.syncing{color:var(--d-accent)}
+#screen-d .syncing .sync-icon{animation:d-spin 1s linear infinite}
+
+/* greeting block under the bar */
+#screen-d .d-greet{margin:30px 4px 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+#screen-d .d-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--d-ink-3);margin-bottom:14px;
+}
+#screen-d .d-eyebrow b{width:5px;height:5px;border-radius:50%;background:var(--d-accent);box-shadow:0 0 0 3px var(--d-accent-soft)}
+#screen-d .d-h1{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:clamp(34px,5vw,56px);line-height:.98;letter-spacing:-.045em;color:var(--d-ink);
+}
+#screen-d .d-h1 .d-faint{color:var(--d-ink-3)}
+#screen-d .d-date{
+  text-align:right;font-size:13px;font-weight:600;color:var(--d-ink-2);
+  line-height:1.5;
+}
+#screen-d .d-date small{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+
+/* =================================================================
+   BENTO GRID — asymmetrical, generous gaps, single radius
+   ================================================================= */
+#screen-d .d-bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:18px;
+}
+#screen-d .d-card{
+  background:var(--d-surface);
+  border-radius:var(--d-r);
+  padding:22px;
+  box-shadow:var(--d-soft);
+  position:relative;
+  transition:transform .55s var(--d-ease), box-shadow .55s var(--d-ease);
+}
+#screen-d .d-card::after{ /* faint inner highlight, concentric */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--d-inset), inset 0 0 0 1px rgba(228,234,241,.6);
+}
+#screen-d .d-card.d-float:hover{transform:translateY(-5px);box-shadow:var(--d-soft-hover)}
+
+#screen-d .d-card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+#screen-d .d-kicker{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--d-ink-3);
+  display:inline-flex;align-items:center;gap:8px;
+}
+#screen-d .d-kicker svg{width:13px;height:13px;color:var(--d-accent);opacity:.9}
+
+/* span helpers */
+#screen-d .d-c4{grid-column:span 4}
+#screen-d .d-c5{grid-column:span 5}
+#screen-d .d-c6{grid-column:span 6}
+#screen-d .d-c7{grid-column:span 7}
+#screen-d .d-c8{grid-column:span 8}
+#screen-d .d-c12{grid-column:span 12}
+
+/* =================================================================
+   HERO — readiness ring, double-bezel floating tray
+   ================================================================= */
+#screen-d .d-hero{
+  grid-column:span 7;
+  background:var(--d-tray);
+  border-radius:var(--d-r-tray);
+  padding:9px;                 /* outer shell of double-bezel */
+  box-shadow:var(--d-soft-lg);
+  position:relative;
+}
+#screen-d .d-hero::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,255,255,.6);
+}
+#screen-d .d-hero-core{       /* inner core */
+  position:relative;
+  background:
+    radial-gradient(120% 120% at 88% 6%, rgba(37,99,235,.07), transparent 52%),
+    linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  border-radius:calc(var(--d-r-tray) - 9px);
+  padding:30px 32px;
+  box-shadow:var(--d-inset);
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:34px;align-items:center;
+}
+#screen-d .d-ring-wrap{position:relative;width:208px;height:208px;flex:none}
+#screen-d .d-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+#screen-d .d-ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+#screen-d .d-ring-score{
+  font-family:'Space Grotesk','Sora',sans-serif;
+  font-weight:700;font-size:62px;line-height:1;letter-spacing:-.05em;color:var(--d-ink);
+  font-variant-numeric:tabular-nums;
+}
+#screen-d .d-ring-score em{font-size:20px;font-style:normal;color:var(--d-ink-3);font-weight:600;letter-spacing:-.02em}
+#screen-d .d-ring-label{margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-ring-track{stroke:#E6ECF3}
+#screen-d .d-ring-prog{stroke:url(#d-ringgrad);stroke-linecap:round;animation:d-ring 1.5s var(--d-ease) .35s both}
+
+#screen-d .d-hero-meta{display:flex;flex-direction:column}
+#screen-d .d-hero-eye{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;margin-bottom:12px;display:inline-flex;align-items:center;gap:8px}
+#screen-d .d-hero-eye b{width:5px;height:5px;border-radius:50%;background:var(--d-accent);box-shadow:0 0 0 3px var(--d-accent-soft)}
+#screen-d .d-hero-state{
+  font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;
+  font-size:clamp(26px,2.7vw,34px);line-height:1.02;letter-spacing:-.035em;color:var(--d-ink);
+}
+#screen-d .d-hero-state .d-hl{
+  background:linear-gradient(120deg,var(--d-accent),var(--d-accent-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#screen-d .d-hero-sub{margin-top:10px;font-size:13.5px;line-height:1.55;color:var(--d-ink-2);max-width:34ch}
+
+/* recovery trio inside hero */
+#screen-d .d-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+#screen-d .d-trio-it{
+  background:var(--d-canvas-2);border-radius:var(--d-r-sm);padding:13px 14px;
+  box-shadow:inset 0 0 0 1px var(--d-line);
+  transition:transform .4s var(--d-ease), box-shadow .4s var(--d-ease);
+}
+#screen-d .d-trio-it:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.18), 0 10px 22px -14px rgba(30,50,80,.4)}
+#screen-d .d-trio-k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-trio-v{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.03em;margin-top:6px;color:var(--d-ink);font-variant-numeric:tabular-nums}
+#screen-d .d-trio-v small{font-size:12px;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-delta{display:inline-flex;align-items:center;gap:3px;margin-top:5px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+#screen-d .d-delta svg{width:11px;height:11px}
+#screen-d .d-up{color:var(--d-good)}
+#screen-d .d-down{color:var(--d-accent)}
+
+/* =================================================================
+   HRV TREND (right of hero, tall)
+   ================================================================= */
+#screen-d .d-trend{grid-column:span 5;display:flex;flex-direction:column}
+#screen-d .d-trend-top{display:flex;align-items:baseline;gap:12px;margin-top:2px}
+#screen-d .d-trend-big{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:40px;letter-spacing:-.04em;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-trend-big small{font-size:15px;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-trend-tags{margin-left:auto;display:flex;gap:7px}
+#screen-d .d-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.08em;
+  padding:4px 9px;border-radius:999px;color:var(--d-ink-2);
+  background:var(--d-canvas-2);box-shadow:inset 0 0 0 1px var(--d-line);
+  display:inline-flex;align-items:center;gap:5px;
+}
+#screen-d .d-tag i{width:7px;height:2px;border-radius:2px}
+#screen-d .d-tag .d-sw-base{width:9px;height:0;border-top:1.5px dashed #B9C5D6}
+#screen-d .d-tag .d-sw-line{background:var(--d-accent)}
+#screen-d .d-chart{flex:1;margin-top:18px;position:relative;min-height:150px}
+#screen-d .d-chart svg{width:100%;height:100%;display:block;overflow:visible}
+#screen-d .d-chart-foot{display:flex;justify-content:space-between;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--d-ink-3);text-transform:uppercase;font-weight:600}
+
+/* =================================================================
+   VITALS — six varied bento tiles
+   ================================================================= */
+#screen-d .d-vitals{grid-column:span 7;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+#screen-d .d-vt{
+  background:var(--d-surface);border-radius:var(--d-r);padding:18px;position:relative;
+  box-shadow:var(--d-soft);
+  transition:transform .55s var(--d-ease), box-shadow .55s var(--d-ease);
+  overflow:hidden;
+}
+#screen-d .d-vt::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:var(--d-inset), inset 0 0 0 1px rgba(228,234,241,.6)}
+#screen-d .d-vt:hover{transform:translateY(-5px);box-shadow:var(--d-soft-hover)}
+#screen-d .d-vt-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;display:flex;align-items:center;justify-content:space-between}
+#screen-d .d-vt-k svg{width:15px;height:15px;color:var(--d-accent);opacity:.85}
+#screen-d .d-vt-v{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.035em;margin-top:16px;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-vt-v small{font-size:13px;color:var(--d-ink-3);font-weight:600;letter-spacing:-.01em}
+#screen-d .d-vt-sub{margin-top:7px;font-size:11.5px;color:var(--d-ink-3);font-weight:500}
+/* steps tile gets a mini progress */
+#screen-d .d-steps-bar{margin-top:13px;height:7px;border-radius:999px;background:#E9EEF4;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.04)}
+#screen-d .d-steps-bar i{display:block;height:100%;width:84.3%;border-radius:999px;background:linear-gradient(90deg,var(--d-accent),var(--d-accent-2))}
+/* calories paired mini-bars */
+#screen-d .d-cal-row{display:flex;gap:7px;margin-top:14px}
+#screen-d .d-cal-col{flex:1}
+#screen-d .d-cal-col span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-cal-col b{display:block;font-family:'Space Grotesk',sans-serif;font-size:19px;letter-spacing:-.03em;color:var(--d-ink);margin-top:3px;font-variant-numeric:tabular-nums}
+#screen-d .d-cal-burn b{color:var(--d-accent-deep)}
+
+/* =================================================================
+   SLEEP STAGES
+   ================================================================= */
+#screen-d .d-sleep{grid-column:span 5;display:flex;flex-direction:column}
+#screen-d .d-sleep-total{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:34px;letter-spacing:-.04em;margin-top:2px;color:var(--d-ink);font-variant-numeric:tabular-nums;line-height:1}
+#screen-d .d-sleep-total small{font-size:13px;color:var(--d-good);font-weight:700}
+#screen-d .d-ribbon{display:flex;gap:4px;height:16px;margin-top:20px;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.05)}
+#screen-d .d-ribbon i{height:100%;border-radius:5px}
+#screen-d .d-seg-deep{background:linear-gradient(180deg,#1D4ED8,#1E40AF)}
+#screen-d .d-seg-rem{background:linear-gradient(180deg,var(--d-accent),var(--d-accent-deep))}
+#screen-d .d-seg-light{background:linear-gradient(180deg,#93C5FD,#60A5FA)}
+#screen-d .d-seg-awake{background:#D3DCE7}
+#screen-d .d-sleep-legend{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:20px}
+#screen-d .d-lg{display:flex;align-items:center;gap:10px}
+#screen-d .d-lg i{width:11px;height:11px;border-radius:4px;flex:none}
+#screen-d .d-lg .d-lg-t{font-size:12px;font-weight:600;color:var(--d-ink-2)}
+#screen-d .d-lg .d-lg-v{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--d-ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* =================================================================
+   STRAVA RUN  (wide footer card)
+   ================================================================= */
+#screen-d .d-run{
+  grid-column:span 12;
+  background:
+    radial-gradient(140% 180% at 100% 0%, rgba(252,82,0,.10), transparent 46%),
+    linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+}
+#screen-d .d-run-badge{
+  width:60px;height:60px;border-radius:18px;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,#fc5200,#e24400);
+  box-shadow:0 10px 22px -10px rgba(252,82,0,.7), inset 0 1px 0 rgba(255,255,255,.35);
+}
+#screen-d .d-run-badge svg{width:30px;height:30px}
+#screen-d .d-run-id{min-width:160px}
+#screen-d .d-run-id .d-run-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;display:flex;align-items:center;gap:7px}
+#screen-d .d-run-id .d-run-t{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.035em;margin-top:6px;color:var(--d-ink)}
+#screen-d .d-run-stats{margin-left:auto;display:flex;gap:30px;flex-wrap:wrap}
+#screen-d .d-rs{}
+#screen-d .d-rs span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600}
+#screen-d .d-rs b{display:block;font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:25px;letter-spacing:-.04em;color:var(--d-ink);margin-top:5px;font-variant-numeric:tabular-nums}
+#screen-d .d-rs b small{font-size:13px;color:var(--d-ink-3);font-weight:600}
+
+/* =================================================================
+   SETTINGS OVERLAY — clean light modal
+   ================================================================= */
+#screen-d .settings-overlay{display:none}
+#screen-d.show-settings .settings-overlay{
+  display:flex;position:fixed;inset:0;z-index:200;
+  align-items:center;justify-content:center;padding:28px;
+  background:rgba(30,50,80,.30);
+  backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
+  animation:d-rise .4s var(--d-ease) both;
+}
+#screen-d .d-modal{
+  width:min(560px,100%);max-height:88vh;overflow:auto;
+  background:var(--d-tray);border-radius:var(--d-r-tray);padding:9px;
+  box-shadow:0 50px 100px -30px rgba(30,50,80,.5);
+  position:relative;
+}
+#screen-d .d-modal::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,255,255,.6)}
+#screen-d .d-modal-core{
+  background:linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  border-radius:calc(var(--d-r-tray) - 9px);
+  padding:26px 26px 22px;box-shadow:var(--d-inset);
+}
+#screen-d .d-modal-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+#screen-d .d-modal-h .d-mt{font-family:'Space Grotesk','Sora',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.04em;color:var(--d-ink)}
+#screen-d .d-modal-h .d-ms{font-size:12.5px;color:var(--d-ink-3);margin-top:5px;line-height:1.5;max-width:42ch}
+#screen-d .d-close{
+  width:38px;height:38px;border-radius:50%;flex:none;border:0;cursor:pointer;color:var(--d-ink-2);
+  background:var(--d-canvas-2);display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--d-line);transition:transform .3s var(--d-ease), color .2s, box-shadow .3s var(--d-ease);
+}
+#screen-d .d-close svg{width:16px;height:16px}
+#screen-d .d-close:hover{color:var(--d-accent);transform:rotate(90deg);box-shadow:inset 0 0 0 1px rgba(37,99,235,.25)}
+
+/* master auto-sync row */
+#screen-d .d-master{
+  display:flex;align-items:center;gap:14px;margin:20px 0 8px;
+  background:var(--d-accent-wash);border-radius:var(--d-r-sm);padding:15px 16px;
+  box-shadow:inset 0 0 0 1px rgba(37,99,235,.14);
+}
+#screen-d .d-master .d-m-ico{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,var(--d-accent),var(--d-accent-deep));box-shadow:0 6px 14px -6px rgba(37,99,235,.6)}
+#screen-d .d-master .d-m-ico svg{width:18px;height:18px}
+#screen-d .d-master .d-m-t{font-weight:700;font-size:14px;color:var(--d-ink);letter-spacing:-.01em}
+#screen-d .d-master .d-m-s{font-size:11.5px;color:var(--d-ink-2);margin-top:2px}
+
+#screen-d .d-int-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--d-ink-3);font-weight:600;margin:18px 2px 10px}
+#screen-d .d-int{display:flex;flex-direction:column;gap:9px}
+#screen-d .d-int-row{
+  display:flex;align-items:center;gap:13px;
+  background:var(--d-surface);border-radius:var(--d-r-sm);padding:12px 14px;
+  box-shadow:inset 0 0 0 1px var(--d-line), 0 2px 6px -4px rgba(30,50,80,.18);
+  transition:transform .35s var(--d-ease), box-shadow .35s var(--d-ease);
+}
+#screen-d .d-int-row:hover{transform:translateX(2px)}
+#screen-d .d-int-row.d-off{opacity:.62}
+#screen-d .d-int-dot{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff}
+#screen-d .d-int-dot svg{width:17px;height:17px}
+#screen-d .d-int-meta{min-width:0}
+#screen-d .d-int-name{font-weight:700;font-size:13.5px;color:var(--d-ink);letter-spacing:-.01em}
+#screen-d .d-int-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--d-ink-3);margin-top:3px;display:inline-flex;align-items:center;gap:6px}
+#screen-d .d-int-sub .d-st{display:inline-flex;align-items:center;gap:5px;color:var(--d-good);font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+#screen-d .d-int-sub .d-st i{width:6px;height:6px;border-radius:50%;background:var(--d-good)}
+#screen-d .d-int-sub .d-st.d-off-t{color:var(--d-ink-3)}
+#screen-d .d-int-sub .d-st.d-off-t i{background:#C2CCD9}
+
+/* accent toggles */
+#screen-d .d-tg{margin-left:auto;flex:none;width:46px;height:27px;border-radius:999px;background:#D6DEE8;position:relative;cursor:pointer;transition:background .35s var(--d-ease);box-shadow:inset 0 0 0 1px rgba(30,50,80,.06)}
+#screen-d .d-tg::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(30,50,80,.3);transition:transform .35s var(--d-ease)}
+#screen-d .d-tg.d-on{background:linear-gradient(120deg,var(--d-accent),var(--d-accent-deep))}
+#screen-d .d-tg.d-on::after{transform:translateX(19px)}
+
+/* =================================================================
+   RESPONSIVE — aggressive single-column collapse below 900px
+   ================================================================= */
+@media (max-width:1040px){
+  #screen-d .d-hero,#screen-d .d-trend,#screen-d .d-vitals,#screen-d .d-sleep{grid-column:span 12}
+  #screen-d .d-hero-core{grid-template-columns:1fr;justify-items:center;text-align:center;gap:24px}
+  #screen-d .d-hero-meta{align-items:center}
+  #screen-d .d-trio{width:100%}
+}
+@media (max-width:900px){
+  #screen-d .d-nav{display:none}
+  #screen-d .d-run-stats{gap:20px}
+}
+@media (max-width:680px){
+  #screen-d .d-bento{gap:14px}
+  #screen-d .d-vitals{grid-template-columns:1fr 1fr;gap:14px}
+  #screen-d .d-topbar{flex-wrap:wrap;border-radius:24px;padding:14px}
+  #screen-d .d-top-right{width:100%;margin-left:0;justify-content:flex-start}
+  #screen-d .d-greet{margin-top:22px}
+  #screen-d .d-run{gap:18px}
+  #screen-d .d-run-stats{width:100%;margin-left:0;justify-content:space-between;gap:14px}
+}
+@media (max-width:460px){
+  #screen-d .d-vitals{grid-template-columns:1fr}
+  #screen-d .d-sleep-legend{grid-template-columns:1fr}
+}
+</style>
+
+<section class="screen" id="screen-d">
+  <div class="d-wrap">
+
+    <!-- ============ TOP BAR (floating island) ============ -->
+    <header class="d-topbar d-anim d-d1">
+      <div class="d-brand">
+        <div class="d-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg>
+        </div>
+        <span class="d-word">Vitals</span>
+      </div>
+
+      <nav class="d-nav" aria-label="Primary">
+        <a href="#" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>
+          Dashboard
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+          Sleep
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>
+          Activity
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Habits
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 0 9 3.6 9 8s-4 8-9 8a10 10 0 0 1-3.3-.5L3 21l1.4-4.2A7.3 7.3 0 0 1 3 11c0-4.4 4-8 9-8Z"/></svg>
+          Ask Claude
+        </a>
+      </nav>
+
+      <div class="d-top-right">
+        <span class="d-device">
+          <span class="d-live"><i></i></span>
+          Fitbit Air
+        </span>
+        <button class="d-icon-btn d-sync" data-sync aria-label="Sync now">
+          <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg>
+        </button>
+        <button class="d-icon-btn" data-open-settings aria-label="Open settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ GREETING ============ -->
+    <div class="d-greet d-anim d-d2">
+      <div>
+        <span class="d-eyebrow"><b></b>Morning briefing</span>
+        <h1 class="d-h1">Good morning,<br><span class="d-faint">Alex.</span></h1>
+      </div>
+      <div class="d-date">
+        Saturday, June 20
+        <small>Day 171 / 2026</small>
+      </div>
+    </div>
+
+    <!-- ============ BENTO GRID ============ -->
+    <div class="d-bento">
+
+      <!-- HERO: readiness ring (double-bezel tray) -->
+      <section class="d-hero d-anim d-d3">
+        <div class="d-hero-core">
+          <div class="d-ring-wrap">
+            <svg viewBox="0 0 208 208" aria-label="Readiness 82 of 100">
+              <defs>
+                <linearGradient id="d-ringgrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#60A5FA"/>
+                  <stop offset="0.55" stop-color="#2563EB"/>
+                  <stop offset="1" stop-color="#1D4ED8"/>
+                </linearGradient>
+              </defs>
+              <circle class="d-ring-track" cx="104" cy="104" r="90" fill="none" stroke-width="15"/>
+              <circle class="d-ring-prog" cx="104" cy="104" r="90" fill="none" stroke-width="15"
+                stroke-dasharray="565.5" stroke-dashoffset="101.7"/>
+            </svg>
+            <div class="d-ring-center">
+              <div class="d-ring-score">82<em>/100</em></div>
+              <div class="d-ring-label">Readiness</div>
+            </div>
+          </div>
+
+          <div class="d-hero-meta">
+            <span class="d-hero-eye"><b></b>Morning readiness</span>
+            <div class="d-hero-state">Primed for<br><span class="d-hl">training.</span></div>
+            <p class="d-hero-sub">Recovery markers are trending up across the board. A solid window for a quality session today.</p>
+
+            <div class="d-trio">
+              <div class="d-trio-it">
+                <div class="d-trio-k">HRV</div>
+                <div class="d-trio-v">64<small> ms</small></div>
+                <div class="d-delta d-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+6%</div>
+              </div>
+              <div class="d-trio-it">
+                <div class="d-trio-k">Rest HR</div>
+                <div class="d-trio-v">52<small> bpm</small></div>
+                <div class="d-delta d-down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>−3</div>
+              </div>
+              <div class="d-trio-it">
+                <div class="d-trio-k">Sleep</div>
+                <div class="d-trio-v">7h 24m</div>
+                <div class="d-delta d-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+18m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HRV TREND -->
+      <section class="d-card d-float d-trend d-anim d-d4">
+        <div class="d-card-h">
+          <span class="d-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 5-8 4 5"/></svg>
+            14-day HRV
+          </span>
+        </div>
+        <div class="d-trend-top">
+          <div class="d-trend-big">64<small> ms avg</small></div>
+          <div class="d-trend-tags">
+            <span class="d-tag"><i class="d-sw-line"></i>HRV</span>
+            <span class="d-tag"><i class="d-sw-base"></i>Base 60</span>
+          </div>
+        </div>
+        <div class="d-chart">
+          <svg viewBox="0 0 360 150" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="d-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2563EB" stop-opacity=".22"/>
+                <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- baseline (60ms) -->
+            <line x1="0" y1="93.75" x2="360" y2="93.75" stroke="#B9C5D6" stroke-width="1.2" stroke-dasharray="4 5"/>
+            <!-- area fill: 14 pts, vals 58,62,57,64,60,66,63,69,61,67,72,65,68,64 mapped 50..76 -> y 131..18 -->
+            <path d="M0,116.5 L27.7,99.2 L55.4,120.8 L83.1,90.5 L110.8,107.7 L138.5,81.9 L166.2,94.9 L193.8,68.9 L221.5,103.4 L249.2,77.6 L276.9,55.9 L304.6,86.2 L332.3,73.2 L360,90.5 L360,150 L0,150 Z" fill="url(#d-area)"/>
+            <path d="M0,116.5 L27.7,99.2 L55.4,120.8 L83.1,90.5 L110.8,107.7 L138.5,81.9 L166.2,94.9 L193.8,68.9 L221.5,103.4 L249.2,77.6 L276.9,55.9 L304.6,86.2 L332.3,73.2 L360,90.5"
+              fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- latest point marker -->
+            <circle cx="360" cy="90.5" r="4.2" fill="#fff" stroke="#2563EB" stroke-width="2.6"/>
+          </svg>
+        </div>
+        <div class="d-chart-foot"><span>Jun 7</span><span>Jun 13</span><span>Jun 20</span></div>
+      </section>
+
+      <!-- VITALS: 6 varied tiles -->
+      <section class="d-vitals d-anim d-d5">
+        <article class="d-vt">
+          <div class="d-vt-k">SpO₂
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>
+          </div>
+          <div class="d-vt-v">98<small>%</small></div>
+          <div class="d-vt-sub">Blood oxygen · stable</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Respiratory
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-4 3 8 2-6 2 4 4-2"/></svg>
+          </div>
+          <div class="d-vt-v">14.2<small> br/min</small></div>
+          <div class="d-vt-sub">Overnight average</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Skin temp
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z"/></svg>
+          </div>
+          <div class="d-vt-v">−0.2<small> °</small></div>
+          <div class="d-vt-sub">vs baseline</div>
+        </article>
+
+        <article class="d-vt">
+          <div class="d-vt-k">Steps
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-1.5 2-2 4-1.5 6.5.5 2 2 3 2 5.5a3 3 0 0 1-6 .3"/><path d="M9.5 19.5c0 .8-.7 1.5-1.7 1.5S6 20.3 6 19.3c0-1.4.6-2.3.6-2.3"/></svg>
+          </div>
+          <div class="d-vt-v">8,431</div>
+          <div class="d-steps-bar"><i></i></div>
+          <div class="d-vt-sub">84% of 10,000 goal</div>
+        </article>
+
+        <article class="d-vt" style="grid-column:span 2">
+          <div class="d-vt-k">Calories
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1.5 3 3.5 3 6a7.5 7.5 0 0 1-15 0c0-3 1.5-5 3.5-7 0 2 1 3 2 3 .8 0 1.5-.7 1.5-1.5 0-2.5-2.5-3.5-3-7Z"/></svg>
+          </div>
+          <div class="d-cal-row">
+            <div class="d-cal-col d-cal-burn"><span>Burned</span><b>2,180</b></div>
+            <div class="d-cal-col"><span>Eaten</span><b>1,940</b></div>
+            <div class="d-cal-col"><span>Net</span><b>+240</b></div>
+          </div>
+          <div class="d-vt-sub" style="margin-top:11px">Energy balance running a slight deficit</div>
+        </article>
+      </section>
+
+      <!-- SLEEP STAGES -->
+      <section class="d-card d-float d-sleep d-anim d-d6">
+        <div class="d-card-h">
+          <span class="d-kicker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+            Sleep stages
+          </span>
+        </div>
+        <div class="d-sleep-total">7h 24m<small> &nbsp;+18m</small></div>
+        <div class="d-ribbon" aria-hidden="true">
+          <i class="d-seg-deep" style="width:20.7%"></i>
+          <i class="d-seg-rem" style="width:24.3%"></i>
+          <i class="d-seg-light" style="width:49.8%"></i>
+          <i class="d-seg-awake" style="width:5.2%"></i>
+        </div>
+        <div class="d-sleep-legend">
+          <div class="d-lg"><i class="d-seg-deep"></i><span class="d-lg-t">Deep</span><span class="d-lg-v">1h 32m</span></div>
+          <div class="d-lg"><i class="d-seg-rem"></i><span class="d-lg-t">REM</span><span class="d-lg-v">1h 48m</span></div>
+          <div class="d-lg"><i class="d-seg-light"></i><span class="d-lg-t">Light</span><span class="d-lg-v">3h 41m</span></div>
+          <div class="d-lg"><i class="d-seg-awake"></i><span class="d-lg-t">Awake</span><span class="d-lg-v">23m</span></div>
+        </div>
+      </section>
+
+      <!-- STRAVA RUN -->
+      <section class="d-card d-float d-run d-anim d-d7">
+        <div class="d-run-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg>
+        </div>
+        <div class="d-run-id">
+          <div class="d-run-k">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;color:#fc5200"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>
+            Today · Strava
+          </div>
+          <div class="d-run-t">Morning Run</div>
+        </div>
+        <div class="d-run-stats">
+          <div class="d-rs"><span>Distance</span><b>5.02<small> km</small></b></div>
+          <div class="d-rs"><span>Time</span><b>37:13</b></div>
+          <div class="d-rs"><span>Pace</span><b>7:25<small> /km</small></b></div>
+          <div class="d-rs"><span>Calories</span><b>400</b></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS OVERLAY ============ -->
+  <div class="settings-overlay">
+    <div class="d-modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="d-modal-core">
+        <div class="d-modal-h">
+          <div>
+            <div class="d-mt">Integrations</div>
+            <p class="d-ms">Connected sources sync automatically. Turning one off stops it from ever showing as “offline.”</p>
+          </div>
+          <button class="d-close" data-close-settings aria-label="Close settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- master auto-sync -->
+        <div class="d-master">
+          <div class="d-m-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg>
+          </div>
+          <div>
+            <div class="d-m-t">Automatic sync</div>
+            <div class="d-m-s">Pull from all active sources on a schedule</div>
+          </div>
+          <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Automatic sync"></span>
+        </div>
+
+        <div class="d-int-label">Sources</div>
+        <div class="d-int">
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#00b0b9,#008a91)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Fitbit Air</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 4h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Fitbit Air"></span>
+          </div>
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#378add,#2563EB)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="4"/><path d="M9 9l1.5 3L12 7l1.5 4L15 9"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Apple Watch Ultra 2</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 4h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Apple Watch Ultra 2"></span>
+          </div>
+
+          <div class="d-int-row">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#fc5200,#e24400)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Strava</div>
+              <div class="d-int-sub"><span class="d-st"><i></i>Connected</span> · synced 1h ago</div>
+            </div>
+            <span class="d-tg d-on" role="switch" aria-checked="true" aria-label="Strava"></span>
+          </div>
+
+          <div class="d-int-row d-off">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#e24b4a,#c23a39)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">WHOOP MG</div>
+              <div class="d-int-sub"><span class="d-st d-off-t"><i></i>Off</span> · hidden from dashboard</div>
+            </div>
+            <span class="d-tg" role="switch" aria-checked="false" aria-label="WHOOP MG"></span>
+          </div>
+
+          <div class="d-int-row d-off">
+            <div class="d-int-dot" style="background:linear-gradient(140deg,#1d9e75,#16805f)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>
+            </div>
+            <div class="d-int-meta">
+              <div class="d-int-name">Oura Ring 4</div>
+              <div class="d-int-sub"><span class="d-st d-off-t"><i></i>Off</span> · hidden from dashboard</div>
+            </div>
+            <span class="d-tg" role="switch" aria-checked="false" aria-label="Oura Ring 4"></span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

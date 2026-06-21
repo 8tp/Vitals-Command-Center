@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vitals — redesign directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#07090d;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.switcher{position:fixed;top:0;left:0;right:0;height:52px;z-index:1000;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(8,10,14,.86);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#e7ecf2}
+.switcher .b{font-weight:800;font-size:14px;letter-spacing:-.01em;white-space:nowrap}
+.switcher .seg{display:flex;gap:3px;background:rgba(255,255,255,.06);padding:4px;border-radius:999px}
+.switcher .seg button{border:0;background:transparent;color:#aeb8c6;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer;transition:.16s;white-space:nowrap}
+.switcher .seg button:hover{color:#fff}
+.switcher .seg button.active{background:#fff;color:#0a0c10}
+.switcher .hint{margin-left:auto;font-size:12px;color:#8a96a6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage{position:fixed;inset:52px 0 0 0;overflow:auto}
+.screen{display:none;min-height:100%}
+.screen.active{display:block}
+@media (max-width:760px){.switcher .hint{display:none}}
+</style>
+</head>
+<body>
+<div class="switcher">
+  <span class="b">Vitals · directions</span>
+  <div class="seg" id="seg">
+    <button data-screen="a" class="active">Editorial Minimal</button>
+    <button data-screen="b">Tactical Telemetry</button>
+    <button data-screen="c">Ethereal Glass</button>
+    <button data-screen="d">Soft Daylight</button>
+  </div>
+  <span class="hint">Four different apps · same data · try Sync &amp; the gear → Settings</span>
+</div>
+<div class="stage">

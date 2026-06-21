@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vitals — Soft Daylight, refined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   SHARED FOUNDATION — all three directions ride the same
+   "Soft Daylight" base: cool silver-white canvas, bold grotesk,
+   ONE electric-blue accent, soft TINTED shadows, 22px squircle.
+   The directions differ ONLY in how they group: tonal sections
+   (Calm) vs aurora glass (Neural) vs pure hairlines (Instrument).
+   ============================================================ */
+:root{
+  --canvas:#F4F6F8; --canvas-2:#FAFBFC; --surface:#FFFFFF;
+  --tray:#EDF1F5; --zone:#EEF2F7; --zone-2:#F3F6FA;
+  --ink:#0E1726; --ink-2:#384556; --ink-3:#7C8AA0; --ink-4:#9AA7BA;
+  --line:#E4EAF1; --line-2:#EDF1F6;
+  --accent:#2563EB; --accent-2:#60A5FA; --accent-deep:#1D4ED8;
+  --accent-soft:rgba(37,99,235,.10); --accent-wash:rgba(37,99,235,.055);
+  --good:#0EA5A0; --strava:#FC5200;
+  --r:22px; --r-sm:14px; --r-lg:28px;
+  --soft:0 1px 2px rgba(30,50,80,.04), 0 18px 40px -22px rgba(30,50,80,.18);
+  --soft-lg:0 2px 4px rgba(30,50,80,.05), 0 34px 64px -28px rgba(30,50,80,.26);
+  --soft-hi:0 4px 8px rgba(30,50,80,.06), 0 44px 80px -26px rgba(30,50,80,.30);
+  --inset:inset 0 1px 0 rgba(255,255,255,.9);
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Sora',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;background:#0a0e14}
+
+/* ---------- light switcher (daylight-appropriate) ---------- */
+.switcher{
+  position:fixed;top:0;left:0;right:0;height:56px;z-index:1000;
+  display:flex;align-items:center;gap:16px;padding:0 20px;
+  background:rgba(250,251,252,.82);backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid var(--line);color:var(--ink);
+}
+.switcher .b{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:-.02em;white-space:nowrap;display:flex;align-items:center;gap:9px}
+.switcher .b i{width:9px;height:9px;border-radius:3px;background:linear-gradient(140deg,var(--accent),var(--accent-deep));box-shadow:0 0 0 3px var(--accent-soft)}
+.switcher .seg{display:flex;gap:3px;background:var(--tray);padding:4px;border-radius:999px;box-shadow:inset 0 1px 2px rgba(30,50,80,.06)}
+.switcher .seg button{border:0;background:transparent;color:var(--ink-3);font:600 12.5px/1 'Sora',sans-serif;padding:9px 16px;border-radius:999px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
+.switcher .seg button:hover{color:var(--ink)}
+.switcher .seg button.active{background:var(--surface);color:var(--accent-deep);box-shadow:0 2px 6px -2px rgba(30,50,80,.18), inset 0 0 0 1px rgba(37,99,235,.10)}
+.switcher .hint{margin-left:auto;font-size:12px;color:var(--ink-4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.stage{position:fixed;inset:56px 0 0 0;overflow:auto}
+.screen{display:none;min-height:100%}
+.screen.active{display:block}
+@media (max-width:820px){.switcher .hint{display:none}}
+
+/* ---------- shared entry motion (every keyframe defined; entries use both-fill) ---------- */
+@keyframes rd-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rd-fade{from{opacity:0}to{opacity:1}}
+@keyframes rd-spin{to{transform:rotate(360deg)}}
+@keyframes rd-ring{from{stroke-dashoffset:565.5}to{stroke-dashoffset:101.8}}
+@keyframes rd-ring-c{from{stroke-dashoffset:578}to{stroke-dashoffset:104}}
+@keyframes rd-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+@keyframes rd-drift{0%{transform:translate(0,0)}50%{transform:translate(-18px,12px)}100%{transform:translate(0,0)}}
+@keyframes rd-thread{to{stroke-dashoffset:0}}
+.an{opacity:0;animation:rd-rise .8s var(--ease) both}
+/* deterministic screenshot mode: freeze all entry/loop motion at final state */
+.still .an{opacity:1!important;animation:none!important}
+.still .ring-prog{animation:none!important}
+.still .aurora i,.still .threads path{animation:none!important}
+.still .live i::before,.still .syncing .sync-i{animation:none!important}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
+.d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.40s}.d7{animation-delay:.47s}.d8{animation-delay:.54s}
+
+/* shared sync-spin + live dot helpers (used by all three) */
+.sync.syncing{color:var(--accent)!important}
+.syncing .sync-i{animation:rd-spin 1s linear infinite}
+.live{position:relative;width:8px;height:8px;flex:none;display:inline-block}
+.live i{position:absolute;inset:0;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(14,165,160,.18)}
+.live i::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--good);animation:rd-pulse 2.4s var(--ease) infinite}
+
+/* =================================================================
+   ███  SCREEN A — "Daylight · Calm"  (Soft Daylight × Google Health)
+   Soft TONAL SECTIONS group information; cards almost gone. Friendly,
+   rounded, humane. Elevation reserved for the readiness hero only.
+   ================================================================= */
+#rd-a{color:var(--ink);background:
+  radial-gradient(1100px 620px at 86% -10%, rgba(37,99,235,.06), transparent 60%),
+  radial-gradient(900px 560px at -8% 110%, rgba(96,165,250,.07), transparent 58%),
+  linear-gradient(180deg,var(--canvas-2),var(--canvas) 44%);}
+#rd-a .wrap{max-width:1240px;margin:0 auto;padding:28px 32px 64px}
+#rd-a *{letter-spacing:-.01em}
+
+/* top bar — floating glass island */
+#rd-a .top{display:flex;align-items:center;gap:20px;background:rgba(255,255,255,.78);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-radius:999px;padding:10px 14px 10px 20px;box-shadow:var(--soft);position:relative}
+#rd-a .top::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.5);pointer-events:none}
+#rd-a .brand{display:flex;align-items:center;gap:11px}
+#rd-a .logo{width:34px;height:34px;border-radius:11px;flex:none;background:linear-gradient(140deg,var(--accent),var(--accent-deep));display:grid;place-items:center;color:#fff;box-shadow:0 6px 16px -6px rgba(37,99,235,.6), inset 0 1px 0 rgba(255,255,255,.4)}
+#rd-a .logo svg{width:20px;height:20px}
+#rd-a .word{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.03em}
+#rd-a .nav{display:flex;gap:2px;background:var(--tray);padding:4px;border-radius:999px;box-shadow:inset 0 1px 2px rgba(30,50,80,.06)}
+#rd-a .nav a{font-size:13px;font-weight:600;color:var(--ink-3);padding:8px 15px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:.3s var(--ease);white-space:nowrap}
+#rd-a .nav a svg{width:15px;height:15px}
+#rd-a .nav a:hover{color:var(--ink)}
+#rd-a .nav a.active{color:var(--accent-deep);background:var(--surface);box-shadow:0 2px 6px -2px rgba(30,50,80,.18), inset 0 0 0 1px rgba(37,99,235,.10)}
+#rd-a .tr{margin-left:auto;display:flex;align-items:center;gap:10px}
+#rd-a .chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:7px 13px 7px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line), 0 2px 5px -3px rgba(30,50,80,.2);white-space:nowrap}
+#rd-a .ib{width:40px;height:40px;border-radius:50%;flex:none;background:var(--surface);border:0;cursor:pointer;color:var(--ink-2);display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line), 0 2px 6px -3px rgba(30,50,80,.22);transition:.3s var(--ease)}
+#rd-a .ib svg{width:18px;height:18px}
+#rd-a .ib:hover{color:var(--accent);transform:translateY(-1px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.22), 0 8px 18px -8px rgba(37,99,235,.4)}
+
+/* greeting */
+#rd-a .greet{margin:30px 6px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+#rd-a .eye{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px}
+#rd-a .eye b{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#rd-a .h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(32px,4.6vw,52px);line-height:.98;letter-spacing:-.045em}
+#rd-a .h1 .faint{color:var(--ink-3)}
+#rd-a .date{text-align:right;font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.5}
+#rd-a .date small{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+
+/* the ONE elevated moment: readiness hero on a soft tonal band */
+#rd-a .hero{margin-top:22px;border-radius:var(--r-lg);background:linear-gradient(180deg,#FFFFFF,#F7FAFD);box-shadow:var(--soft-lg);position:relative;padding:34px 38px;display:grid;grid-template-columns:auto 1fr;gap:40px;align-items:center;overflow:hidden}
+#rd-a .hero::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:var(--inset), inset 0 0 0 1px rgba(228,234,241,.7)}
+#rd-a .hero::before{content:"";position:absolute;width:420px;height:420px;right:-80px;top:-180px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.08),transparent 62%);pointer-events:none}
+#rd-a .ring{position:relative;width:212px;height:212px;flex:none}
+#rd-a .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#rd-a .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#rd-a .ring .sc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:64px;line-height:1;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+#rd-a .ring .sc em{font-size:20px;font-style:normal;color:var(--ink-3);font-weight:600}
+#rd-a .ring .lb{margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-a .ring-prog{stroke:url(#a-grad);stroke-linecap:round;animation:rd-ring 1.5s var(--ease) .35s both}
+#rd-a .hero-meta{min-width:0}
+#rd-a .hero-st{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,2.7vw,34px);line-height:1.02;letter-spacing:-.035em}
+#rd-a .hero-st .hl{background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#rd-a .hero-sub{margin-top:11px;font-size:14px;line-height:1.55;color:var(--ink-2);max-width:42ch}
+/* recovery trio — plain stats divided by hairlines, NOT boxes */
+#rd-a .trio{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+#rd-a .trio .t{padding:0 22px}
+#rd-a .trio .t:first-child{padding-left:0}
+#rd-a .trio .t+.t{border-left:1px solid var(--line)}
+#rd-a .trio .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-a .trio .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums}
+#rd-a .trio .v small{font-size:13px;color:var(--ink-3);font-weight:600}
+#rd-a .delta{display:inline-flex;align-items:center;gap:3px;margin-top:6px;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums}
+#rd-a .delta svg{width:11px;height:11px}
+#rd-a .up{color:var(--good)}#rd-a .down{color:var(--accent)}
+
+/* section header — hairline, sentence case, friendly */
+#rd-a .sec{margin-top:42px}
+#rd-a .sec-h{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:22px}
+#rd-a .sec-h h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.03em}
+#rd-a .sec-h .more{font-size:12px;font-weight:600;color:var(--ink-3);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+
+/* vitals — a row grouped by hairlines, no card boxes */
+#rd-a .vitals{display:grid;grid-template-columns:repeat(5,1fr)}
+#rd-a .vt{padding:4px 22px;position:relative}
+#rd-a .vt:first-child{padding-left:0}
+#rd-a .vt+.vt{border-left:1px solid var(--line)}
+#rd-a .vt .k{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-a .vt .k svg{width:14px;height:14px;color:var(--accent);opacity:.8}
+#rd-a .vt .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.035em;margin-top:14px;font-variant-numeric:tabular-nums;line-height:1}
+#rd-a .vt .v small{font-size:13px;color:var(--ink-3);font-weight:600}
+#rd-a .vt .s{margin-top:8px;font-size:11.5px;color:var(--ink-3);font-weight:500}
+#rd-a .mini{margin-top:11px;height:6px;border-radius:999px;background:#E9EEF4;overflow:hidden}
+#rd-a .mini i{display:block;height:100%;width:84%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+/* two-up: HRV + sleep, soft tonal wells (not heavy cards) */
+#rd-a .twoup{margin-top:42px;display:grid;grid-template-columns:1.25fr 1fr;gap:24px}
+#rd-a .well{background:var(--zone);border-radius:var(--r);padding:24px 26px;position:relative}
+#rd-a .well .wh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+#rd-a .well .wh h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;letter-spacing:-.02em}
+#rd-a .well .wh .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink-3);font-weight:600}
+#rd-a .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.1}
+#rd-a .big small{font-size:14px;color:var(--ink-3);font-weight:600}
+#rd-a .chart{height:140px;margin-top:14px}
+#rd-a .chart svg{width:100%;height:100%;display:block;overflow:visible}
+#rd-a .chart-foot{display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;font-weight:600}
+#rd-a .ribbon{display:flex;gap:4px;height:16px;margin-top:18px;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.05)}
+#rd-a .ribbon i{height:100%;border-radius:5px}
+#rd-a .sd{background:linear-gradient(180deg,#1D4ED8,#1E40AF)}
+#rd-a .sr{background:linear-gradient(180deg,var(--accent),var(--accent-deep))}
+#rd-a .sl{background:linear-gradient(180deg,#93C5FD,#60A5FA)}
+#rd-a .sa{background:#D3DCE7}
+#rd-a .leg{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:20px}
+#rd-a .lg{display:flex;align-items:center;gap:10px}
+#rd-a .lg i{width:11px;height:11px;border-radius:4px;flex:none}
+#rd-a .lg .lt{font-size:12px;font-weight:600;color:var(--ink-2)}
+#rd-a .lg .lv{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* strava run — soft tonal band, hairline-separated stats */
+#rd-a .run{margin-top:42px;border-radius:var(--r);background:radial-gradient(150% 200% at 100% 0%, rgba(252,82,0,.08), transparent 46%), var(--zone-2);padding:24px 26px;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+#rd-a .run .bd{width:54px;height:54px;border-radius:16px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,#fc5200,#e24400);box-shadow:0 10px 22px -10px rgba(252,82,0,.7), inset 0 1px 0 rgba(255,255,255,.35)}
+#rd-a .run .bd svg{width:28px;height:28px}
+#rd-a .run .id .rk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-a .run .id .rt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.035em;margin-top:5px}
+#rd-a .run .stats{margin-left:auto;display:flex}
+#rd-a .run .rs{padding:0 22px}
+#rd-a .run .rs+.rs{border-left:1px solid var(--line)}
+#rd-a .run .rs span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-a .run .rs b{display:block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.04em;margin-top:5px;font-variant-numeric:tabular-nums}
+#rd-a .run .rs b small{font-size:12px;color:var(--ink-3);font-weight:600}
+
+@media (max-width:1000px){#rd-a .hero{grid-template-columns:1fr;justify-items:center;text-align:center}#rd-a .twoup{grid-template-columns:1fr}#rd-a .vitals{grid-template-columns:repeat(3,1fr);gap:18px 0}#rd-a .vt:nth-child(3n+1){padding-left:0;border-left:0}}
+@media (max-width:820px){#rd-a .nav{display:none}}
+
+/* =================================================================
+   ███  SCREEN B — "Daylight · Neural"  (Soft Daylight × Gemini)
+   Bright aurora wash + drifting neural threads; glowing gradient
+   ring; barely-there bright glass; edge-to-edge; fluid depth.
+   ================================================================= */
+#rd-b{color:var(--ink);position:relative;background:linear-gradient(180deg,#FAFBFD,#F2F5FA 52%)}
+#rd-b .aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#rd-b .aurora i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:rd-drift 22s var(--ease) infinite}
+#rd-b .aurora i:nth-child(1){width:560px;height:560px;left:-120px;top:-160px;background:radial-gradient(circle,rgba(37,99,235,.20),transparent 60%)}
+#rd-b .aurora i:nth-child(2){width:520px;height:520px;right:-100px;top:-60px;background:radial-gradient(circle,rgba(96,165,250,.20),transparent 60%);animation-delay:-7s}
+#rd-b .aurora i:nth-child(3){width:600px;height:600px;left:30%;bottom:-280px;background:radial-gradient(circle,rgba(34,211,238,.14),transparent 62%);animation-delay:-13s}
+#rd-b .threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.5}
+#rd-b .threads path{fill:none;stroke:url(#b-thread);stroke-width:1.2;stroke-dasharray:6 10;animation:rd-thread 8s linear infinite}
+#rd-b .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:28px 32px 64px}
+#rd-b *{letter-spacing:-.01em}
+
+/* glass island top bar */
+#rd-b .top{display:flex;align-items:center;gap:20px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border-radius:999px;padding:10px 14px 10px 20px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 18px 40px -22px rgba(37,99,235,.32), 0 0 0 1px rgba(255,255,255,.5) inset;position:relative}
+#rd-b .brand{display:flex;align-items:center;gap:11px}
+#rd-b .logo{width:34px;height:34px;border-radius:11px;flex:none;background:linear-gradient(140deg,var(--accent-2),var(--accent-deep));display:grid;place-items:center;color:#fff;box-shadow:0 8px 20px -6px rgba(37,99,235,.7), inset 0 1px 0 rgba(255,255,255,.5)}
+#rd-b .logo svg{width:20px;height:20px}
+#rd-b .word{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.03em}
+#rd-b .nav{display:flex;gap:2px;background:rgba(255,255,255,.5);padding:4px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+#rd-b .nav a{font-size:13px;font-weight:600;color:var(--ink-3);padding:8px 15px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:.3s var(--ease);white-space:nowrap}
+#rd-b .nav a svg{width:15px;height:15px}
+#rd-b .nav a:hover{color:var(--ink)}
+#rd-b .nav a.active{color:#fff;background:linear-gradient(120deg,var(--accent),var(--accent-deep));box-shadow:0 8px 18px -8px rgba(37,99,235,.7)}
+#rd-b .tr{margin-left:auto;display:flex;align-items:center;gap:10px}
+#rd-b .chip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.6);border-radius:999px;padding:7px 13px 7px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7), 0 2px 8px -3px rgba(37,99,235,.3);white-space:nowrap}
+#rd-b .ib{width:40px;height:40px;border-radius:50%;flex:none;background:rgba(255,255,255,.6);border:0;cursor:pointer;color:var(--ink-2);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7), 0 2px 8px -3px rgba(37,99,235,.3);transition:.3s var(--ease)}
+#rd-b .ib svg{width:18px;height:18px}
+#rd-b .ib:hover{color:var(--accent);transform:translateY(-1px)}
+
+#rd-b .greet{margin:30px 6px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+#rd-b .eye{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:13px}
+#rd-b .eye b{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#rd-b .h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(32px,4.6vw,52px);line-height:.98;letter-spacing:-.045em}
+#rd-b .h1 .faint{background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#rd-b .date{text-align:right;font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.5}
+#rd-b .date small{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+
+/* hero: glowing gradient ring + glass meta, threads connecting nodes */
+#rd-b .hero{margin-top:22px;position:relative;display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:center;padding:18px 8px}
+#rd-b .ring{position:relative;width:236px;height:236px;flex:none;filter:drop-shadow(0 18px 38px rgba(37,99,235,.34))}
+#rd-b .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#rd-b .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#rd-b .ring .sc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:70px;line-height:1;letter-spacing:-.05em;font-variant-numeric:tabular-nums;background:linear-gradient(140deg,var(--accent-deep),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#rd-b .ring .sc em{font-size:21px;font-style:normal;color:var(--ink-3);font-weight:600;-webkit-text-fill-color:var(--ink-3)}
+#rd-b .ring .lb{margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-b .ring-prog{stroke:url(#b-grad);stroke-linecap:round;animation:rd-ring-c 1.6s var(--ease) .35s both}
+#rd-b .hero-st{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,2.9vw,38px);line-height:1.02;letter-spacing:-.035em}
+#rd-b .hero-st .hl{background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#rd-b .hero-sub{margin-top:11px;font-size:14px;line-height:1.55;color:var(--ink-2);max-width:44ch}
+/* trio as luminous glass nodes */
+#rd-b .trio{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap}
+#rd-b .node{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:14px 18px;min-width:120px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7), 0 14px 30px -18px rgba(37,99,235,.4);transition:.4s var(--ease)}
+#rd-b .node:hover{transform:translateY(-3px);box-shadow:inset 0 0 0 1px rgba(37,99,235,.3), 0 20px 36px -16px rgba(37,99,235,.5)}
+#rd-b .node .k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-b .node .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:25px;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
+#rd-b .node .v small{font-size:12px;color:var(--ink-3);font-weight:600}
+#rd-b .delta{display:inline-flex;align-items:center;gap:3px;margin-top:5px;font-size:11px;font-weight:700}
+#rd-b .delta svg{width:11px;height:11px}#rd-b .up{color:var(--good)}#rd-b .down{color:var(--accent)}
+
+#rd-b .sec{margin-top:40px}
+#rd-b .sec-h{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+#rd-b .sec-h h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.02em}
+#rd-b .sec-h .ln{flex:1;height:1px;background:linear-gradient(90deg,rgba(37,99,235,.25),transparent)}
+/* vitals as a luminous glass strip, hairline-divided inside */
+#rd-b .vitals{background:rgba(255,255,255,.45);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:var(--r);box-shadow:inset 0 0 0 1px rgba(255,255,255,.65), 0 20px 44px -26px rgba(37,99,235,.4);display:grid;grid-template-columns:repeat(5,1fr);overflow:hidden}
+#rd-b .vt{padding:20px 22px}
+#rd-b .vt+.vt{box-shadow:inset 1px 0 0 rgba(37,99,235,.08)}
+#rd-b .vt .k{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-b .vt .k svg{width:14px;height:14px;color:var(--accent);opacity:.85}
+#rd-b .vt .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-.035em;margin-top:13px;font-variant-numeric:tabular-nums;line-height:1}
+#rd-b .vt .v small{font-size:12px;color:var(--ink-3);font-weight:600}
+#rd-b .vt .s{margin-top:7px;font-size:11px;color:var(--ink-3);font-weight:500}
+#rd-b .mini{margin-top:10px;height:6px;border-radius:999px;background:rgba(37,99,235,.12);overflow:hidden}
+#rd-b .mini i{display:block;height:100%;width:84%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+#rd-b .twoup{margin-top:40px;display:grid;grid-template-columns:1.25fr 1fr;gap:24px}
+#rd-b .glass{background:rgba(255,255,255,.5);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:var(--r);padding:24px 26px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.65), 0 20px 44px -26px rgba(37,99,235,.4);position:relative}
+#rd-b .glass .wh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+#rd-b .glass .wh h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;letter-spacing:-.02em}
+#rd-b .glass .wh .tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);font-weight:600}
+#rd-b .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.1}
+#rd-b .big small{font-size:14px;color:var(--ink-3);font-weight:600}
+#rd-b .chart{height:140px;margin-top:14px}
+#rd-b .chart svg{width:100%;height:100%;display:block;overflow:visible}
+#rd-b .chart-foot{display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;font-weight:600}
+#rd-b .ribbon{display:flex;gap:4px;height:16px;margin-top:18px;border-radius:999px;overflow:hidden}
+#rd-b .ribbon i{height:100%;border-radius:5px}
+#rd-b .sd{background:linear-gradient(180deg,#1D4ED8,#1E40AF)}#rd-b .sr{background:linear-gradient(180deg,var(--accent),var(--accent-deep))}#rd-b .sl{background:linear-gradient(180deg,#93C5FD,#60A5FA)}#rd-b .sa{background:#CBD6E4}
+#rd-b .leg{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:20px}
+#rd-b .lg{display:flex;align-items:center;gap:10px}#rd-b .lg i{width:11px;height:11px;border-radius:4px;flex:none}
+#rd-b .lg .lt{font-size:12px;font-weight:600;color:var(--ink-2)}#rd-b .lg .lv{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+#rd-b .run{margin-top:40px;border-radius:var(--r);background:radial-gradient(160% 200% at 100% 0%, rgba(252,82,0,.14), transparent 46%), rgba(255,255,255,.5);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), 0 20px 44px -26px rgba(252,82,0,.34);padding:24px 26px;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+#rd-b .run .bd{width:54px;height:54px;border-radius:16px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,#fc5200,#e24400);box-shadow:0 12px 26px -10px rgba(252,82,0,.8), inset 0 1px 0 rgba(255,255,255,.35)}
+#rd-b .run .bd svg{width:28px;height:28px}
+#rd-b .run .id .rk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-b .run .id .rt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.035em;margin-top:5px}
+#rd-b .run .stats{margin-left:auto;display:flex;gap:30px;flex-wrap:wrap}
+#rd-b .run .rs span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-b .run .rs b{display:block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.04em;margin-top:5px;font-variant-numeric:tabular-nums}
+#rd-b .run .rs b small{font-size:12px;color:var(--ink-3);font-weight:600}
+@media (max-width:1000px){#rd-b .hero{grid-template-columns:1fr;justify-items:center;text-align:center}#rd-b .twoup{grid-template-columns:1fr}#rd-b .vitals{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:820px){#rd-b .nav{display:none}#rd-b .vitals{grid-template-columns:repeat(2,1fr)}}
+
+/* =================================================================
+   ███  SCREEN C — "Daylight · Instrument"  (Soft Daylight × WHOOP)
+   Data-forward. Left rail nav. Edge-to-edge, NO boxes — sections
+   divided only by whitespace + 1px hairlines. HUGE numerals.
+   ================================================================= */
+#rd-c{color:var(--ink);background:var(--canvas-2);display:grid;grid-template-columns:232px 1fr;min-height:100%}
+#rd-c *{letter-spacing:-.01em}
+/* left rail */
+#rd-c .rail{border-right:1px solid var(--line);padding:26px 20px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;align-self:start;height:calc(100vh - 56px)}
+#rd-c .rail .brand{display:flex;align-items:center;gap:11px;padding:0 8px 22px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+#rd-c .rail .logo{width:34px;height:34px;border-radius:11px;flex:none;background:linear-gradient(140deg,var(--accent),var(--accent-deep));display:grid;place-items:center;color:#fff;box-shadow:0 6px 16px -6px rgba(37,99,235,.6)}
+#rd-c .rail .logo svg{width:20px;height:20px}
+#rd-c .rail .word{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.03em}
+#rd-c .rail a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;text-decoration:none;color:var(--ink-3);font-size:13.5px;font-weight:600;transition:.25s var(--ease)}
+#rd-c .rail a svg{width:18px;height:18px}
+#rd-c .rail a:hover{color:var(--ink);background:var(--zone)}
+#rd-c .rail a.active{color:var(--accent-deep);background:var(--accent-wash);box-shadow:inset 0 0 0 1px rgba(37,99,235,.12)}
+#rd-c .rail a.active svg{color:var(--accent)}
+#rd-c .rail .rdev{margin-top:auto;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:var(--zone);font-size:12px;font-weight:600;color:var(--ink-2)}
+
+/* main column */
+#rd-c .main{min-width:0}
+#rd-c .head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:30px 40px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#rd-c .head .eye{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:8px;margin-bottom:11px}
+#rd-c .head .eye b{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#rd-c .head h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,40px);line-height:1;letter-spacing:-.045em}
+#rd-c .head h1 .faint{color:var(--ink-3)}
+#rd-c .head .ha{display:flex;align-items:center;gap:10px}
+#rd-c .head .date{text-align:right;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-right:6px}
+#rd-c .head .date small{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+#rd-c .ib{width:40px;height:40px;border-radius:50%;flex:none;background:var(--surface);border:0;cursor:pointer;color:var(--ink-2);display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line), 0 2px 6px -3px rgba(30,50,80,.22);transition:.3s var(--ease)}
+#rd-c .ib svg{width:18px;height:18px}
+#rd-c .ib:hover{color:var(--accent);transform:translateY(-1px)}
+
+/* readiness strip — ring + huge metrics, hairline-divided, no box */
+#rd-c .strip{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;padding:36px 40px;border-bottom:1px solid var(--line)}
+#rd-c .ring{position:relative;width:188px;height:188px;flex:none}
+#rd-c .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#rd-c .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#rd-c .ring .sc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:56px;line-height:1;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+#rd-c .ring .sc em{font-size:17px;font-style:normal;color:var(--ink-3);font-weight:600}
+#rd-c .ring .lb{margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-c .ring-prog{stroke:url(#c-grad);stroke-linecap:round;animation:rd-ring-c 1.5s var(--ease) .35s both}
+#rd-c .strip-meta{min-width:0}
+#rd-c .strip-st{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,2.6vw,32px);line-height:1.04;letter-spacing:-.035em}
+#rd-c .strip-st .hl{color:var(--accent)}
+#rd-c .strip-sub{margin-top:9px;font-size:13.5px;line-height:1.5;color:var(--ink-2);max-width:46ch}
+#rd-c .trio{margin-top:22px;display:grid;grid-template-columns:repeat(3,max-content);gap:0}
+#rd-c .trio .t{padding:0 28px}
+#rd-c .trio .t:first-child{padding-left:0}
+#rd-c .trio .t+.t{border-left:1px solid var(--line)}
+#rd-c .trio .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-c .trio .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;letter-spacing:-.04em;margin-top:8px;font-variant-numeric:tabular-nums;line-height:1}
+#rd-c .trio .v small{font-size:14px;color:var(--ink-3);font-weight:600}
+#rd-c .delta{display:inline-flex;align-items:center;gap:3px;margin-top:7px;font-size:11.5px;font-weight:700}
+#rd-c .delta svg{width:11px;height:11px}#rd-c .up{color:var(--good)}#rd-c .down{color:var(--accent)}
+
+/* vitals strip — full-bleed row, vertical hairlines, big numerals */
+#rd-c .vitals{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line)}
+#rd-c .vt{padding:24px 28px}
+#rd-c .vt+.vt{border-left:1px solid var(--line)}
+#rd-c .vt .k{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-c .vt .k svg{width:14px;height:14px;color:var(--accent);opacity:.8}
+#rd-c .vt .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:32px;letter-spacing:-.04em;margin-top:14px;font-variant-numeric:tabular-nums;line-height:1}
+#rd-c .vt .v small{font-size:13px;color:var(--ink-3);font-weight:600}
+#rd-c .vt .s{margin-top:8px;font-size:11.5px;color:var(--ink-3);font-weight:500}
+#rd-c .mini{margin-top:12px;height:6px;border-radius:999px;background:#E9EEF4;overflow:hidden}
+#rd-c .mini i{display:block;height:100%;width:84%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+/* HRV + sleep — two columns split by a single vertical hairline */
+#rd-c .split{display:grid;grid-template-columns:1.3fr 1fr;border-bottom:1px solid var(--line)}
+#rd-c .col{padding:28px 40px}
+#rd-c .col+.col{border-left:1px solid var(--line)}
+#rd-c .col .ch{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+#rd-c .col .ch h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.02em}
+#rd-c .col .ch .tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);font-weight:600}
+#rd-c .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.1}
+#rd-c .big small{font-size:14px;color:var(--ink-3);font-weight:600}
+#rd-c .chart{height:128px;margin-top:12px}
+#rd-c .chart svg{width:100%;height:100%;display:block;overflow:visible}
+#rd-c .chart-foot{display:flex;justify-content:space-between;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;font-weight:600}
+#rd-c .ribbon{display:flex;gap:4px;height:14px;margin-top:16px;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(30,50,80,.05)}
+#rd-c .ribbon i{height:100%;border-radius:5px}
+#rd-c .sd{background:linear-gradient(180deg,#1D4ED8,#1E40AF)}#rd-c .sr{background:linear-gradient(180deg,var(--accent),var(--accent-deep))}#rd-c .sl{background:linear-gradient(180deg,#93C5FD,#60A5FA)}#rd-c .sa{background:#D3DCE7}
+#rd-c .leg{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:18px}
+#rd-c .lg{display:flex;align-items:center;gap:10px}#rd-c .lg i{width:11px;height:11px;border-radius:4px;flex:none}
+#rd-c .lg .lt{font-size:12px;font-weight:600;color:var(--ink-2)}#rd-c .lg .lv{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* run strip */
+#rd-c .run{padding:26px 40px;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+#rd-c .run .bd{width:50px;height:50px;border-radius:15px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,#fc5200,#e24400);box-shadow:0 10px 22px -10px rgba(252,82,0,.7)}
+#rd-c .run .bd svg{width:26px;height:26px}
+#rd-c .run .id .rk{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-c .run .id .rt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.035em;margin-top:4px}
+#rd-c .run .stats{margin-left:auto;display:flex}
+#rd-c .run .rs{padding:0 26px}
+#rd-c .run .rs+.rs{border-left:1px solid var(--line)}
+#rd-c .run .rs span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#rd-c .run .rs b{display:block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;letter-spacing:-.04em;margin-top:5px;font-variant-numeric:tabular-nums}
+#rd-c .run .rs b small{font-size:12px;color:var(--ink-3);font-weight:600}
+@media (max-width:1080px){#rd-c{grid-template-columns:1fr}#rd-c .rail{display:none}#rd-c .strip{grid-template-columns:1fr;justify-items:start}#rd-c .split{grid-template-columns:1fr}#rd-c .col+.col{border-left:0;border-top:1px solid var(--line)}#rd-c .vitals{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="switcher">
+  <span class="b"><i></i>Vitals · Soft Daylight, refined</span>
+  <div class="seg" id="seg">
+    <button data-screen="a" class="active">Calm · Google Health</button>
+    <button data-screen="b">Neural · Gemini</button>
+    <button data-screen="c">Instrument · WHOOP</button>
+  </div>
+  <span class="hint">less cards · more hairlines, whitespace &amp; type · try Sync ↻</span>
+</div>
+<div class="stage">
+
+<!-- ============================ SCREEN A ============================ -->
+<section class="screen active" id="rd-a">
+  <div class="wrap">
+    <header class="top an d1">
+      <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg></div><span class="word">Vitals</span></div>
+      <nav class="nav">
+        <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>Dashboard</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>Sleep</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>Activity</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Habits</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 0 9 3.6 9 8s-4 8-9 8a10 10 0 0 1-3.3-.5L3 21l1.4-4.2A7.3 7.3 0 0 1 3 11c0-4.4 4-8 9-8Z"/></svg>Ask Claude</a>
+      </nav>
+      <div class="tr">
+        <span class="chip"><span class="live"><i></i></span>Fitbit Air</span>
+        <button class="ib sync" data-sync aria-label="Sync"><svg class="sync-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg></button>
+        <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg></button>
+      </div>
+    </header>
+
+    <div class="greet an d2">
+      <div><span class="eye"><b></b>Morning briefing</span><h1 class="h1">Good morning, <span class="faint">Alex.</span></h1></div>
+      <div class="date">Saturday, June 20<small>Day 171 / 2026</small></div>
+    </div>
+
+    <section class="hero an d3">
+      <div class="ring">
+        <svg viewBox="0 0 208 208"><defs><linearGradient id="a-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset=".55" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient></defs><circle cx="104" cy="104" r="90" fill="none" stroke="#E6ECF3" stroke-width="14"/><circle class="ring-prog" cx="104" cy="104" r="90" fill="none" stroke-width="14" stroke-dasharray="565.5" stroke-dashoffset="101.8"/></svg>
+        <div class="ctr"><div class="sc">82<em>/100</em></div><div class="lb">Readiness</div></div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-st">Primed for <span class="hl">training.</span></div>
+        <p class="hero-sub">Recovery markers are trending up across the board. A solid window for a quality session today.</p>
+        <div class="trio">
+          <div class="t"><div class="k">HRV</div><div class="v">64<small> ms</small></div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+6%</div></div>
+          <div class="t"><div class="k">Resting HR</div><div class="v">52<small> bpm</small></div><div class="delta down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>−3</div></div>
+          <div class="t"><div class="k">Sleep</div><div class="v">7h 24m</div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+18m</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec an d4">
+      <div class="sec-h"><h2>Today's vitals</h2><span class="more">Fitbit Air · 06:42</span></div>
+      <div class="vitals">
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>SpO₂</div><div class="v">98<small>%</small></div><div class="s">Blood oxygen · stable</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-4 3 8 2-6 2 4 4-2"/></svg>Respiratory</div><div class="v">14.2<small> br/min</small></div><div class="s">Overnight average</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z"/></svg>Skin temp</div><div class="v">−0.2<small> °</small></div><div class="s">vs baseline</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-1.5 2-2 4-1.5 6.5.5 2 2 3 2 5.5a3 3 0 0 1-6 .3"/></svg>Steps</div><div class="v">8,431</div><div class="mini"><i></i></div><div class="s">84% of 10,000</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1.5 3 3.5 3 6a7.5 7.5 0 0 1-15 0c0-3 1.5-5 3.5-7 0 2 1 3 2 3 .8 0 1.5-.7 1.5-1.5 0-2.5-2.5-3.5-3-7Z"/></svg>Energy</div><div class="v">+240</div><div class="s">2,180 burned · 1,940 eaten</div></div>
+      </div>
+    </section>
+
+    <div class="twoup an d5">
+      <div class="well">
+        <div class="wh"><h3>14-day HRV</h3><span class="tag">ms · baseline 60</span></div>
+        <div class="big">64<small> ms avg</small></div>
+        <div class="chart"><svg viewBox="0 0 360 140" preserveAspectRatio="none"><defs><linearGradient id="a-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".20"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="87" x2="360" y2="87" stroke="#B9C5D6" stroke-width="1.1" stroke-dasharray="4 5"/><path d="M0,108 L27.7,92 L55.4,112 L83.1,84 L110.8,100 L138.5,76 L166.2,88 L193.8,64 L221.5,96 L249.2,72 L276.9,52 L304.6,80 L332.3,68 L360,84 L360,140 L0,140 Z" fill="url(#a-area)"/><path d="M0,108 L27.7,92 L55.4,112 L83.1,84 L110.8,100 L138.5,76 L166.2,88 L193.8,64 L221.5,96 L249.2,72 L276.9,52 L304.6,80 L332.3,68 L360,84" fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="84" r="4" fill="#fff" stroke="#2563EB" stroke-width="2.6"/></svg></div>
+        <div class="chart-foot"><span>Jun 7</span><span>Jun 13</span><span>Jun 20</span></div>
+      </div>
+      <div class="well">
+        <div class="wh"><h3>Sleep stages</h3><span class="tag">last night</span></div>
+        <div class="big">7h 24m<small style="color:var(--good)"> +18m</small></div>
+        <div class="ribbon"><i class="sd" style="width:20.7%"></i><i class="sr" style="width:24.3%"></i><i class="sl" style="width:49.8%"></i><i class="sa" style="width:5.2%"></i></div>
+        <div class="leg">
+          <div class="lg"><i class="sd"></i><span class="lt">Deep</span><span class="lv">1h 32m</span></div>
+          <div class="lg"><i class="sr"></i><span class="lt">REM</span><span class="lv">1h 48m</span></div>
+          <div class="lg"><i class="sl"></i><span class="lt">Light</span><span class="lv">3h 41m</span></div>
+          <div class="lg"><i class="sa"></i><span class="lt">Awake</span><span class="lv">23m</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="run an d6">
+      <div class="bd"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg></div>
+      <div class="id"><div class="rk">Today · Strava · Apple Watch</div><div class="rt">Morning Run</div></div>
+      <div class="stats">
+        <div class="rs"><span>Distance</span><b>5.02<small> km</small></b></div>
+        <div class="rs"><span>Time</span><b>37:13</b></div>
+        <div class="rs"><span>Pace</span><b>7:25<small> /km</small></b></div>
+        <div class="rs"><span>Calories</span><b>400</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SCREEN B ============================ -->
+<section class="screen" id="rd-b">
+  <div class="aurora"><i></i><i></i><i></i></div>
+  <svg class="threads" viewBox="0 0 1440 900" preserveAspectRatio="none"><defs><linearGradient id="b-thread" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".5"/><stop offset="1" stop-color="#22D3EE" stop-opacity=".2"/></linearGradient></defs><path d="M-50,160 C300,80 520,300 820,200 1120,100 1300,260 1500,180"/><path d="M-50,420 C260,520 560,360 880,460 1180,560 1320,400 1500,500"/><path d="M-50,680 C320,620 520,780 860,700 1160,630 1340,760 1500,690"/></svg>
+  <div class="wrap">
+    <header class="top an d1">
+      <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg></div><span class="word">Vitals</span></div>
+      <nav class="nav">
+        <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>Dashboard</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>Sleep</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>Activity</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Habits</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 0 9 3.6 9 8s-4 8-9 8a10 10 0 0 1-3.3-.5L3 21l1.4-4.2A7.3 7.3 0 0 1 3 11c0-4.4 4-8 9-8Z"/></svg>Ask Claude</a>
+      </nav>
+      <div class="tr">
+        <span class="chip"><span class="live"><i></i></span>Fitbit Air</span>
+        <button class="ib sync" data-sync aria-label="Sync"><svg class="sync-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg></button>
+        <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg></button>
+      </div>
+    </header>
+
+    <div class="greet an d2">
+      <div><span class="eye"><b></b>Morning briefing</span><h1 class="h1">Good morning, <span class="faint">Alex.</span></h1></div>
+      <div class="date">Saturday, June 20<small>Day 171 / 2026</small></div>
+    </div>
+
+    <section class="hero an d3">
+      <div class="ring">
+        <svg viewBox="0 0 208 208"><defs><linearGradient id="b-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset=".5" stop-color="#2563EB"/><stop offset="1" stop-color="#7C3AED" stop-opacity=".9"/></linearGradient></defs><circle cx="104" cy="104" r="92" fill="none" stroke="rgba(37,99,235,.12)" stroke-width="9"/><circle class="ring-prog" cx="104" cy="104" r="92" fill="none" stroke-width="9" stroke-dasharray="578" stroke-dashoffset="104"/></svg>
+        <div class="ctr"><div class="sc">82<em>/100</em></div><div class="lb">Readiness</div></div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-st">Primed for <span class="hl">training.</span></div>
+        <p class="hero-sub">Recovery markers are trending up across the board. A solid window for a quality session today.</p>
+        <div class="trio">
+          <div class="node"><div class="k">HRV</div><div class="v">64<small> ms</small></div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+6%</div></div>
+          <div class="node"><div class="k">Resting HR</div><div class="v">52<small> bpm</small></div><div class="delta down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>−3</div></div>
+          <div class="node"><div class="k">Sleep</div><div class="v">7h 24m</div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+18m</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec an d4">
+      <div class="sec-h"><h2>Today's vitals</h2><span class="ln"></span></div>
+      <div class="vitals">
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>SpO₂</div><div class="v">98<small>%</small></div><div class="s">Blood oxygen · stable</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-4 3 8 2-6 2 4 4-2"/></svg>Respiratory</div><div class="v">14.2<small> br/min</small></div><div class="s">Overnight average</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z"/></svg>Skin temp</div><div class="v">−0.2<small> °</small></div><div class="s">vs baseline</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-1.5 2-2 4-1.5 6.5.5 2 2 3 2 5.5a3 3 0 0 1-6 .3"/></svg>Steps</div><div class="v">8,431</div><div class="mini"><i></i></div><div class="s">84% of 10,000</div></div>
+        <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1.5 3 3.5 3 6a7.5 7.5 0 0 1-15 0c0-3 1.5-5 3.5-7 0 2 1 3 2 3 .8 0 1.5-.7 1.5-1.5 0-2.5-2.5-3.5-3-7Z"/></svg>Energy</div><div class="v">+240</div><div class="s">2,180 burned · 1,940 eaten</div></div>
+      </div>
+    </section>
+
+    <div class="twoup an d5">
+      <div class="glass">
+        <div class="wh"><h3>14-day HRV</h3><span class="tag">ms · baseline 60</span></div>
+        <div class="big">64<small> ms avg</small></div>
+        <div class="chart"><svg viewBox="0 0 360 140" preserveAspectRatio="none"><defs><linearGradient id="b-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".28"/><stop offset="1" stop-color="#22D3EE" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="87" x2="360" y2="87" stroke="#A9B8CE" stroke-width="1.1" stroke-dasharray="4 5"/><path d="M0,108 L27.7,92 L55.4,112 L83.1,84 L110.8,100 L138.5,76 L166.2,88 L193.8,64 L221.5,96 L249.2,72 L276.9,52 L304.6,80 L332.3,68 L360,84 L360,140 L0,140 Z" fill="url(#b-area)"/><path d="M0,108 L27.7,92 L55.4,112 L83.1,84 L110.8,100 L138.5,76 L166.2,88 L193.8,64 L221.5,96 L249.2,72 L276.9,52 L304.6,80 L332.3,68 L360,84" fill="none" stroke="url(#b-grad)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="84" r="4.4" fill="#fff" stroke="#2563EB" stroke-width="2.6"/></svg></div>
+        <div class="chart-foot"><span>Jun 7</span><span>Jun 13</span><span>Jun 20</span></div>
+      </div>
+      <div class="glass">
+        <div class="wh"><h3>Sleep stages</h3><span class="tag">last night</span></div>
+        <div class="big">7h 24m<small style="color:var(--good)"> +18m</small></div>
+        <div class="ribbon"><i class="sd" style="width:20.7%"></i><i class="sr" style="width:24.3%"></i><i class="sl" style="width:49.8%"></i><i class="sa" style="width:5.2%"></i></div>
+        <div class="leg">
+          <div class="lg"><i class="sd"></i><span class="lt">Deep</span><span class="lv">1h 32m</span></div>
+          <div class="lg"><i class="sr"></i><span class="lt">REM</span><span class="lv">1h 48m</span></div>
+          <div class="lg"><i class="sl"></i><span class="lt">Light</span><span class="lv">3h 41m</span></div>
+          <div class="lg"><i class="sa"></i><span class="lt">Awake</span><span class="lv">23m</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="run an d6">
+      <div class="bd"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg></div>
+      <div class="id"><div class="rk">Today · Strava · Apple Watch</div><div class="rt">Morning Run</div></div>
+      <div class="stats">
+        <div class="rs"><span>Distance</span><b>5.02<small> km</small></b></div>
+        <div class="rs"><span>Time</span><b>37:13</b></div>
+        <div class="rs"><span>Pace</span><b>7:25<small> /km</small></b></div>
+        <div class="rs"><span>Calories</span><b>400</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SCREEN C ============================ -->
+<section class="screen" id="rd-c">
+  <aside class="rail">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21"/></svg></div><span class="word">Vitals</span></div>
+    <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>Dashboard</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>Sleep</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>Activity</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Habits</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c5 0 9 3.6 9 8s-4 8-9 8a10 10 0 0 1-3.3-.5L3 21l1.4-4.2A7.3 7.3 0 0 1 3 11c0-4.4 4-8 9-8Z"/></svg>Ask Claude</a>
+    <div class="rdev"><span class="live"><i></i></span>Fitbit Air · live</div>
+  </aside>
+  <div class="main">
+    <header class="head an d1">
+      <div><span class="eye"><b></b>Morning briefing</span><h1>Good morning, <span class="faint">Alex.</span></h1></div>
+      <div class="ha">
+        <div class="date">Saturday, June 20<small>Day 171 / 2026</small></div>
+        <button class="ib sync" data-sync aria-label="Sync"><svg class="sync-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 4v4h-4"/><path d="M3 20v-4h4"/></svg></button>
+        <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg></button>
+      </div>
+    </header>
+
+    <section class="strip an d2">
+      <div class="ring">
+        <svg viewBox="0 0 208 208"><defs><linearGradient id="c-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset=".5" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient></defs><circle cx="104" cy="104" r="92" fill="none" stroke="#DCE4EE" stroke-width="10"/><circle class="ring-prog" cx="104" cy="104" r="92" fill="none" stroke-width="10" stroke-dasharray="578" stroke-dashoffset="104"/></svg>
+        <div class="ctr"><div class="sc">82<em>/100</em></div><div class="lb">Readiness</div></div>
+      </div>
+      <div class="strip-meta">
+        <div class="strip-st">Primed for <span class="hl">training.</span></div>
+        <p class="strip-sub">Recovery markers are trending up across the board. A solid window for a quality session today.</p>
+        <div class="trio">
+          <div class="t"><div class="k">HRV</div><div class="v">64<small> ms</small></div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+6%</div></div>
+          <div class="t"><div class="k">Resting HR</div><div class="v">52<small> bpm</small></div><div class="delta down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>−3</div></div>
+          <div class="t"><div class="k">Sleep</div><div class="v">7h 24m</div><div class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg>+18m</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vitals an d3">
+      <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>SpO₂</div><div class="v">98<small>%</small></div><div class="s">Blood oxygen · stable</div></div>
+      <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-4 3 8 2-6 2 4 4-2"/></svg>Respiratory</div><div class="v">14.2<small> br/min</small></div><div class="s">Overnight average</div></div>
+      <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0Z"/></svg>Skin temp</div><div class="v">−0.2<small> °</small></div><div class="s">vs baseline</div></div>
+      <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-1.5 2-2 4-1.5 6.5.5 2 2 3 2 5.5a3 3 0 0 1-6 .3"/></svg>Steps</div><div class="v">8,431</div><div class="mini"><i></i></div><div class="s">84% of 10,000</div></div>
+      <div class="vt"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1.5 3 3.5 3 6a7.5 7.5 0 0 1-15 0c0-3 1.5-5 3.5-7 0 2 1 3 2 3 .8 0 1.5-.7 1.5-1.5 0-2.5-2.5-3.5-3-7Z"/></svg>Energy</div><div class="v">+240</div><div class="s">2,180 burned · 1,940 eaten</div></div>
+    </section>
+
+    <section class="split an d4">
+      <div class="col">
+        <div class="ch"><h3>14-day HRV</h3><span class="tag">ms · baseline 60</span></div>
+        <div class="big">64<small> ms avg</small></div>
+        <div class="chart"><svg viewBox="0 0 360 128" preserveAspectRatio="none"><defs><linearGradient id="c-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".18"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="80" x2="360" y2="80" stroke="#C2CEDD" stroke-width="1" stroke-dasharray="4 5"/><path d="M0,98 L27.7,84 L55.4,102 L83.1,77 L110.8,91 L138.5,69 L166.2,80 L193.8,58 L221.5,87 L249.2,66 L276.9,48 L304.6,73 L332.3,62 L360,77 L360,128 L0,128 Z" fill="url(#c-area)"/><path d="M0,98 L27.7,84 L55.4,102 L83.1,77 L110.8,91 L138.5,69 L166.2,80 L193.8,58 L221.5,87 L249.2,66 L276.9,48 L304.6,73 L332.3,62 L360,77" fill="none" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="77" r="3.8" fill="#fff" stroke="#2563EB" stroke-width="2.4"/></svg></div>
+        <div class="chart-foot"><span>Jun 7</span><span>Jun 13</span><span>Jun 20</span></div>
+      </div>
+      <div class="col">
+        <div class="ch"><h3>Sleep stages</h3><span class="tag">7h 24m total</span></div>
+        <div class="big">7h 24m<small style="color:var(--good)"> +18m</small></div>
+        <div class="ribbon"><i class="sd" style="width:20.7%"></i><i class="sr" style="width:24.3%"></i><i class="sl" style="width:49.8%"></i><i class="sa" style="width:5.2%"></i></div>
+        <div class="leg">
+          <div class="lg"><i class="sd"></i><span class="lt">Deep</span><span class="lv">1h 32m</span></div>
+          <div class="lg"><i class="sr"></i><span class="lt">REM</span><span class="lv">1h 48m</span></div>
+          <div class="lg"><i class="sl"></i><span class="lt">Light</span><span class="lv">3h 41m</span></div>
+          <div class="lg"><i class="sa"></i><span class="lt">Awake</span><span class="lv">23m</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="run an d5">
+      <div class="bd"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.6 2 4.2 14.1h3.7l2.7-5.2 2.6 5.2h3.6L10.6 2Zm3.4 12.1-1.8 3.5-1.8-3.5H7.1L12.2 24l5.1-9.9h-3.3Z"/></svg></div>
+      <div class="id"><div class="rk">Today · Strava · Apple Watch</div><div class="rt">Morning Run</div></div>
+      <div class="stats">
+        <div class="rs"><span>Distance</span><b>5.02<small> km</small></b></div>
+        <div class="rs"><span>Time</span><b>37:13</b></div>
+        <div class="rs"><span>Pace</span><b>7:25<small> /km</small></b></div>
+        <div class="rs"><span>Calories</span><b>400</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+(function(){
+  var seg=document.getElementById('seg');
+  var screens=document.querySelectorAll('.screen');
+  function show(id){
+    screens.forEach(function(s){s.classList.toggle('active', s.id==='rd-'+id);});
+    seg.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.dataset.screen===id);});
+    var st=document.querySelector('.stage'); if(st) st.scrollTop=0;
+  }
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(b)show(b.dataset.screen);});
+  document.addEventListener('click',function(e){
+    var s=e.target.closest('[data-sync]');
+    if(s&&!s.classList.contains('syncing')){s.classList.add('syncing');setTimeout(function(){s.classList.remove('syncing');},1800);}
+  });
+  if(/still/.test(location.search)) document.documentElement.classList.add('still');
+  var def=(location.hash||'').replace('#','');
+  show(['a','b','c'].indexOf(def)>=0?def:'a');
+})();
+</script>
+</body>
+</html>

@@ -11,7 +11,7 @@ import { NAV_ICONS } from '../shared/icons.js';
 export function BottomNav() {
   return (
     <nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-bg-surface/90 backdrop-blur-md"
+      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-bg-base/90 backdrop-blur-md"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Primary"
     >
@@ -26,7 +26,7 @@ export function BottomNav() {
                 className={({ isActive }) =>
                   clsx(
                     'flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 transition-colors',
-                    isActive ? 'text-signal' : 'text-ink-mute hover:text-ink',
+                    isActive ? 'text-accent' : 'text-ink-mute hover:text-ink',
                   )
                 }
               >

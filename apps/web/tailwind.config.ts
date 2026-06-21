@@ -1,15 +1,16 @@
 import type { Config } from 'tailwindcss';
 
 /*
- * Design system: "Vitals — calm consumer health". Token names map 1:1 to
- * tokens.css CSS vars so the page agents consume by name (values change per
- * theme, names stay stable):
+ * Design system: "Vitals — Instrument (Soft Daylight)". Token names map 1:1 to
+ * tokens.css CSS vars so components consume by name (values change per theme,
+ * names stay stable):
  *   bg.base / bg.surface / bg.surface2 / bg.inset
  *   ink / ink-dim / ink-mute
- *   signal / warn / alert / info  (+ *-soft via bg-signal-soft etc.)
- *   device.fitbit (series color, used sparingly)
+ *   signal / accent / warn / alert / info  (+ *-soft)
+ *   sleep.deep / sleep.rem / sleep.light / sleep.awake (+ *-soft) — data palette
+ *   device.fitbit / whoop / oura / apple / strava (series colors)
  *   hairline / hairline-strong (border colors)
- * Fonts: display/body/mono ALL map to Plus Jakarta Sans (mono kept as alias).
+ * Fonts: display/body = Geist, mono = Geist Mono.
  */
 const config: Config = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -32,6 +33,14 @@ const config: Config = {
           soft: 'var(--signal-soft)',
           emerald: 'var(--signal-emerald)',
         },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          2: 'var(--accent-2)',
+          deep: 'var(--accent-deep)',
+          soft: 'var(--accent-soft)',
+          wash: 'var(--accent-wash)',
+        },
+        good: 'var(--good)',
         brand: {
           from: 'var(--brand-from)',
           to: 'var(--brand-to)',
@@ -48,11 +57,22 @@ const config: Config = {
           DEFAULT: 'var(--info)',
           soft: 'var(--info-soft)',
         },
+        sleep: {
+          deep: 'var(--sleep-deep)',
+          rem: 'var(--sleep-rem)',
+          light: 'var(--sleep-light)',
+          awake: 'var(--sleep-awake)',
+          'deep-soft': 'var(--sleep-deep-soft)',
+          'rem-soft': 'var(--sleep-rem-soft)',
+          'light-soft': 'var(--sleep-light-soft)',
+          'awake-soft': 'var(--sleep-awake-soft)',
+        },
         device: {
           fitbit: 'var(--device-fitbit)',
           whoop: 'var(--device-whoop)',
           oura: 'var(--device-oura)',
           apple: 'var(--device-apple)',
+          strava: 'var(--device-strava)',
         },
         hairline: {
           DEFAULT: 'var(--hairline)',
@@ -64,15 +84,21 @@ const config: Config = {
         hairline: 'var(--hairline)',
         'hairline-strong': 'var(--hairline-strong)',
       },
+      divideColor: {
+        DEFAULT: 'var(--hairline)',
+        hairline: 'var(--hairline)',
+        'hairline-strong': 'var(--hairline-strong)',
+      },
       fontFamily: {
-        display: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        body: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        mono: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        display: ['Geist', 'system-ui', '-apple-system', 'sans-serif'],
+        body: ['Geist', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['Geist Mono', 'ui-monospace', 'SF Mono', 'monospace'],
       },
       borderRadius: {
-        sm: '10px',
-        md: '14px',
-        lg: '20px',
+        sm: '12px',
+        md: '16px',
+        lg: '22px',
+        xl: '26px',
         pill: '999px',
       },
       boxShadow: {
@@ -84,8 +110,8 @@ const config: Config = {
         '3xs': ['10px', '14px'],
       },
       letterSpacing: {
-        label: '0',
-        labelWide: '0',
+        label: '0.085em',
+        tightest: '-0.045em',
       },
       keyframes: {
         'arc-sweep': {
@@ -97,12 +123,16 @@ const config: Config = {
           to: { strokeDashoffset: 'var(--ring-target)' },
         },
         'fade-rise': {
-          from: { opacity: '0', transform: 'translateY(4px)' },
+          from: { opacity: '0', transform: 'translateY(12px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        spin: {
+          to: { transform: 'rotate(360deg)' },
         },
       },
       animation: {
-        'fade-rise': 'fade-rise 0.4s ease-out both',
+        'fade-rise': 'fade-rise 0.6s cubic-bezier(0.16,1,0.3,1) both',
+        'spin-slow': 'spin 1s linear infinite',
       },
     },
   },

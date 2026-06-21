@@ -11,6 +11,13 @@ const STORAGE_KEY = 'vcc-units';
 
 function readUnits(): Units {
   try {
+    // ?units=metric|imperial forces a system (screenshot/deep-link affordance).
+    const m = /[?&]units=(metric|imperial)/.exec(location.search);
+    if (m) return m[1] as Units;
+  } catch {
+    /* ignore */
+  }
+  try {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v === 'metric' || v === 'imperial') return v;
   } catch {

@@ -1,0 +1,27 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Maskable variant: full-bleed background (the OS applies the mask), content
+       kept within the ~80% safe zone. Same Instrument brand as icon.svg. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="512" cy="320" r="660" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="0.62" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#sheen)"/>
+
+  <!-- content scaled to ~84% and centered to survive maskable cropping -->
+  <g transform="translate(512 512) scale(0.84) translate(-512 -512)">
+    <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="#ffffff" stroke-opacity="0.20" stroke-width="46" stroke-linecap="round"/>
+    <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="#ffffff" stroke-width="46" stroke-linecap="round" stroke-dasharray="1057 1700"/>
+    <circle cx="744.6" cy="252.1" r="15" fill="#2563EB" stroke="#ffffff" stroke-width="10"/>
+    <path d="M 352 512 L 452 512 L 486 470 L 514 512 L 540 512 L 566 402 L 596 624 L 622 512 L 672 512"
+          fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

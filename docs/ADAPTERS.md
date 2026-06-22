@@ -83,6 +83,61 @@ handed to the normalizer. Metrics the bridge doesn't carry for that device
 
 ---
 
+## Activity-only sources (Strava)
+
+The two paths above feed the **daily consensus** — one row per day per device.
+**Strava is different**: it's an *activity source*, not a consensus device. It
+contributes **workouts only** (runs/cardio), never `daily_summary` rows, never
+HRV/RHR/sleep, and never participates in the weighted consensus. It is *not* in
+`DEVICE_SOURCES`; it lives in the broader `INTEGRATION_IDS`
+(`packages/shared/src/integrations.ts`) as `kind: 'activity'`.
+
+**OAuth + routes.** Strava authenticates via OAuth 2.0
+(`apps/api/src/services/strava.ts`, `StravaClient`). The browser routes mirror
+WHOOP's, in `apps/api/src/routes/auth.ts`:
+`/auth/strava/authorize` · `/callback` · `/status` (reusing the same in-memory
+state-store helpers).
+
+**Pull (workouts only).** In the sync orchestrator (`jobs/sync.ts`) the Strava
+pull returns `{ daily: [], sleepSessions: [], workouts }` — `mapActivity()`
+turns each Strava activity into a `Workout` tagged `source: 'strava'`, spread into
+the `writeSessions(...)` workouts array alongside the wearable workouts.
+
+**Detail backfill.** After writing the workouts, `backfillStravaDetail()` fetches
+**rich per-run detail** for any Strava workout in range that lacks it — splits,
+laps, segment efforts, and run/walk **intervals** reconstructed from the velocity
+stream by `detectIntervals()` (`services/strava.ts`). `mapDetail()` assembles the
+`WorkoutDetail`, which is persisted as JSON in `workouts.detail_json` (migration
+`007`) and served by `GET /api/workouts/:id`. Each activity is an independent
+fetch — one bad id is logged and skipped, never aborting the sync.
+
+**Gating.** Both the pull and the backfill are gated identically: they no-op
+unless `STRAVA_CLIENT_ID` is set, Strava is **enabled** in `integration_settings`
+(`queries.settings.getIntegrationSetting(db, 'strava').enabled`), and a token file
+exists. Strava is excluded from `GET /api/devices/status`.
+
+---
+
+## Enable + cadence gate: `integration_settings`
+
+Whether an adapter runs at all is gated by the per-source
+`integration_settings` row (migration `006`), independent of whether its
+credentials are present:
+
+- **`enabled`** — a disabled integration is treated as "not set up": its sync is
+  skipped and it never reads as "disconnected" (a dormant WHOOP/Oura shouldn't
+  look offline when you're just not wearing it). The Strava lane checks this
+  directly; the wearable lanes surface it through `computeIntegrationStatuses()`.
+- **`auto_sync` + `sync_interval_minutes`** — drive the scheduler's cadence
+  (`jobs/scheduler.ts` runs at the minimum interval across `enabled && auto_sync`
+  integrations). The app-level `app_settings.autoSyncEnabled` is the master switch
+  above all of them.
+
+When you add a new adapter, seed its `integration_settings` defaults in the same
+migration so it has an enable/cadence row from first boot.
+
+---
+
 ## The data model: per-device columns + consensus
 
 All four devices share one wide row in `daily_summary` (keyed by `date`). Each
@@ -109,9 +164,12 @@ columns. Source of truth is `packages/db/src/migrations/`.
     `stand_hours`.
 
 `sleep_sessions` and `workouts` are separate tables, each with a `source` column
-(`CHECK (source IN ('whoop','oura','apple','fitbit'))`) and a foreign key to
-`daily_summary(date)`. Sleep/workout rows require a parent daily row, so the
-writers call an `ensureDailyStub()` insert first.
+and a foreign key to `daily_summary(date)`. The two columns differ:
+`sleep_sessions.source` is `CHECK (source IN ('whoop','oura','apple','fitbit'))`
+(the four consensus devices), while `workouts.source` was widened in migration
+`006` to `CHECK (source IN ('whoop','oura','apple','fitbit','strava'))` — runs from
+the Strava **activity source** land here too. Sleep/workout rows require a parent
+daily row, so the writers call an `ensureDailyStub()` insert first.
 
 ### Consensus + confidence
 
@@ -181,9 +239,10 @@ reusing the in-memory state-store helpers) and add the corresponding env vars to
 
 ### Step 3 — add the columns
 
-Create the next migration, e.g.
-`packages/db/src/migrations/006_add_garmin.sql`. Migrations are additive and run
-in filename order on every boot (tracked in `_migrations`). Two parts:
+Create the next migration. Migrations `001`–`008` are taken, so the next free
+number is **`009`**, e.g. `packages/db/src/migrations/009_add_garmin.sql`.
+Migrations are additive and run in filename order on every boot (tracked in
+`_migrations`). Two parts:
 
 1. `ALTER TABLE daily_summary ADD COLUMN has_garmin INTEGER NOT NULL DEFAULT 0;`
    plus one `ADD COLUMN garmin_<metric> ...` per metric.
@@ -194,6 +253,10 @@ in filename order on every boot (tracked in `_migrations`). Two parts:
 
 Update the `daily_summary` upsert query in
 `packages/db/src/queries/dailySummary.ts` to include the new columns.
+
+3. Seed an `integration_settings` row for the new id (see the §"Enable + cadence
+   gate") so it has an enable/cadence gate from first boot, and add the id to the
+   `integration_settings.id` `CHECK` list and to `INTEGRATION_IDS`.
 
 ### Step 4 — teach the normalizer
 

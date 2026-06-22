@@ -15,6 +15,11 @@ that never touches a vendor cloud.
 
 <br>
 
+**New here?** Go from zero to a fully populated demo dashboard in 5 minutes — no
+accounts, no OAuth. See **[docs/QUICKSTART.md](docs/QUICKSTART.md)**.
+
+<br>
+
 <img src="site/assets/screenshot-desktop.png" alt="Vitals dashboard (light theme)" width="860">
 
 <br><br>
@@ -44,10 +49,17 @@ box you control. No subscription, no data broker, no lock-in.
   reconciled into a weighted **consensus** with a per-metric **confidence** level.
 - **Daily readiness** — one friendly read on how recovered you are today, from
   HRV, resting HR, sleep, and skin-temperature trend versus your baseline.
-- **Daily AI brief + Ask** — a short, specific morning brief and a free-form
-  "Ask" box, run through a configurable provider chain. Use a cloud model or go
-  **100% local** with Ollama / any OpenAI-compatible server — no API key, nothing
-  leaves the machine.
+- **Runs & workouts via Strava** — connect Strava (live OAuth) to sync Apple
+  Watch / phone runs into your timeline. Click any run for a detail modal with
+  splits, laps, segments, and reconstructed run/walk **intervals** (rebuilt from
+  the activity's velocity stream).
+- **Daily AI brief** — a short, specific morning brief that renders right on the
+  dashboard, analyzing your recovery, trends, and recent runs (down to per-mile
+  interval paces). Toggle it on/off, auto-generate it, or hit **Regenerate** any
+  time. Plus a free-form **Ask** box for one-off questions.
+- **Bring your own AI** — the brief and Ask run through a configurable provider
+  chain. Use a cloud model or go **100% local** with Ollama / any
+  OpenAI-compatible server — no API key, nothing leaves the machine.
 - **Calm PWA dashboard** — a React + Vite progressive web app with light and
   dark themes, installable on phone and desktop.
 - **Query from Claude** — a built-in **MCP server** lets you ask your own health
@@ -57,45 +69,73 @@ box you control. No subscription, no data broker, no lock-in.
 
 ## Supported sources
 
-| Source | How it connects |
-|---|---|
-| **Fitbit / Pixel / Google Health** | Google Health API "bridge" (OAuth) — also aggregates other devices that sync to it |
-| **Apple Health** | [Health Auto Export](https://www.healthexportapp.com/) iOS app → REST ingest (`POST /api/ingest/apple`) |
-| **Oura** | Oura personal access token |
-| **WHOOP** | WHOOP OAuth |
-| **Garmin & others** | Community-extensible via the same adapter pattern |
+Vitals has two kinds of source. **Consensus devices** provide daily vitals +
+sleep that get reconciled into one weighted read. **Activity sources** provide
+workouts only — they feed the timeline but don't vote in the consensus.
 
-A device is sourced **either** from the Google Health bridge **or** from its
-native adapter — never both, so nothing is double-counted. Which devices the
-bridge owns is set by `GOOGLE_HEALTH_SOURCES`. See **[docs/ADAPTERS.md](docs/ADAPTERS.md)**.
+| Source | Kind | How it connects |
+|---|---|---|
+| **Fitbit / Pixel / Google Health** | Consensus (vitals + sleep) | Google Health API "bridge" (OAuth) — also aggregates other devices that sync to it |
+| **Apple Health** | Consensus (vitals + sleep) | [Health Auto Export](https://www.healthexportapp.com/) iOS app → REST ingest (`POST /api/ingest/apple`) |
+| **Oura** | Consensus (vitals + sleep) | Oura personal access token (no OAuth) |
+| **WHOOP** | Consensus (vitals + sleep) | WHOOP OAuth |
+| **Strava** | Activity (workouts only) | Strava OAuth — syncs runs into the `workouts` table with splits/laps/segments and reconstructed run/walk intervals |
+| **Garmin & others** | Consensus | Community-extensible via the same adapter pattern |
+
+For consensus devices, a device is sourced **either** from the Google Health
+bridge **or** from its native adapter — never both, so nothing is
+double-counted. Which devices the bridge owns is set by `GOOGLE_HEALTH_SOURCES`.
+See **[docs/ADAPTERS.md](docs/ADAPTERS.md)**.
 
 ## Quick start
 
+The fastest path is **seed-first**: load 90 days of realistic demo data and see
+a fully populated dashboard with no accounts and no OAuth.
+
 ```bash
-# 1. Clone
+# 1. Clone + configure
 git clone https://github.com/8tp/vitals-command-center.git
 cd vitals-command-center
-
-# 2. Configure
 cp .env.example .env
-# edit .env — set DB_PATH, pick your sources, choose your AI provider chain
 
-# 3. Connect at least one source
-#    - Fitbit/Google: set GOOGLE_CLIENT_ID/SECRET, then visit /api/auth/google/authorize
-#    - WHOOP:         set WHOOP_CLIENT_ID/SECRET, then visit /api/auth/whoop/authorize
-#    - Oura:          set OURA_PAT
-#    - Apple Health:  set APPLE_INGEST_SECRET and point Health Auto Export at /api/ingest/apple
-
-# 4. Install + run (API + dashboard + MCP server together)
+# 2. Install (needs Node ≥ 20 and a C toolchain — see prereqs below)
 npm install
+
+# 3. Seed 90 days of demo data — zero accounts needed
+npm run db:seed
+
+# 4. Run (API + dashboard + MCP server together)
 npm run dev
+# → open http://localhost:5173 for a live, populated demo dashboard
 ```
 
-By default the API serves on `http://localhost:3001`, the dashboard (Vite) on
-`http://localhost:5173`, and the MCP HTTP server on `:8787`. Trigger a first data
-pull with `npm run sync:manual` (or `POST /api/sync`).
+**Prereqs:** Node.js ≥ 20 **and** a C toolchain (`better-sqlite3` compiles a
+native module). On macOS: `xcode-select --install`. On Debian/Ubuntu:
+`sudo apt install build-essential python3`. A missing toolchain is the most
+common silent install failure.
 
-> Requires Node.js ≥ 20.
+**Connect a real source** (when you're ready):
+
+```bash
+#  - Oura:          set OURA_PAT  (Personal Access Token, no OAuth — the easiest first source)
+#  - Strava:        set STRAVA_CLIENT_ID/SECRET, then visit /api/auth/strava/authorize  (runs + workouts)
+#  - Fitbit/Google: set GOOGLE_CLIENT_ID/SECRET, then visit /api/auth/google/authorize
+#  - WHOOP:         set WHOOP_CLIENT_ID/SECRET, then visit /api/auth/whoop/authorize
+#  - Apple Health:  set APPLE_INGEST_SECRET and point Health Auto Export at /api/ingest/apple
+```
+
+Then trigger a pull with `npm run sync:manual` (or `POST /api/sync`).
+
+By default the API serves on `http://localhost:3001`, the dashboard (Vite) on
+`http://localhost:5173`, and the MCP HTTP server on `:8787`.
+
+**Configuration highlights:** `GOOGLE_HEALTH_SOURCES` (bridge vs. native
+routing), `AI_PROVIDERS` (provider chain), `DB_PATH`, `VITE_USER_NAME` (the
+dashboard greeting), and `VITE_ALLOWED_HOSTS` (extra hostnames the dev server
+accepts behind a reverse proxy).
+
+> Full walkthrough — demo data, your first real source, and turning on the AI
+> brief — in **[docs/QUICKSTART.md](docs/QUICKSTART.md)**.
 
 ## Architecture at a glance
 
@@ -121,6 +161,7 @@ Full design in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
 | Doc | What's in it |
 |---|---|
+| [docs/QUICKSTART.md](docs/QUICKSTART.md) | 5-minute path: demo data → first real source → AI brief |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, data flow, consensus model, deployment topology |
 | [docs/API.md](docs/API.md) | REST API reference (`/api/*` routes + response envelope) |
 | [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Running Vitals on an always-on box, launchd jobs, backups, Tailscale |

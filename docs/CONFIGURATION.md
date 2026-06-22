@@ -39,6 +39,18 @@ Conventions in the tables below:
 | `API_HOST` | `0.0.0.0` | No | No | **Code-only** (not in `.env.example`). Interface the API binds to. For a Tailscale-fronted box, set `API_HOST=127.0.0.1` so only Tailscale Serve can reach it. See [SELF_HOSTING](./SELF_HOSTING.md#remote-access-with-tailscale). |
 | `DISABLE_SCHEDULERS` | unset | No | No | **Code-only.** Set to `1` to stop the in-process cron schedulers (sync/brief/weekly) from starting — useful if you run those jobs from launchd/systemd instead. |
 
+## Web / dashboard
+
+`VITE_`-prefixed variables are read by the web build. Vite's `envDir` resolves
+from the **repo root**, so these live in the **single root `.env`** alongside
+every other variable — there is no separate env file under `apps/web`. Only
+`VITE_*` keys are exposed to the browser; all other root values stay private.
+
+| Variable | Default | Required | Secret | Description |
+|---|---|---|---|---|
+| `VITE_USER_NAME` | — (unnamed) | No | No | Display name for the dashboard / Ask greeting ("Good morning, `<name>`."). Leave blank for an unnamed greeting. |
+| `VITE_ALLOWED_HOSTS` | — | No | No | Comma-separated extra hostnames the Vite **dev server** accepts beyond Tailscale `*.ts.net` (which is always allowed). Set this to a reverse-proxy hostname you front the dashboard with — e.g. a Caddy/nginx domain like `.lab.example.dev`. Dev-server only; the production build is served by the API and ignores this. |
+
 ## Storage paths
 
 Paths may be absolute or repo-relative. Repo-relative paths resolve against the
@@ -65,7 +77,7 @@ populated by both paths. See [ADAPTERS](./ADAPTERS.md) for the full model.
 | `GOOGLE_HEALTH_SOURCES` | `fitbit,apple,whoop,oura` | No | No | Comma list of devices the bridge owns. Valid values: `fitbit`, `apple`, `whoop`, `oura`. Anything omitted falls to its native adapter. Unset = all four via the bridge. |
 | `GOOGLE_CLIENT_ID` | — | For bridge/Fitbit | No | Google Cloud OAuth Web client ID. Enable the **Google Health API** and create an OAuth Web application client. |
 | `GOOGLE_CLIENT_SECRET` | — | For bridge/Fitbit | Yes | OAuth client secret for the same client. |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:3001/api/auth/google/callback` | No | No | Must match the redirect URI registered in Google Cloud Console **exactly**. Google only allows `localhost` for unverified apps — for headless boxes use the SSH-tunnel trick in [SELF_HOSTING](./SELF_HOSTING.md#connect-google-health-the-bridge). |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:3001/api/auth/google/callback` | No | No | Must match the redirect URI registered in Google Cloud Console **exactly**. Google only allows `localhost` for unverified apps — for headless boxes use the SSH-tunnel trick in [SELF_HOSTING](./SELF_HOSTING.md#connect-google-health-the-bridge--advancedoptional). |
 | `GOOGLE_POST_AUTH_REDIRECT` | `http://localhost:5173/?connected=fitbit` | No | No | Where the user lands after a successful OAuth round-trip. |
 | `GOOGLE_TOKEN_FILE` | `./data/.google-tokens.json` | No | Yes | Where the access/refresh tokens are persisted. Auto-refreshes; re-auth needed only if Google revokes the refresh token. |
 
@@ -94,6 +106,24 @@ Oura uses a Personal Access Token, so there's no OAuth round-trip.
 |---|---|---|---|---|
 | `OURA_PAT` | — | For native Oura | Yes | Personal Access Token from <https://cloud.ouraring.com> → Personal Access Tokens. PATs don't expire; re-issue only on rotation. |
 
+## Strava (activity source, native OAuth)
+
+Strava is an **activity source** — it pulls workouts (runs, rides, etc.) into the
+`workouts` table; it is **not** a consensus wearable. Unlike WHOOP/Oura/Apple, it
+is **not** governed by `GOOGLE_HEALTH_SOURCES`. The sync runs only when Strava
+credentials are present **and** the integration is enabled in
+`integration_settings` (the per-source toggle in the dashboard Settings, on by
+default). Create an API Application at <https://www.strava.com/settings/api> and
+set its **Authorization Callback Domain** to `localhost`.
+
+| Variable | Default | Required | Secret | Description |
+|---|---|---|---|---|
+| `STRAVA_CLIENT_ID` | — | For Strava | No | Strava API Application client ID. The `/auth/strava/*` routes are inert until this is set. |
+| `STRAVA_CLIENT_SECRET` | — | For Strava | Yes | Strava API Application client secret. |
+| `STRAVA_REDIRECT_URI` | `http://localhost:3001/api/auth/strava/callback` | No | No | OAuth callback. The callback **domain** must be `localhost` (set in the Strava app settings). |
+| `STRAVA_POST_AUTH_REDIRECT` | `http://localhost:5173/?connected=strava` | No | No | Where the user lands after a successful OAuth round-trip. |
+| `STRAVA_TOKEN_FILE` | `./data/.strava-tokens.json` | No | Yes | Token storage file; the access token refreshes automatically. |
+
 ## Apple Health REST ingest
 
 Used as the Apple source whenever `apple` is **not** in `GOOGLE_HEALTH_SOURCES`.
@@ -107,12 +137,14 @@ The iOS "Health Auto Export" app POSTs JSON to `POST /api/ingest/apple`.
 
 The on-box AI runner (used by the daily brief and `/ask`) tries providers in
 order and falls back on any failure (CLI not installed/logged-in, HTTP refused,
-empty output).
+empty output). **No Anthropic API key is required** for the brief or Ask in any
+configuration — the default `claude` provider drives the logged-in `claude` CLI.
 
 | Variable | Default | Required | Secret | Description |
 |---|---|---|---|---|
 | `AI_PROVIDERS` | `claude,codex` | No | No | Comma-ordered provider chain. Values: `claude` (`claude -p` CLI), `codex` (`codex exec` CLI), `ollama` (local Ollama server), `openai-compat` (LocalAI / LM Studio / vLLM). For a no-cloud setup use e.g. `AI_PROVIDERS=ollama`; for a hybrid, `AI_PROVIDERS=ollama,claude`. |
 | `AI_TIMEOUT_MS` | `240000` | No | No | Shared timeout (ms) for every provider, CLI or HTTP. Commented out in `.env.example`. |
+| `AI_CLI_PATH` | `$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/opt/node@22/bin` | No | No | **Code-only.** `PATH` prefix the CLI providers are launched with, so launchd/systemd jobs can find `claude`/`codex` outside an interactive shell. Override if your CLIs live elsewhere. |
 | `OLLAMA_URL` | `http://127.0.0.1:11434` | For `ollama` | No | Base URL of your Ollama server (`ollama serve`). |
 | `OLLAMA_MODEL` | `llama3.1` | For `ollama` | No | Model to use; `ollama pull <model>` first. |
 | `OPENAI_COMPAT_URL` | — | For `openai-compat` | No | Base URL of an OpenAI-compatible server. `openai-compat` is only attempted when this is set. POSTs to `${OPENAI_COMPAT_URL}/v1/chat/completions`. |
@@ -120,11 +152,20 @@ empty output).
 | `OPENAI_COMPAT_KEY` | — | No | Yes | Optional bearer key. Most local servers need none — leave blank to omit the `Authorization` header entirely. |
 | `ANTHROPIC_API_KEY` | — | No | Yes | Anthropic API key from <https://console.anthropic.com>. Only needed if a code path uses the Anthropic SDK directly. The `claude` provider above uses the `claude` **CLI** (your Claude subscription), not this key. |
 | `ANTHROPIC_MODEL` | `claude-opus-4-6` | No | No | Model id used when the Anthropic SDK path is invoked. |
-| `BRIEF_CLI` | unset | No | No | **Code-only.** Force a specific CLI (`claude` or `codex`) for brief generation, bypassing the chain. |
+| `BRIEF_CLI` | unset | No | No | **Code-only.** Force a specific CLI (`claude` or `codex`) for **brief** generation, bypassing the chain order. |
+| `ASK_CLI` | unset | No | No | **Code-only.** Same as `BRIEF_CLI` but for the `/ask` endpoint — force `claude` or `codex` for Ask answers. |
+| `BRIEF_MODEL` | unset | No | No | **Code-only.** Override the model the CLI provider uses for **brief** generation (passed through to the chosen CLI). Unset = the CLI's own default. |
 
 > **Local-only privacy note:** `ollama` and `openai-compat` keep *all* inference
 > on-box — nothing leaves the machine. The CLI providers (`claude`, `codex`) run
 > orchestration locally but call a cloud model.
+
+> **AI on/off lives in the database, not `.env`.** The dashboard toggles
+> `aiEnabled` (master gate for the Ask tab + AI summary + auto-generation) and
+> `aiAutoSummary` (auto-generate the daily brief) are stored in the `app_settings`
+> table (migration 008) and changed from the dashboard **Settings**, not via
+> environment variables. The variables above only configure *which* provider and
+> model run when AI is enabled.
 
 ## MCP server (remote, for claude.ai)
 

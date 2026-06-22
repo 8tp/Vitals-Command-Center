@@ -23,20 +23,26 @@ The repo is a TypeScript monorepo:
 
 ## 1. Prerequisites
 
-- **Node.js 20+** (22 works too). The repo's `engines` requires `>=20`.
-- **An always-on box** to host it — a Mac mini is the reference target; any
-  Linux box works as well.
+**Two hard requirements — install these first or `npm install` will fail:**
+
+- **Node.js >= 20** (22 works too). The repo's `engines` requires `>=20`.
+- **A C/C++ toolchain.** `better-sqlite3` is a native module that compiles at
+  install time:
+  - **macOS:** `xcode-select --install`
+  - **Debian/Ubuntu:** `sudo apt install build-essential python3`
+
+Then:
+
 - **git** and a terminal.
+- **An always-on box** to host it — a Mac mini is the reference target; any
+  Linux box works as well. The app and the systemd units are Linux-portable;
+  the shipped launchd plist + shell scripts are macOS examples (see §7).
 - *Optional:* **Tailscale**, for private remote access to the dashboard and to
   expose the MCP server to claude.ai.
 - *Optional:* **Ollama** (or another local LLM server), if you want AI briefs
-  with zero cloud calls.
+  with zero cloud calls (see §3 and §5).
 - *Optional:* **Python 3.12+** and the `sqlite3` CLI — only needed for the
   legacy Apple Health XML importer and for shell scripts.
-
-`better-sqlite3` is a native module, so a working C/C++ toolchain is needed at
-install time (Xcode Command Line Tools on macOS; `build-essential` + `python3`
-on Debian/Ubuntu).
 
 ## 2. Clone and install
 
@@ -59,19 +65,26 @@ Either way, create your `.env` (the setup script does this for you):
 cp .env.example .env
 ```
 
-Then apply the database schema (idempotent; also runs automatically on API
-boot):
+The schema applies itself: migrations **001–008 auto-run on API boot**, so the
+explicit migrate step is optional. Run it by hand only if you want the DB built
+before the first start (idempotent):
 
 ```bash
-npm run db:migrate
+npm run db:migrate   # optional
 ```
 
-Want something on screen before connecting real devices? Seed 90 days of demo
-data:
+### See it working first (recommended)
+
+Before wiring up any real account, seed 90 days of demo data and start the app —
+this is the fastest way to confirm your install is healthy and to see every
+dashboard surface populated:
 
 ```bash
-npm run db:seed
+npm run db:seed       # 90 days of synthetic data
+npm run dev           # then open http://localhost:5173
 ```
+
+Once the demo data looks right, connect a real source (§4).
 
 ## 3. Configure `.env`
 
@@ -83,47 +96,63 @@ reference — every variable, its default, and whether it's required/secret — 
 A few things worth setting deliberately:
 
 - `GOOGLE_HEALTH_SOURCES` decides which devices come from the Google Health
-  bridge vs. their native adapters (see [ADAPTERS](./ADAPTERS.md)). Default is
-  all four via the bridge. If you plan to push Apple data over REST, keep
-  `apple` *out* of this list.
+  bridge vs. their native adapters (see [ADAPTERS](./ADAPTERS.md)). The default
+  lists **all four** (`fitbit,apple,whoop,oura`), i.e. everything via the bridge.
+  **Critical:** a native adapter (Oura PAT / WHOOP OAuth / Apple REST) is
+  *silently ignored* for any source still in this list — the bridge owns it. To
+  use a native adapter you must **remove that source from
+  `GOOGLE_HEALTH_SOURCES`** (or set the list empty). This is the most common
+  "I set my Oura token but nothing syncs" trap.
 - `AI_PROVIDERS` is the ordered fallback chain for briefs and `/ask`
-  (`claude,codex` by default; use `ollama` for fully local).
+  (`claude,codex` by default). The default providers call cloud models through a
+  **logged-in CLI** (no API key) — set `AI_PROVIDERS=ollama` for a fully-local,
+  no-cloud setup (see §5).
+- `VITE_USER_NAME` personalizes the dashboard greeting; `VITE_ALLOWED_HOSTS`
+  lets the Vite dev server accept a reverse-proxy hostname (e.g. a Caddy
+  domain). Both live in the **single root `.env`** alongside everything else —
+  Vite's `envDir` resolves from the repo root.
 - On your production box, set `NODE_ENV=production`.
+
+> **Lowest-friction first real source:** an **Oura Personal Access Token** — no
+> OAuth round-trip, no cloud project. Just remove `oura` from
+> `GOOGLE_HEALTH_SOURCES`, set `OURA_PAT`, and sync (§4 → §6). The Google Health
+> bridge below is the heaviest integration; treat it as advanced/optional, not
+> your starting point.
 
 ## 4. Connect at least one data source
 
-You only need one to get going. Connect more later.
+You only need one to get going. Connect more later. The native sources below are
+the lowest friction; the Google Health bridge at the end is the heaviest and is
+best treated as advanced/optional.
 
-### Connect Google Health (the "bridge")
+Remember the routing rule: WHOOP/Oura/Apple come from the bridge for any source
+listed in `GOOGLE_HEALTH_SOURCES`, and from their **native** adapter only when
+removed from that list (Strava is separate — see below).
 
-The Google Health API connection can cover Fitbit/Pixel, Apple HealthKit, and
-residual WHOOP/Oura in one OAuth grant.
+### Connect Oura (native PAT) — start here
 
-1. In Google Cloud Console, enable the **Google Health API** and create an OAuth
-   **Web application** client. Run the consent screen as **External / Testing**
-   and add your own Google account as a test user — this is a personal,
-   unverified app, so no security review is needed.
-2. Add the redirect URI **exactly** as Vitals uses it:
-   `http://localhost:3001/api/auth/google/callback`.
-3. Put `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` into `.env`.
-4. Start Vitals (`npm run dev`, see §5) and visit
-   `http://localhost:3001/api/auth/google/authorize` (or click **Connect** on the
-   dashboard). Approve in the browser; Google redirects back, tokens are
-   persisted to `data/.google-tokens.json`, and they auto-refresh thereafter.
+The least-effort real source: no OAuth, no cloud project, tokens don't expire.
 
-**Headless box?** Google only allows `localhost` redirect URIs for unverified
-apps, so the callback must land on `localhost` *as seen from your browser*. SSH
-forward the API port from your laptop to the box and do the OAuth dance locally:
+1. Remove `oura` from `GOOGLE_HEALTH_SOURCES` (otherwise the PAT is ignored).
+2. <https://cloud.ouraring.com> → **Personal Access Tokens** → create one.
+3. Set `OURA_PAT=...` in `.env`. That's the whole setup.
 
-```bash
-ssh -L 3001:localhost:3001 you@your-host
-# then on your laptop, open:
-#   http://localhost:3001/api/auth/google/authorize
-```
+### Connect Strava (native OAuth — workouts only)
 
-The browser hits `localhost:3001` on your laptop, the tunnel forwards it to the
-box, the box exchanges the code and writes `data/.google-tokens.json`. Tear down
-the tunnel once it's done.
+Strava is an **activity source**: it pulls Apple-Watch / phone-tracked workouts
+(runs, rides, etc.) into the `workouts` table. It is **not** a consensus device
+and is **not** governed by `GOOGLE_HEALTH_SOURCES` — it is gated solely by its
+per-integration toggle (`enabled`, on by default; see §3's Settings note) plus
+its credentials.
+
+1. <https://www.strava.com/settings/api> → create an **API Application**. Set
+   the **Authorization Callback Domain** to `localhost`.
+2. Put `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` into `.env`. The redirect URI
+   defaults to `http://localhost:3001/api/auth/strava/callback`.
+3. Start Vitals, then visit
+   `http://localhost:3001/api/auth/strava/authorize` (or click **Connect Strava**
+   on the dashboard). Approve; tokens persist to `data/.strava-tokens.json` and
+   refresh automatically. (The headless SSH-tunnel trick below works here too.)
 
 ### Connect WHOOP (native OAuth)
 
@@ -139,13 +168,6 @@ Use this when `whoop` is **not** in `GOOGLE_HEALTH_SOURCES`.
    on the dashboard). Approve; tokens persist to `data/.whoop-tokens.json` and
    the refresh token auto-rotates. (The headless SSH-tunnel trick above works
    here too.)
-
-### Connect Oura (native PAT)
-
-Use this when `oura` is **not** in `GOOGLE_HEALTH_SOURCES`.
-
-1. <https://cloud.ouraring.com> → **Personal Access Tokens** → create one.
-2. Set `OURA_PAT=...` in `.env`. PATs don't expire; that's the whole setup.
 
 ### Connect Apple Health (REST push)
 
@@ -187,6 +209,42 @@ python3 scripts/import_apple_health.py \
   --db ./data/vitals.db
 ```
 
+### Connect Google Health (the "bridge") — advanced/optional
+
+This is the **heaviest** integration. One OAuth grant can cover Fitbit/Pixel,
+Apple HealthKit, and residual WHOOP/Oura together, but standing it up means a GCP
+project, an enabled API, a consent screen, and an exact redirect URI. Skip it
+unless you specifically need Fitbit/Pixel or the consolidated bridge — a native
+source (above) is a far easier first connection.
+
+1. In Google Cloud Console, create a project and **enable the Google Health
+   API**.
+2. Create an OAuth **Web application** client. Configure the consent screen as
+   **External / Testing** and **add your own Google account as a test user** —
+   this is a personal, unverified app, so no security review is needed.
+3. Add the redirect URI **exactly** as Vitals uses it:
+   `http://localhost:3001/api/auth/google/callback`.
+4. Put `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` into `.env`.
+5. Start Vitals (`npm run dev`, see §5) and visit
+   `http://localhost:3001/api/auth/google/authorize` (or click **Connect** on the
+   dashboard). Approve in the browser; Google redirects back, tokens are
+   persisted to `data/.google-tokens.json`, and they auto-refresh thereafter.
+
+**Headless box trap.** Google only allows `localhost` redirect URIs for
+unverified apps, so the callback must land on `localhost` *as seen from your
+browser*. On a Mac mini / NUC with no local browser, SSH-forward the API port
+from your laptop and do the OAuth dance there:
+
+```bash
+ssh -L 3001:localhost:3001 you@your-host
+# then on your laptop, open:
+#   http://localhost:3001/api/auth/google/authorize
+```
+
+The browser hits `localhost:3001` on your laptop, the tunnel forwards it to the
+box, the box exchanges the code and writes `data/.google-tokens.json`. Tear down
+the tunnel once it's done.
+
 ## 5. Run it
 
 ### Development (everything, hot-reload)
@@ -195,9 +253,9 @@ python3 scripts/import_apple_health.py \
 npm run dev
 ```
 
-This runs the API (`:3001`), the Vite dashboard (`:5173`), and the MCP server
-concurrently. Open **http://localhost:5173**. (Individual workspaces:
-`npm run dev:api`, `npm run dev:web`, `npm run dev:mcp`.)
+Dev runs **three processes** concurrently — the API (`:3001`), the Vite
+dashboard (`:5173`), and the MCP server. Open **http://localhost:5173**.
+(Individual workspaces: `npm run dev:api`, `npm run dev:web`, `npm run dev:mcp`.)
 
 ### Production (build once, the API serves the dashboard)
 
@@ -206,9 +264,31 @@ npm run build          # builds all workspaces (incl. apps/web/dist)
 NODE_ENV=production npm run start --workspace apps/api
 ```
 
-In production the API serves the built dashboard from `apps/web/dist`, so you
-only run the **one** API process to get both the API and the UI on `:3001`. The
-in-process schedulers start automatically (unless `DISABLE_SCHEDULERS=1`).
+Production collapses to a **single built API process**: the API serves the
+prebuilt dashboard from `apps/web/dist`, so one process gives you both the API
+and the UI on `:3001`. The schedulers run **in-process** in that same process
+(unless `DISABLE_SCHEDULERS=1`) — no separate Vite or job processes.
+
+### AI without the cloud (Ollama)
+
+The default `AI_PROVIDERS=claude,codex` shells out to a **logged-in CLI**
+(`claude -p` / `codex exec`) — local orchestration, but the model itself is in
+the cloud, and the chain quietly skips any provider whose CLI isn't installed or
+signed in. For a **fully-local, no-cloud** brief and Ask, run Ollama and point
+the chain at it:
+
+```bash
+ollama serve
+ollama pull llama3.1
+# in .env:
+#   AI_PROVIDERS=ollama
+#   OLLAMA_URL=http://127.0.0.1:11434
+#   OLLAMA_MODEL=llama3.1
+```
+
+With `ollama` (or `openai-compat`) as the only provider, **no inference traffic
+leaves the box**. No Anthropic API key is needed for the brief or Ask in any
+configuration — the `claude` provider uses your CLI session, not a key.
 
 ## 6. First sync and first brief
 
@@ -245,10 +325,14 @@ the API if you'd rather drive sync/brief from the service manager than in-proces
 
 ### macOS (launchd)
 
-The repo ships a working briefing example at
-`scripts/com.vcc.briefing.plist` (it fires every 30 min in the morning and calls
-the idempotent `scripts/brief-if-ready.sh`, which syncs and then generates the
-brief via the Claude Code CLI once today's data is present). Use it as a model.
+The repo ships a briefing **example** at `scripts/com.vcc.briefing.plist`, which
+fires every 30 min in the morning and calls the idempotent
+`scripts/brief-if-ready.sh` (syncs, then generates the brief via the Claude Code
+CLI once today's data is present). These are macOS *examples, not drop-in
+files*: the plist hardcodes a repo path and `brief-if-ready.sh` resolves the
+repo from a `$VCC_REPO` placeholder. **Set `$VCC_REPO` (or edit the paths)
+before loading them**, and treat the plist below as a template you fill in for
+your own `<repo>` location.
 
 A minimal **API** agent — `~/Library/LaunchAgents/com.vcc.api.plist`:
 

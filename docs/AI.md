@@ -20,9 +20,18 @@ anything off your machine.
 ## How it works
 
 Both features build a compact context packet from your SQLite data
-(`buildBriefContext` in `apps/api/src/services/localBrief.ts`): today's row, a
-14-day window of key metrics, and the previous brief for continuity. That packet
-plus a system prompt is handed to a small **agent runner**
+(`buildBriefContext` in `apps/api/src/services/localBrief.ts`):
+
+- today's row,
+- a 14-day window of key metrics,
+- **recent runs** — Strava activities sync into the local DB (since 2026-06)
+  with split-level detail, so the packet carries your last runs with
+  **per-mile interval paces**. The work efforts are reconstructed (walk
+  recoveries removed), and the prompt explicitly tells the model *not* to read
+  the distance auto-splits as a fade on interval workouts,
+- and the previous brief for continuity.
+
+That packet plus a system prompt is handed to a small **agent runner**
 (`apps/api/src/services/agentCli.ts`), which tries a chain of providers and
 returns the first one that succeeds.
 
@@ -33,6 +42,26 @@ returns the first one that succeeds.
 - **Ask** — `answerQuestion()` (`localAsk.ts`), behind `POST /api/ask`. The
   answer streams back over SSE (the providers are non-streaming, so it arrives as
   one event).
+
+---
+
+## Dashboard AI summary & toggles
+
+The daily brief also renders on the dashboard as an AI summary card. Two switches
+control it, both stored **in the database** (`app_settings`, migration
+`008_ai_settings.sql`) and toggled from the dashboard **Settings** — *not* from
+`.env`:
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `aiEnabled` | on | **Master gate.** When off, the Ask tab and the dashboard brief card are hidden and all auto-generation stops. |
+| `aiAutoSummary` | on | **Auto-generate the brief.** When on, the brief is generated when it's missing for today and refreshed after a new sync/run. Turn it off to keep AI on but only generate manually. |
+
+A manual **Regenerate** button on the dashboard re-runs the brief on demand. It
+works whenever `aiEnabled` is on, regardless of `aiAutoSummary`.
+
+The cron job (`apps/api/src/jobs/local-brief.ts`) checks both flags and skips if
+either is off; manual generation only checks `aiEnabled`.
 
 ---
 
@@ -50,6 +79,11 @@ connection refused, empty output), it falls through to the next:
 | `openai-compat` | Any OpenAI-compatible server (LocalAI, LM Studio, vLLM, …) | On-box / your LAN | Optional |
 
 **Default:** `AI_PROVIDERS=claude,codex`.
+
+**No Anthropic API key is required for the brief or Ask.** The `claude` provider
+shells out to the Claude Code CLI and uses your **logged-in CLI subscription**,
+not an API key. For a **fully-local** setup where nothing leaves the box, set
+`AI_PROVIDERS=ollama` and `ollama pull` a model (see below).
 
 You can override the provider per feature without changing the chain:
 

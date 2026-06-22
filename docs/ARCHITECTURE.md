@@ -29,7 +29,7 @@ vitals-command-center/
 | Workspace | What it owns |
 |---|---|
 | **`apps/api`** | The Fastify REST API (`/api/*`), the sync/normalizer pipeline, the AI brief + Ask services, the cron schedulers, the Apple ingest endpoint, and the OAuth callbacks for WHOOP/Google. In production it also serves the built dashboard as static files (SPA fallback). |
-| **`apps/web`** | The React 18 + Vite progressive web app. Light/dark themes, installable PWA, charts via Recharts. In dev it runs on Vite; in prod it is built and served by the API. |
+| **`apps/web`** | The React 18 + Vite progressive web app. Light/dark themes, installable PWA, charts via Recharts. In dev it runs on Vite; in prod it is built and served by the API. Its config is env-driven from the **repo-root `.env`** (`vite.config.ts` sets `envDir` to the repo root): `VITE_USER_NAME` sets the optional display name, and `VITE_ALLOWED_HOSTS` (comma list) adds reverse-proxy hostnames to the dev-server allowlist (Tailscale MagicDNS `.ts.net` is always allowed). Only `VITE_*` keys reach the client; root secrets stay private. |
 | **`apps/mcp-server`** | The Model Context Protocol server. Two entrypoints: `index.ts` (stdio, for Claude Desktop, full read/write) and `http.ts` (Streamable HTTP + OAuth, for claude.ai, read-only). |
 | **`packages/db`** | The `better-sqlite3` connection (WAL mode), the SQL migration runner, and all typed query modules. The single source of truth for the schema. |
 | **`packages/shared`** | Cross-cutting code with no runtime deps beyond Zod: device definitions (`DEVICE_SOURCES`, accuracy rankings, weights), the confidence model, Zod request schemas, and API/domain types. |
@@ -45,7 +45,7 @@ which keeps the schema and the servers in lockstep.
 
 ```
   ┌─────────────────────────────────────────────────────────────────────┐
-  │  SOURCES                                                             │
+  │  CONSENSUS DEVICES (daily vitals)                                   │
   │   Google Health API "bridge"   ──┐  (Fitbit/Pixel + Apple HealthKit │
   │     (OAuth)                       │   + residual WHOOP/Oura)         │
   │   WHOOP native (OAuth)          ──┤                                  │
@@ -58,10 +58,21 @@ which keeps the schema and the servers in lockstep.
             │  normalizer   │   per-source rows → per-device columns,
             │  + confidence │   weighted consensus, confidence level
             └───────┬───────┘
-                    ▼
+                    │
+  ┌─────────────────┴───────────────┐         ┌────────────────────────────┐
+  │                                 │         │  ACTIVITY SOURCE           │
+  │                                 │         │   Strava (OAuth)  ─────────┤
+  │                                 │         │   runs/cardio → workouts   │
+  │                                 │         │   + detail_json (splits/   │
+  │                                 │         │   laps/segments/intervals) │
+  │                                 │         └─────────────┬──────────────┘
+  │                                 │  same sync job, gated by              │
+  │                                 │  integration_settings.enabled         │
+  │                                 ▼         ▼                              │
             ┌───────────────┐
-            │    SQLite     │   daily_summary, sleep_sessions, workouts,
-            │  (@vcc/db)    │   habits, briefings, sync_log  (local file)
+            │    SQLite     │   daily_summary, sleep_sessions, workouts
+            │  (@vcc/db)    │   (+ detail_json), habits, briefings, sync_log,
+            │               │   app_settings, integration_settings (local file)
             └───┬───────┬───┘
                 │       │
       ┌─────────┘       └──────────┬─────────────────┐
@@ -80,13 +91,52 @@ which keeps the schema and the servers in lockstep.
 1. **Pull.** A scheduled sync job (default every 4 hours, `SYNC_CRON`) pulls from
    each configured source. Apple Health is *pushed* instead, via the
    `POST /api/ingest/apple` REST endpoint that the iOS Health Auto Export app calls.
-2. **Normalize.** The normalizer maps each source's payload onto the shared
-   `daily_summary` schema, writing **per-device columns** (e.g. `whoop_hrv`,
+   The same sync run also pulls the **Strava activity source** (see below).
+2. **Normalize.** The normalizer maps each consensus device's payload onto the
+   shared `daily_summary` schema, writing **per-device columns** (e.g. `whoop_hrv`,
    `oura_hrv`, `apple_hrv`), and computing the consensus + confidence (§3).
    Sleep sessions and workouts are stored individually, **tagged with their source**.
 3. **Store.** Everything lands in a local SQLite database (`DB_PATH`, WAL mode).
 4. **Serve.** The REST API exposes the data to the dashboard; the MCP server
    exposes it to Claude; the AI brief/Ask service reads it to generate narratives.
+
+### The Strava activity lane
+
+Strava is an **activity source**, not a consensus device. It is *not* in
+`DEVICE_SOURCES` (`packages/shared/src/devices.ts` = `fitbit`/`whoop`/`oura`/
+`apple`); it lives in the broader integration registry (`INTEGRATION_IDS`,
+`packages/shared/src/integrations.ts`) as `kind: 'activity'`. It runs in the same
+sync orchestrator pass, but on its own lane:
+
+- It contributes **no daily rows** and **no consensus**. Its OAuth pull lands runs
+  in the `workouts` table (`source: 'strava'`), alongside wearable workouts.
+- A backfill step then fetches **rich detail** per run — splits, laps, segment
+  efforts, plus run/walk **intervals** reconstructed from the velocity stream —
+  and persists it as JSON in `workouts.detail_json` (migration `007`). Surfaced
+  by `GET /api/workouts/:id`.
+- The whole lane (pull + detail backfill) is **gated**: it runs only when
+  `STRAVA_CLIENT_ID` is set, Strava is enabled in `integration_settings`, and a
+  token file exists. It is excluded from `GET /api/devices/status`.
+
+### Settings store and sync gating
+
+Two SQLite tables hold user preferences (migrations `006`/`008`):
+
+- **`app_settings`** — a generic JSON key/value store. App-level keys:
+  `autoSyncEnabled` (master auto-sync gate), `aiEnabled` (master AI gate), and
+  `aiAutoSummary` (auto daily-brief generation).
+- **`integration_settings`** — one row per integration id (`fitbit`, `apple`,
+  `strava`, `whoop`, `oura`) carrying `enabled`, `auto_sync`, and
+  `sync_interval_minutes`. This is the per-source enable/cadence gate.
+
+The **sync orchestrator** (`jobs/sync.ts`) reads these gates: the Strava lane
+checks `getIntegrationSetting('strava').enabled`, and the auto-sync scheduler
+(`jobs/scheduler.ts`) no-ops unless `app_settings.autoSyncEnabled` is on, then
+drives cadence from the **most frequent** integration that is both `enabled` and
+`auto_sync` (the minimum `sync_interval_minutes` across them). A full `runSync`
+still covers every source; the per-source cadence just decides when it's "due".
+`GET /api/settings` and the `PATCH` routes expose both tables to the web Settings
+modal.
 
 ---
 
@@ -164,6 +214,15 @@ code path; the default brief/Ask flow runs through the CLI/HTTP runner above and
 works without it. `GET /api/config/status` reports which AI and source
 integrations are configured (booleans only — never secrets).
 
+**AI gating.** Two `app_settings` flags govern the AI layer (§2). `aiEnabled` is
+the master switch — off, it hides the Ask tab and the dashboard AI summary and
+stops auto-generation. `aiAutoSummary` controls whether the **daily brief** is
+generated automatically (on schedule and on the dashboard when missing/stale); a
+manual regenerate still works whenever `aiEnabled` is on. The daily brief's
+context now **includes recent runs** — the last week of Strava workouts with
+per-mile splits and the detected run/walk intervals — so the narrative can reason
+about training load and pacing, not just recovery.
+
 ---
 
 ## 5. The MCP server
@@ -187,6 +246,12 @@ On the read-only HTTP surface, write tools are hidden from `ListTools` and
 rejected if called. The server ships server-level `instructions` (an analyst
 persona + device hierarchy + alert thresholds) that Claude surfaces as the
 session system prompt.
+
+`get_full_context` is the one-shot briefing packet: today's full detail plus a
+**14-day** window of compact daily summaries, baselines, and recent workouts. Run
+**detail now lives in the database** (`workouts.detail_json`, backfilled at sync
+time), so even the read-only HTTP surface can serve per-run **splits and detected
+intervals** with pace/HR — no live Strava call from the MCP server.
 
 The HTTP server hardens the public surface: a human-approval HTML login gate on
 `/authorize`, per-IP brute-force lockout, a coarse rate limit on the

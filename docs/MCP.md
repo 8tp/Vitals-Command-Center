@@ -10,6 +10,11 @@ answers.
 Everything runs on your own machine. The data never leaves it except as part of
 the answer Claude composes for you.
 
+> This is the **interactive** AI surface — you ask, Claude calls tools and
+> answers. It's separate from the stack's *own* on-box AI (the automatic daily
+> brief and the dashboard Ask box), which the API service generates without MCP.
+> See [`AI.md`](./AI.md) for that.
+
 There are **two transports**, and you pick based on where you want to ask from:
 
 | Transport | File | Use it from | Access |
@@ -163,7 +168,7 @@ server exposes everything *except* the two write tools (marked **write**).
 
 | Tool | Args | What it returns |
 |------|------|-----------------|
-| `get_full_context` | `{ date? }` | One-shot briefing packet: today's full summary + 14-day compact window + 7-day workouts + previous briefing + a `briefingTemplate` string. Call this first for any briefing/status request. |
+| `get_full_context` | `{ date? }` | One-shot briefing packet: today's full summary + 14-day compact window + recent runs (with per-split pace/HR) + previous briefing + a `briefingTemplate` string. Call this first for any briefing/status request. |
 | `save_briefing` **(write)** | `{ content, date?, type? }` | Persists a briefing you just composed so the web dashboard shows it. `type` ∈ `daily`/`weekly`/`query_response`. |
 | `get_daily_summary` | `{ date? }` | Metrics for one day: HRV, RHR, SpO2, sleep stages, skin-temp deviation, steps, device availability. |
 | `get_trends` | `{ metric, days? }` | A metric's series with a 7-day moving average. `metric` ∈ `hrv`, `rhr`, `sleep_hours`, `deep_hours`, `rem_hours`, `steps`, `spo2`, `temp_deviation`, `respiratory_rate`, `calories_burned`, `calories_in`. |
@@ -175,9 +180,11 @@ server exposes everything *except* the two write tools (marked **write**).
 | `log_habit_entry` **(write)** | `{ habit_name, value, date? }` | Logs a habit check-in value. |
 | `get_briefing` | `{ date? }` | Retrieves a previously-stored briefing's markdown for a date. |
 
-> **Note:** workout/run detail (VO₂max, splits) is not in this server — those
-> live in your Strava connector. The server instructions tell Claude to
-> correlate recovery data here against training in Strava.
+> **Note:** run detail is in this server. Strava activities (runs) — including
+> their splits, laps, segments, and reconstructed intervals — sync into the
+> local DB and ride along in `get_full_context` (the last ~14 days, newest
+> first, with per-split pace/HR). The read-only MCP surface reads them directly
+> from the DB; there is no separate Strava connector to consult.
 
 ---
 

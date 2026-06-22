@@ -44,13 +44,19 @@ Service liveness. Returns status, uptime, timestamp, and the latest sync per sou
 ```
 
 ### `GET /api/devices/status`
-Connection status for every device source (`fitbit`, `whoop`, `oura`, `apple`).
+Connection status for the **enabled consensus devices** only (`fitbit`, `whoop`,
+`oura`, `apple`). A device the user has switched **off** in Settings is *omitted*
+— it is never reported as "disconnected" (a dormant WHOOP/Oura shouldn't look
+offline when you're simply not wearing it). Strava is an **activity source**, not
+a consensus device, so it is **excluded here**; use `GET /api/settings` for the
+full integration list (Strava included).
+
 "Connected" means the integration is working (recent successful sync that
 produced rows, or recent data) — not necessarily that today's row exists yet.
 ```jsonc
 { "ok": true, "data": { "date": "YYYY-MM-DD", "statuses": [
   { "source": "fitbit", "connected": true, "hasTodayData": false,
-    "lastSeen": "…", "lastSyncOk": true, "message": "connected · today's cycle in progress" }
+    "lastSeen": "…", "lastSyncOk": true, "message": "connected · today's data syncing" }
 ] } }
 ```
 
@@ -62,10 +68,16 @@ Claude Desktop MCP config snippet with absolute paths resolved.
 { "ok": true, "data": {
   "claudeApiConfigured": true, "anthropicApiConfigured": false,
   "whoopConfigured": true, "ouraConfigured": false, "appleIngestConfigured": true,
+  "googleConfigured": true, "stravaConfigured": true,
   "mcp": { "serverName": "vitals-command-center", "transport": "stdio",
            "paths": { /* … */ }, "claudeDesktopConfig": { "snippet": "…", "command": "…", "args": [] } }
 } }
 ```
+`googleConfigured` is `GOOGLE_CLIENT_ID` (the Fitbit/bridge OAuth app);
+`stravaConfigured` is `STRAVA_CLIENT_ID`. `claudeApiConfigured` is always `true`
+(AI runs on the on-box CLI agent regardless of the Anthropic key); the field name
+is retained for the existing web client. `anthropicApiConfigured` reflects the
+optional direct-API key.
 
 ---
 
@@ -106,6 +118,42 @@ Workouts over a range. Query: `range` (default `30d`), optional `sport`
 ```jsonc
 { "ok": true, "data": { "range": { … }, "workouts": [ … ] } }
 ```
+
+### `GET /api/workouts/:id`
+A single workout plus its rich **`detail`** (Strava splits/laps/segments and the
+reconstructed run/walk **intervals**). `404 NOT_FOUND` if the id is unknown.
+```jsonc
+{ "ok": true, "data": { "workout": { /* summary row */ }, "detail": { /* or null */ } } }
+```
+
+`detail` is the `WorkoutDetail` shape — persisted as JSON on the workout row,
+normally backfilled by the sync job:
+```jsonc
+{
+  "splits":   [ { "index": 1, "distanceKm": 1.0, "elapsedSeconds": 312, "movingSeconds": 300,
+                  "paceSecondsPerKm": 300, "avgHr": 162, "elevationGain": 4 } ],
+  "laps":     [ { "index": 1, "name": null, "distanceKm": 2.0, "elapsedSeconds": 600,
+                  "movingSeconds": 590, "avgHr": 165, "maxHr": 178, "avgPaceSecondsPerKm": 295 } ],
+  "segments": [ { "id": 12345, "name": "Track straight", "distanceKm": 0.4, "elapsedSeconds": 90,
+                  "avgHr": 170, "maxHr": 180, "prRank": 1 } ],
+  "intervals": [ { "index": 1, "kind": "work", "distanceKm": 0.4, "durationSeconds": 88,
+                  "avgPaceSecondsPerKm": 220, "avgHr": 172 },
+                 { "index": 2, "kind": "recovery", "distanceKm": 0.1, "durationSeconds": 60,
+                  "avgPaceSecondsPerKm": null, "avgHr": 150 } ],
+  "avgCadence": 174, "totalElevationGain": 28, "avgWatts": null, "sufferScore": 64,
+  "gearName": "…", "deviceName": "…", "description": null, "fetchedAt": "…"
+}
+```
+
+`intervals` are run (`work`) / walk-or-stand (`recovery`) bouts detected from the
+Strava **velocity stream** — they reconstruct interval structure that
+distance-auto-splits and a single lap can't show (`null` when no stream exists).
+
+**On-demand backfill.** If a Strava workout still lacks detail (e.g. it was seeded
+before the integration), the route fetches it from Strava on demand, persists it
+(and any newly-learned `calories`), and returns it — but only when
+`STRAVA_CLIENT_ID` is set, Strava is enabled in `integration_settings`, and a
+token file exists. A fetch failure degrades to `detail: null` rather than erroring.
 
 ---
 
@@ -235,6 +283,41 @@ Last sync time, whether a sync is running, and per-device sync state.
 
 ---
 
+## Settings
+
+User-facing preferences for the web Settings modal. App-level prefs live in
+`app_settings`; per-source toggles live in `integration_settings`. Every mutation
+returns the **full** settings payload so the client can replace its state in one
+round-trip.
+
+### `GET /api/settings`
+App preferences plus the fully-resolved integration list (registry metadata +
+user settings + live connectivity, across all five integrations including Strava).
+```jsonc
+{ "ok": true, "data": {
+  "app": { "autoSyncEnabled": true, "aiEnabled": true, "aiAutoSummary": true },
+  "integrations": [
+    { "id": "fitbit", "kind": "wearable", "enabled": true, "autoSync": true,
+      "syncIntervalMinutes": 240, "configured": true, "connected": true,
+      "hasTodayData": false, "lastSeen": "…", "lastSyncOk": true, "message": null, /* …meta */ },
+    { "id": "strava", "kind": "activity", "enabled": true, /* … */ }
+  ]
+} }
+```
+
+### `PATCH /api/settings/app`
+Update app-level prefs. Body (any subset, Zod-validated): `autoSyncEnabled`,
+`aiEnabled`, `aiAutoSummary` (all booleans). `aiEnabled` is the master AI gate;
+`aiAutoSummary` controls automatic daily-brief generation. Returns the full
+settings payload.
+
+### `PATCH /api/settings/integrations/:id`
+Toggle a single integration. `:id` ∈ `fitbit | apple | strava | whoop | oura`
+(`400 VALIDATION` otherwise). Body (any subset): `enabled` (bool), `autoSync`
+(bool), `syncIntervalMinutes` (int 15–1440). Returns the full settings payload.
+
+---
+
 ## Ingest (Apple Health)
 
 ### `POST /api/ingest/apple`
@@ -273,6 +356,18 @@ connect a source. They are no-ops if the corresponding client id is unset
   tokens, redirects to `GOOGLE_POST_AUTH_REDIRECT`.
 - `GET /api/auth/google/status` → `{ "ok": true, "data": { "connected": bool, "reauthNeeded": bool } }`
   (`reauthNeeded` is `true` after a token refresh hit `invalid_grant`).
+
+### Strava (activity source)
+Strava is the **activity source** — runs/cardio that sync into `workouts` (with
+rich `detail`), not a daily-vitals consensus device. OAuth 2.0, mirroring the
+WHOOP flow.
+- `GET /api/auth/strava/authorize` — redirects to Strava's consent screen.
+  `500 MISCONFIGURED` if `STRAVA_CLIENT_ID` is unset.
+- `GET /api/auth/strava/callback?code&state` — exchanges the code, persists
+  tokens, redirects to `STRAVA_POST_AUTH_REDIRECT`. Bad/expired state →
+  `400 INVALID_STATE`; user denial → `400 STRAVA_DENIED`; exchange failure →
+  `502 STRAVA_EXCHANGE`.
+- `GET /api/auth/strava/status` → `{ "ok": true, "data": { "connected": bool } }`.
 
 > Oura uses a personal access token (`OURA_PAT`) and has no OAuth flow.
 

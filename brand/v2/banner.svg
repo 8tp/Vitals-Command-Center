@@ -1,16 +1,37 @@
-<svg width="1280" height="360" viewBox="0 0 1280 360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1280" height="400" viewBox="0 0 1280 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="w" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#F6F7F9" stop-opacity="0.96"/>
-      <stop offset="50%" stop-color="#F6F7F9" stop-opacity="0.55"/>
-      <stop offset="80%" stop-color="#F6F7F9" stop-opacity="0"/>
+    <linearGradient id="base" x1="0" y1="0" x2="1280" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FAFBFC"/>
+      <stop offset="1" stop-color="#EDF2FB"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="1120" cy="120" r="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#60A5FA" stop-opacity="0.34"/>
+      <stop offset="0.5" stop-color="#2563EB" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logo" x1="0" y1="0" x2="66" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#1D4ED8"/>
     </linearGradient>
   </defs>
-  <rect width="1280" height="360" fill="#F6F7F9"/>
-  <image href="hero.png" xlink:href="hero.png" x="0" y="-340" width="1280" height="853" preserveAspectRatio="xMidYMid slice"/>
-  <rect width="1280" height="360" fill="url(#w)"/>
-  <image href="icon.png" xlink:href="icon.png" x="60" y="112" width="86" height="86"/>
-  <text x="166" y="180" font-family="Plus Jakarta Sans" font-weight="800" font-size="74" fill="#1A2330">Vitals</text>
-  <text x="62" y="246" font-family="Plus Jakarta Sans" font-weight="500" font-size="29" fill="#5B6776">All your wearables, one calm view.</text>
-  <text x="62" y="288" font-family="Plus Jakarta Sans" font-weight="600" font-size="19" letter-spacing="0.5" fill="#0E9C8C">Private  ·  self-hosted  ·  open source</text>
+
+  <rect width="1280" height="400" fill="url(#base)"/>
+  <rect width="1280" height="400" fill="url(#glow)"/>
+
+  <!-- lockup -->
+  <g transform="translate(72 60)">
+    <rect width="66" height="66" rx="19" fill="url(#logo)"/>
+    <g transform="translate(33 33) scale(0.0536) translate(-512 -512)" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" stroke-opacity="0.22" stroke-width="46"/>
+      <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" stroke-width="46" stroke-dasharray="1057 1700"/>
+      <path d="M 352 512 L 452 512 L 486 470 L 514 512 L 540 512 L 566 402 L 596 624 L 622 512 L 672 512" stroke-width="28"/>
+    </g>
+    <text x="86" y="48" font-family="Plus Jakarta Sans" font-weight="800" font-size="46" fill="#16203A">Vitals</text>
+  </g>
+
+  <!-- tagline -->
+  <text x="74" y="218" font-family="Plus Jakarta Sans" font-weight="800" font-size="44" fill="#16203A">All your wearables.</text>
+  <text x="74" y="270" font-family="Plus Jakarta Sans" font-weight="800" font-size="44" fill="#2563EB">One clear read.</text>
+
+  <!-- source line -->
+  <text x="76" y="340" font-family="Plus Jakarta Sans" font-weight="600" font-size="19" letter-spacing="0.4" fill="#5B6776">Fitbit Air  ·  Apple Watch  ·  Strava  ·  Oura  ·  WHOOP  ·  self-hosted &amp; private</text>
 </svg>

@@ -87,8 +87,10 @@ export function BrandLogo({ size = 34 }: { size?: number }) {
         boxShadow: '0 6px 16px -6px rgba(37,99,235,0.6), inset 0 1px 0 rgba(255,255,255,0.4)',
       }}
     >
-      <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12h3.5l2-6 3 13 2.5-9 1.5 2H21" />
+      <svg width={size * 0.62} height={size * 0.62} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {/* gauge + pulse — matches the app icon */}
+        <path d="M6.4 17.3 A8 8 0 1 1 17.6 17.3" />
+        <path d="M8.4 12 L10.6 12 L11.4 10.6 L12.1 12 L12.7 12 L13.3 9.2 L14 14.8 L14.6 12 L15.7 12" strokeWidth={1.8} />
       </svg>
     </span>
   );

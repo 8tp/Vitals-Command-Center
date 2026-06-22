@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath } from 'node:url';
@@ -6,8 +6,23 @@ import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const sharedSrc = resolve(__dirname, '../../packages/shared/src');
+// Load .env from the repo root (the single env file the API/MCP also use) so
+// VITE_-prefixed vars like VITE_USER_NAME come from the same place as everything
+// else. Only VITE_* keys are exposed to the client; root secrets stay private.
+const repoRoot = resolve(__dirname, '../..');
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Extra reverse-proxy hostnames are deployment-specific (and can reveal a
+  // private domain), so they come from VITE_ALLOWED_HOSTS in the root .env
+  // (comma-separated, e.g. ".lab.example.dev") rather than being hardcoded.
+  const env = loadEnv(mode, repoRoot, '');
+  const extraHosts = (env.VITE_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map((h) => h.trim())
+    .filter(Boolean);
+
+  return {
+  envDir: repoRoot,
   resolve: {
     // Alias the shared workspace to its TypeScript source so we don't have to
     // pre-build packages/shared before running `vite dev`.
@@ -54,7 +69,8 @@ export default defineConfig({
   server: {
     host: true, // bind 0.0.0.0 so the tailnet (not just localhost) can reach it
     port: 5173,
-    allowedHosts: ['.ts.net'], // allow MagicDNS hosts (e.g. your-host.your-tailnet.ts.net)
+    // Always allow Tailscale MagicDNS; add deployment hosts via VITE_ALLOWED_HOSTS.
+    allowedHosts: ['.ts.net', ...extraHosts],
     proxy: {
       '/api': { target: 'http://localhost:3001', changeOrigin: true },
     },
@@ -63,4 +79,5 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  };
 });

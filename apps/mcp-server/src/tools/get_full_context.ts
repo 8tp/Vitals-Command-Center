@@ -6,9 +6,9 @@ import { queries } from '@vcc/db';
  * Claude when the direct API is configured: today's full detail + 14-day compact
  * window + previous briefing.
  *
- * Workouts are intentionally NOT included: in the two-MCP model they live in the
- * Strava connector (see migration 004), so this DB's workouts table is empty by
- * design. The briefingTemplate directs Claude to pull training load from Strava.
+ * Recent runs ARE included: since 2026-06 Strava activities sync into this DB
+ * (with per-km splits/laps/segments backfilled), so the packet carries the last
+ * ~14 days of workouts with split-level pace/HR for training analysis.
  *
  * Claude Desktop / claude.ai call this once, then synthesize a briefing or answer
  * and (for briefings) call `save_briefing` to persist.
@@ -54,10 +54,35 @@ export function getFullContext(db: Database, args: Record<string, unknown>) {
     caloriesIn: d.fitbit?.caloriesIn ?? null,
   }));
 
+  // Recent runs (most-recent first) with split-level pace/HR so Claude can
+  // reason about training load, pacing, and intensity distribution directly.
+  const recentRuns = queries.workouts.list(db, windowStart, date).slice(0, 10).map((w) => {
+    const detail = queries.workouts.getWithDetail(db, w.id)?.detail ?? null;
+    return {
+      date: w.date,
+      sport: w.sport,
+      name: w.notes,
+      distanceKm: w.distanceKm,
+      movingMinutes: Math.round(w.durationMinutes),
+      avgHr: w.avgHr,
+      maxHr: w.maxHr,
+      calories: w.calories,
+      avgCadence: detail?.avgCadence ?? null,
+      elevationGainM: detail?.totalElevationGain ?? null,
+      splits:
+        detail?.splits?.map((s) => ({
+          km: s.index,
+          paceSecPerKm: s.paceSecondsPerKm,
+          avgHr: s.avgHr,
+        })) ?? null,
+    };
+  });
+
   return {
     date,
     today,
     window: compactWindow,
+    recentRuns,
     previousBriefing,
     /**
      * Briefing template Claude should follow when asked for a morning briefing.
@@ -66,7 +91,7 @@ export function getFullContext(db: Database, args: Record<string, unknown>) {
     briefingTemplate: `Structure the morning briefing as:
 **Status** — one paragraph: your own recovery read reasoned from HRV vs baseline, RHR, sleep quality and skin-temp deviation (there are no recovery/readiness scores). Cite key numbers + whether today has Fitbit data.
 **Trends** — 2-3 bullets citing specific deltas vs the 14-day window (HRV, RHR, sleep hours/stages, steps).
-**Training** — workouts are NOT in this packet. If a Strava connector is available, call its list_activities for the last 7 days and reference that load; otherwise base training advice on recovery + steps. One line on how today's recovery read should shape the session.
+**Training** — reference \`recentRuns\` in this packet (last ~14 days, with per-km splits + HR). Note recent load, pacing trend, and intensity distribution. One line on how today's recovery read should shape the session.
 **Recommendations** — up to 5, ranked, specific (dosages/timings/durations).
 
 After you finish the briefing, call save_briefing({ date, content }) so the web dashboard can display it. Use the same date this tool was called with.`,

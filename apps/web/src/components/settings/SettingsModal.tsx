@@ -5,7 +5,7 @@ import { useUiStore } from '../../stores/uiStore.js';
 import { useUnitsStore } from '../../stores/unitsStore.js';
 import type { Units } from '../../lib/units.js';
 import { useSettings, type IntegrationStatusView } from '../../hooks/useSettings.js';
-import { IconX, IconSync, IconCheck } from '../shared/icons.js';
+import { IconX, IconSync, IconCheck, IconSparkle } from '../shared/icons.js';
 
 /** Cadence options fold per-source auto-sync + interval into one control. */
 const CADENCE: { label: string; value: string; autoSync: boolean; minutes?: number }[] = [
@@ -148,6 +148,49 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
                   {u}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* AI features — master gate + auto-generate */}
+          <div className="mt-2 rounded-md bg-bg-surface shadow-[inset_0_0_0_1px_var(--hairline)] overflow-hidden">
+            <div className="flex items-center gap-3.5 p-4">
+              <span className="grid place-items-center w-9 h-9 rounded-[11px] text-white shrink-0" style={{ background: 'linear-gradient(140deg, var(--accent), var(--accent-deep))' }}>
+                <IconSparkle size={18} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-[14px] text-ink">AI features</div>
+                <div className="text-[11.5px] text-ink-dim mt-0.5">Daily brief, the Ask tab &amp; on-dashboard summary</div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings?.app.aiEnabled ?? false}
+                aria-label="AI features"
+                disabled={!settings}
+                onClick={() => settings && patchApp({ aiEnabled: !settings.app.aiEnabled })}
+                className={clsx('toggle', settings?.app.aiEnabled && 'on')}
+              />
+            </div>
+            {/* Auto-generate — nested, only meaningful when AI is on */}
+            <div
+              className={clsx(
+                'flex items-center gap-3.5 p-4 pl-[68px] border-t border-hairline transition-opacity',
+                !settings?.app.aiEnabled && 'opacity-45',
+              )}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-[13.5px] text-ink">Auto-generate brief</div>
+                <div className="text-[11.5px] text-ink-dim mt-0.5">Write it each morning &amp; refresh after new runs</div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings?.app.aiAutoSummary ?? false}
+                aria-label="Auto-generate brief"
+                disabled={!settings || !settings.app.aiEnabled}
+                onClick={() => settings && patchApp({ aiAutoSummary: !settings.app.aiAutoSummary })}
+                className={clsx('toggle', settings?.app.aiEnabled && settings?.app.aiAutoSummary && 'on')}
+              />
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import { useHealthData } from '../hooks/useHealthData.js';
 import { Metric } from '../components/shared/Metric.js';
 import { PageHeader, HeaderDate } from '../components/layout/PageHeader.js';
 import { WorkoutRow } from '../components/activity/WorkoutRow.js';
+import { WorkoutDetailModal } from '../components/activity/WorkoutDetailModal.js';
 import { fmtDate } from '../lib/formatters.js';
 import { useUnits } from '../stores/unitsStore.js';
 import { fmtDistance, paceFor } from '../lib/units.js';
@@ -98,6 +99,7 @@ export default function WorkoutsPage() {
 
   return (
     <div>
+      <WorkoutDetailModal />
       <PageHeader
         title="Activity"
         subtitle={subtitle}

@@ -1,6 +1,8 @@
 import type { Workout } from '@vcc/shared';
 import { useUnits } from '../../stores/unitsStore.js';
 import { fmtDistance, paceFor } from '../../lib/units.js';
+import { useUiStore } from '../../stores/uiStore.js';
+import { IconChevronRight } from '../shared/icons.js';
 
 /* ---- per-row formatting (mirrors DashboardPage run-strip math) ---- */
 function hms(min: number): string {
@@ -41,6 +43,7 @@ function Stat({ label, value }: { label: string; value: string }) {
  */
 export function WorkoutRow({ workout, dateLabel }: { workout: Workout; dateLabel: string }) {
   const units = useUnits();
+  const setOpenWorkoutId = useUiStore((s) => s.setOpenWorkoutId);
   const { label, gradient, glyph } = sourceMeta(workout.source);
   const time = workout.startTime ? workout.startTime.slice(11, 16) : null;
   const hasDistance = workout.distanceKm != null && workout.distanceKm > 0;
@@ -48,7 +51,12 @@ export function WorkoutRow({ workout, dateLabel }: { workout: Workout; dateLabel
   const p = paceFor(workout.durationMinutes, workout.distanceKm, units);
 
   return (
-    <div className="flex items-center gap-4 py-4 border-b border-hairline last:border-0">
+    <button
+      type="button"
+      onClick={() => setOpenWorkoutId(workout.id)}
+      aria-label={`Open ${workout.sport} details`}
+      className="group w-full flex items-center gap-4 py-4 border-b border-hairline last:border-0 text-left -mx-2 px-2 rounded-xl hover:bg-bg-surface transition-colors"
+    >
       <span
         className="grid place-items-center w-10 h-10 rounded-[12px] text-white shrink-0"
         style={{ background: gradient }}
@@ -78,8 +86,12 @@ export function WorkoutRow({ workout, dateLabel }: { workout: Workout; dateLabel
             <Stat label="Cal" value={workout.calories != null ? String(Math.round(workout.calories)) : '—'} />
           </>
         )}
+        <IconChevronRight
+          size={18}
+          className="self-center text-ink-mute/40 group-hover:text-ink-mute transition-colors shrink-0"
+        />
       </div>
-    </div>
+    </button>
   );
 }
 

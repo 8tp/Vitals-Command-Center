@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
-import { NAV } from './nav.js';
+import { visibleNav } from './nav.js';
 import { NAV_ICONS, IconSettings } from '../shared/icons.js';
 import { DeviceStatusCluster } from './DeviceStatusCluster.js';
 import { ThemeToggle } from './ThemeToggle.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import { useSettingsStore, selectAiEnabled } from '../../stores/settingsStore.js';
 
 /**
  * Persistent left rail (md+). The Instrument shell's spine: brand, primary nav,
@@ -13,6 +14,7 @@ import { useUiStore } from '../../stores/uiStore.js';
  */
 export function Sidebar() {
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
+  const aiEnabled = useSettingsStore(selectAiEnabled);
 
   return (
     <nav className="hidden md:flex md:flex-col w-[236px] shrink-0 h-full border-r border-hairline bg-bg-base px-4 py-6">
@@ -24,7 +26,7 @@ export function Sidebar() {
 
       {/* Primary nav */}
       <ul className="space-y-1 flex-1">
-        {NAV.map((item) => {
+        {visibleNav(aiEnabled).map((item) => {
           const Icon = NAV_ICONS[item.icon];
           return (
             <li key={item.to}>

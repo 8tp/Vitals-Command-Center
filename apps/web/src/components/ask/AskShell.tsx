@@ -2,6 +2,9 @@ import clsx from 'clsx';
 import type { ReadinessResult, ReadinessState } from '../../lib/readiness.js';
 import { IconSparkle } from '../shared/icons.js';
 
+/** Optional display name from VITE_USER_NAME (.env, gitignored). */
+const USER_NAME = (import.meta.env.VITE_USER_NAME as string | undefined)?.trim() || '';
+
 /** Suggestion chips — clicking one submits it as the question. */
 export const CHIPS = [
   'How should I train today?',
@@ -62,7 +65,7 @@ export function AskGreeting({ readiness }: { readiness: ReadinessResult }) {
       <AskAvatar size={44} />
       <div className="min-w-0">
         <h1 className="font-display font-semibold text-[clamp(22px,3.4vw,26px)] tracking-tightest leading-tight">
-          {greeting()}, Alex.
+          {greeting()}{USER_NAME ? `, ${USER_NAME}.` : '.'}
         </h1>
         <p className="mt-1 text-[13.5px] text-ink-dim leading-snug">
           {CONTEXT[readiness.state](readiness.score)}

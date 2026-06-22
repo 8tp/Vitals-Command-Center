@@ -6,9 +6,11 @@ import { Metric } from '../components/shared/Metric.js';
 import { Sparkline } from '../components/shared/Sparkline.js';
 import { StageBar } from '../components/shared/StageBar.js';
 import { PageHeader, HeaderDate } from '../components/layout/PageHeader.js';
+import { InsightsPanel } from '../components/dashboard/InsightsPanel.js';
 import { fmtNum, fmtDate } from '../lib/formatters.js';
 import { useUnits } from '../stores/unitsStore.js';
 import { fmtDistance, paceFor, fmtTempDelta } from '../lib/units.js';
+import { useSettingsStore, selectAiEnabled, selectAiAutoSummary } from '../stores/settingsStore.js';
 
 /* ---- small data helpers (descending-date `daily`) ---- */
 function latest(daily: NormalizedDailySummary[], pick: (f: FitbitDay) => number | null | undefined) {
@@ -48,6 +50,10 @@ function greeting(): string {
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 }
 
+/** Optional display name from VITE_USER_NAME (.env, gitignored) — keeps the
+ * user's name out of source. Falls back to an unnamed greeting. */
+const USER_NAME = (import.meta.env.VITE_USER_NAME as string | undefined)?.trim() || '';
+
 function findRun(workouts: Workout[]): Workout | null {
   return workouts.find((w) => /run|jog/i.test(w.sport)) ?? workouts[0] ?? null;
 }
@@ -64,6 +70,8 @@ const SECTION = 'px-6 md:px-10 border-b border-hairline';
 export default function DashboardPage() {
   const { daily, workouts, loading, error } = useHealthData();
   const units = useUnits();
+  const aiEnabled = useSettingsStore(selectAiEnabled);
+  const aiAutoSummary = useSettingsStore(selectAiAutoSummary);
 
   if (error) {
     return (
@@ -114,6 +122,16 @@ export default function DashboardPage() {
 
   const run = findRun(workouts);
 
+  // Freshness signal for the AI brief: newest workout event today. When a run
+  // syncs in, this advances past the current brief's timestamp and triggers an
+  // auto-refresh (see InsightsPanel).
+  const freshnessKey = workouts
+    .filter((w) => w.date === today)
+    .map((w) => w.endTime || w.startTime)
+    .filter(Boolean)
+    .sort()
+    .pop();
+
   if (loading && daily.length === 0) {
     return (
       <div>
@@ -133,7 +151,14 @@ export default function DashboardPage() {
       <PageHeader
         title={
           <>
-            {greeting()}, <span className="text-ink-mute">Alex.</span>
+            {greeting()}
+            {USER_NAME ? (
+              <>
+                , <span className="text-ink-mute">{USER_NAME}.</span>
+              </>
+            ) : (
+              '.'
+            )}
           </>
         }
         subtitle={SUBHEAD[readiness.state]}
@@ -231,6 +256,13 @@ export default function DashboardPage() {
             {paceFor(run.durationMinutes, run.distanceKm, units) && <Metric size="lg" className="pr-6 sm:px-6 border-l border-hairline max-sm:border-l-0 max-sm:pl-0 max-sm:border-t max-sm:pt-4 max-sm:mt-3" label="Pace" value={paceFor(run.durationMinutes, run.distanceKm, units)!.value} unit={paceFor(run.durationMinutes, run.distanceKm, units)!.unit} />}
             {run.calories != null && <Metric size="lg" className="pl-6 sm:px-6 border-l border-hairline max-sm:pt-4 max-sm:mt-3 max-sm:border-t" label="Calories" value={Math.round(run.calories).toLocaleString()} />}
           </div>
+        </section>
+      )}
+
+      {/* AI daily brief — last, compact; hidden entirely when AI features are off */}
+      {aiEnabled && (
+        <section className="px-6 md:px-10 py-7 border-t border-hairline animate-fade-rise">
+          <InsightsPanel autoSummary={aiAutoSummary} freshnessKey={freshnessKey} compact />
         </section>
       )}
     </div>

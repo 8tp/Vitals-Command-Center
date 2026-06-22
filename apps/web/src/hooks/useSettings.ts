@@ -3,6 +3,7 @@ import type { IntegrationId, IntegrationMeta } from '@vcc/shared';
 import { apiGet, apiPatch } from '../lib/api.js';
 import { useHealthStore } from '../stores/healthStore.js';
 import { useUiStore } from '../stores/uiStore.js';
+import { useSettingsStore, type AppFlags } from '../stores/settingsStore.js';
 
 /** Mirror of the server's IntegrationStatus (registry meta + settings + live state). */
 export interface IntegrationStatusView extends IntegrationMeta {
@@ -18,7 +19,7 @@ export interface IntegrationStatusView extends IntegrationMeta {
 }
 
 export interface SettingsPayload {
-  app: { autoSyncEnabled: boolean };
+  app: AppFlags;
   integrations: IntegrationStatusView[];
 }
 
@@ -45,7 +46,9 @@ export function useSettings(active: boolean) {
     setLoading(true);
     setError(null);
     try {
-      setSettings(await apiGet<SettingsPayload>('/api/settings'));
+      const payload = await apiGet<SettingsPayload>('/api/settings');
+      setSettings(payload);
+      useSettingsStore.getState().setApp(payload.app);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -64,13 +67,16 @@ export function useSettings(active: boolean) {
         patch,
       );
       setSettings(next);
+      useSettingsStore.getState().setApp(next.app);
       if ('enabled' in patch) void fetchAll(range);
     },
     [fetchAll, range],
   );
 
-  const patchApp = useCallback(async (patch: { autoSyncEnabled?: boolean }) => {
-    setSettings(await apiPatch<typeof patch, SettingsPayload>('/api/settings/app', patch));
+  const patchApp = useCallback(async (patch: Partial<AppFlags>) => {
+    const next = await apiPatch<Partial<AppFlags>, SettingsPayload>('/api/settings/app', patch);
+    setSettings(next);
+    useSettingsStore.getState().setApp(next.app);
   }, []);
 
   return { settings, loading, error, patchIntegration, patchApp, reload: load };

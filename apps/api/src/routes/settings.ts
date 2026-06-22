@@ -17,12 +17,16 @@ const integrationPatch = z.object({
 
 const appPatch = z.object({
   autoSyncEnabled: z.boolean().optional(),
+  aiEnabled: z.boolean().optional(),
+  aiAutoSummary: z.boolean().optional(),
 });
 
 function buildSettings(db: import('better-sqlite3').Database) {
   return {
     app: {
       autoSyncEnabled: queries.settings.getAppSettingJson<boolean>(db, 'autoSyncEnabled', true),
+      aiEnabled: queries.settings.getAppSettingJson<boolean>(db, 'aiEnabled', true),
+      aiAutoSummary: queries.settings.getAppSettingJson<boolean>(db, 'aiAutoSummary', true),
     },
     integrations: computeIntegrationStatuses(db),
   };
@@ -53,12 +57,10 @@ export const registerSettingsRoutes: FastifyPluginAsync = async (app) => {
 
   app.patch('/settings/app', { schema: { body: appPatch } }, async (req) => {
     const patch = req.body as z.infer<typeof appPatch>;
-    if (typeof patch.autoSyncEnabled === 'boolean') {
-      queries.settings.setAppSetting(
-        req.server.db,
-        'autoSyncEnabled',
-        JSON.stringify(patch.autoSyncEnabled),
-      );
+    for (const key of ['autoSyncEnabled', 'aiEnabled', 'aiAutoSummary'] as const) {
+      if (typeof patch[key] === 'boolean') {
+        queries.settings.setAppSetting(req.server.db, key, JSON.stringify(patch[key]));
+      }
     }
     return ok(buildSettings(req.server.db));
   });

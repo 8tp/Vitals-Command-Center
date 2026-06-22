@@ -3,7 +3,14 @@ import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { request } from 'undici';
 import type { FastifyBaseLogger } from 'fastify';
-import type { Workout } from '@vcc/shared';
+import type {
+  Workout,
+  WorkoutDetail,
+  WorkoutSplit,
+  WorkoutLap,
+  WorkoutSegmentEffort,
+  WorkoutInterval,
+} from '@vcc/shared';
 
 // apps/api/src/services → up 4 = repo root. Resolve relative token-file paths
 // against the repo root, not the api workspace cwd (mirrors whoop.ts).
@@ -55,6 +62,47 @@ interface StravaActivity {
   average_heartrate?: number;
   max_heartrate?: number;
   calories?: number; // detail endpoint only
+}
+
+// --- Raw detail shapes (GET /activities/{id}, only fields we read). --------
+interface StravaSplit {
+  split: number;
+  distance: number; // meters
+  elapsed_time: number;
+  moving_time: number;
+  average_speed: number; // m/s (moving)
+  average_heartrate?: number;
+  elevation_difference?: number;
+}
+interface StravaLap {
+  lap_index: number;
+  name?: string;
+  distance: number;
+  elapsed_time: number;
+  moving_time: number;
+  average_speed: number;
+  average_heartrate?: number;
+  max_heartrate?: number;
+}
+interface StravaSegmentEffort {
+  segment: { id: number; name: string };
+  distance: number;
+  elapsed_time: number;
+  average_heartrate?: number;
+  max_heartrate?: number;
+  pr_rank?: number | null;
+}
+interface StravaActivityDetail extends StravaActivity {
+  splits_metric?: StravaSplit[];
+  laps?: StravaLap[];
+  segment_efforts?: StravaSegmentEffort[];
+  average_cadence?: number; // per-leg for runs
+  total_elevation_gain?: number;
+  average_watts?: number;
+  suffer_score?: number | null;
+  gear?: { name?: string } | null;
+  device_name?: string | null;
+  description?: string | null;
 }
 
 // --- Client ---------------------------------------------------------------
@@ -211,6 +259,68 @@ export class StravaClient {
     this.log?.info({ activities: raw.length }, 'strava fetched');
     return raw.map(mapActivity);
   }
+
+  /**
+   * Fetch one activity's full detail (splits/laps/segments + extra stats),
+   * mapped to WorkoutDetail. Also returns `calories` so callers can backfill
+   * the summary row (the list endpoint omits it). Returns null on 404 (a
+   * deleted/inaccessible activity) so a single bad id doesn't fail a sync.
+   */
+  async getActivityDetail(
+    activityId: number | string,
+  ): Promise<{ detail: WorkoutDetail; calories: number | null } | null> {
+    const token = await this.accessToken();
+    const url = `${API_BASE}/activities/${activityId}?include_all_efforts=true`;
+    for (let attempt = 0; ; attempt++) {
+      const res = await request(url, { headers: { authorization: `Bearer ${token}` } });
+      if (res.statusCode === 429 && attempt < 3) {
+        await new Promise((r) => setTimeout(r, 60_000));
+        continue;
+      }
+      if (res.statusCode === 404) {
+        this.log?.warn({ activityId }, 'strava activity not found; skipping detail');
+        return null;
+      }
+      if (res.statusCode !== 200) {
+        const text = await res.body.text();
+        throw new Error(`Strava ${url} → ${res.statusCode}: ${text}`);
+      }
+      const a = (await res.body.json()) as StravaActivityDetail;
+      const detail = mapDetail(a);
+      // Reconstruct run/walk intervals from the velocity stream (the only place
+      // interval structure lives when there's just one lap). Best-effort: a
+      // stream failure leaves intervals null rather than failing the detail.
+      detail.intervals = await this.getIntervals(activityId, token).catch((err) => {
+        this.log?.warn({ err, activityId }, 'strava streams fetch failed; no intervals');
+        return null;
+      });
+      return { detail, calories: a.calories ?? null };
+    }
+  }
+
+  /** Fetch velocity/distance/time/HR streams and segment them into intervals. */
+  private async getIntervals(
+    activityId: number | string,
+    token: string,
+  ): Promise<WorkoutInterval[] | null> {
+    const keys = 'time,distance,velocity_smooth,heartrate,moving';
+    const url = `${API_BASE}/activities/${activityId}/streams?keys=${keys}&key_by_type=true`;
+    const res = await request(url, { headers: { authorization: `Bearer ${token}` } });
+    if (res.statusCode !== 200) {
+      if (res.statusCode === 404) return null; // activity has no streams
+      const text = await res.body.text();
+      throw new Error(`Strava ${url} → ${res.statusCode}: ${text}`);
+    }
+    const body = (await res.body.json()) as Record<string, { data?: number[] }>;
+    const streams = {
+      time: body.time?.data ?? [],
+      distance: body.distance?.data ?? [],
+      velocity: body.velocity_smooth?.data ?? [],
+      heartrate: body.heartrate?.data,
+    };
+    if (streams.time.length < 4 || streams.velocity.length < 4) return null;
+    return detectIntervals(streams);
+  }
 }
 
 // --- Pure transform — easy to unit-test without HTTP. ---------------------
@@ -252,6 +362,146 @@ export function mapActivity(a: StravaActivity): Workout {
     distanceKm: a.distance != null ? a.distance / 1000 : null,
     zoneMinutes: { z1: 0, z2: 0, z3: 0, z4: 0, z5: 0 },
     notes: a.name ?? null,
+  };
+}
+
+// Run/walk threshold (m/s). Running sits ~3-5 m/s, walking ~1-1.6 m/s, so 2.4
+// cleanly separates work efforts from recovery for foot sports.
+const WORK_SPEED_MS = 2.4;
+// Ignore class flickers shorter than this (GPS noise, a brief slow corner).
+const MIN_BOUT_SEC = 18;
+
+/**
+ * Segment a velocity stream into run ('work') and walk/stand ('recovery') bouts.
+ * Pure + side-effect free. Classifies each sample by speed, then merges bouts
+ * shorter than MIN_BOUT_SEC into their neighbor so noise doesn't fragment the
+ * structure. Returns interval bouts with per-bout distance, duration, pace, HR.
+ */
+export function detectIntervals(streams: {
+  time: number[];
+  distance: number[];
+  velocity: number[];
+  heartrate?: number[];
+}): WorkoutInterval[] {
+  const { time, distance, velocity, heartrate } = streams;
+  const n = Math.min(time.length, distance.length, velocity.length);
+  if (n < 4) return [];
+
+  const cls: number[] = Array.from({ length: n }, (_, i) =>
+    (velocity[i] ?? 0) >= WORK_SPEED_MS ? 1 : 0,
+  );
+
+  const coalesce = (c: number[]): { v: number; s: number; e: number }[] => {
+    const segs: { v: number; s: number; e: number }[] = [];
+    for (let i = 0; i < c.length; i++) {
+      if (i > 0 && c[i] === c[i - 1]) segs[segs.length - 1]!.e = i;
+      else segs.push({ v: c[i]!, s: i, e: i });
+    }
+    return segs;
+  };
+
+  // Absorb sub-threshold bouts into a neighbor's class, then re-coalesce. Repeat
+  // until stable so a short walk inside a long run (or vice versa) is smoothed.
+  let segs = coalesce(cls);
+  let changed = true;
+  while (changed && segs.length > 1) {
+    changed = false;
+    for (let i = 0; i < segs.length; i++) {
+      const seg = segs[i]!;
+      if (time[seg.e]! - time[seg.s]! < MIN_BOUT_SEC) {
+        const v = i > 0 ? segs[i - 1]!.v : segs[i + 1]!.v;
+        for (let j = seg.s; j <= seg.e; j++) cls[j] = v;
+        changed = true;
+      }
+    }
+    if (changed) segs = coalesce(cls);
+  }
+
+  return segs.map((seg, idx) => {
+    const durationSeconds = time[seg.e]! - time[seg.s]!;
+    const distanceKm = (distance[seg.e]! - distance[seg.s]!) / 1000;
+    let avgHr: number | null = null;
+    if (heartrate && heartrate.length >= seg.e) {
+      let sum = 0;
+      let cnt = 0;
+      for (let j = seg.s; j <= seg.e; j++) {
+        const h = heartrate[j];
+        if (h != null && h > 0) {
+          sum += h;
+          cnt += 1;
+        }
+      }
+      avgHr = cnt ? Math.round(sum / cnt) : null;
+    }
+    return {
+      index: idx + 1,
+      kind: seg.v === 1 ? ('work' as const) : ('recovery' as const),
+      distanceKm,
+      durationSeconds,
+      avgPaceSecondsPerKm: distanceKm > 0 ? durationSeconds / distanceKm : null,
+      avgHr,
+    };
+  });
+}
+
+// pace (s/km) from a moving speed in m/s; null when stopped/unknown.
+function paceFromSpeed(metersPerSecond: number | undefined): number | null {
+  return metersPerSecond && metersPerSecond > 0 ? 1000 / metersPerSecond : null;
+}
+// pace (s/km) from distance (m) + moving time (s).
+function paceFromDistance(meters: number, movingSeconds: number): number | null {
+  return meters > 0 ? movingSeconds / (meters / 1000) : null;
+}
+
+/** Map a raw Strava activity detail to our WorkoutDetail. `fetchedAt` is set by
+ * the caller path via `new Date()`; isolated here so the transform stays pure
+ * apart from that single timestamp. */
+export function mapDetail(a: StravaActivityDetail): WorkoutDetail {
+  const splits: WorkoutSplit[] = (a.splits_metric ?? []).map((s) => ({
+    index: s.split,
+    distanceKm: s.distance / 1000,
+    elapsedSeconds: s.elapsed_time,
+    movingSeconds: s.moving_time,
+    paceSecondsPerKm: paceFromSpeed(s.average_speed),
+    avgHr: s.average_heartrate ?? null,
+    elevationGain: s.elevation_difference ?? null,
+  }));
+  const laps: WorkoutLap[] = (a.laps ?? []).map((l) => ({
+    index: l.lap_index,
+    name: l.name ?? null,
+    distanceKm: l.distance / 1000,
+    elapsedSeconds: l.elapsed_time,
+    movingSeconds: l.moving_time,
+    avgHr: l.average_heartrate ?? null,
+    maxHr: l.max_heartrate ?? null,
+    avgPaceSecondsPerKm: paceFromSpeed(l.average_speed) ?? paceFromDistance(l.distance, l.moving_time),
+  }));
+  const segments: WorkoutSegmentEffort[] = (a.segment_efforts ?? []).map((e) => ({
+    id: e.segment.id,
+    name: e.segment.name,
+    distanceKm: e.distance / 1000,
+    elapsedSeconds: e.elapsed_time,
+    avgHr: e.average_heartrate ?? null,
+    maxHr: e.max_heartrate ?? null,
+    prRank: e.pr_rank ?? null,
+  }));
+  // Strava reports run cadence per-leg; double to the conventional steps/min.
+  const isRun = (a.sport_type ?? a.type) === 'Run';
+  const avgCadence =
+    a.average_cadence != null ? Math.round(a.average_cadence * (isRun ? 2 : 1)) : null;
+
+  return {
+    splits,
+    laps,
+    segments,
+    avgCadence,
+    totalElevationGain: a.total_elevation_gain ?? null,
+    avgWatts: a.average_watts ?? null,
+    sufferScore: a.suffer_score ?? null,
+    gearName: a.gear?.name ?? null,
+    deviceName: a.device_name ?? null,
+    description: a.description ?? null,
+    fetchedAt: new Date().toISOString(),
   };
 }
 

@@ -80,9 +80,11 @@ export default function SleepPage() {
     );
   }
 
-  // Latest real session (newest first), and the previous one for the delta.
-  const last = sleep.find((s) => !s.isNap) ?? sleep[0] ?? null;
-  const prev = last ? sleep.filter((s) => !s.isNap && s.id !== last.id)[0] ?? null : null;
+  // The /api/sleep list returns sessions oldest-first (ORDER BY start_time ASC),
+  // so sort newest-first before picking "last night" and the prior night.
+  const byNewest = [...sleep].sort((a, b) => b.startTime.localeCompare(a.startTime));
+  const last = byNewest.find((s) => !s.isNap) ?? byNewest[0] ?? null;
+  const prev = last ? byNewest.filter((s) => !s.isNap && s.id !== last.id)[0] ?? null : null;
 
   // 14-day series from `daily` (ascending) for trend + debt.
   const series = toSleepSeries(daily);

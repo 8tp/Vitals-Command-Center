@@ -135,6 +135,74 @@ export interface Workout {
   notes: string | null;
 }
 
+/** One distance split (per-km by default) from a Strava activity detail. */
+export interface WorkoutSplit {
+  index: number; // 1-based split number
+  distanceKm: number;
+  elapsedSeconds: number;
+  movingSeconds: number;
+  paceSecondsPerKm: number | null; // moving pace
+  avgHr: number | null;
+  elevationGain: number | null; // meters
+}
+
+/** One lap (manual or auto) from a Strava activity. */
+export interface WorkoutLap {
+  index: number;
+  name: string | null;
+  distanceKm: number;
+  elapsedSeconds: number;
+  movingSeconds: number;
+  avgHr: number | null;
+  maxHr: number | null;
+  avgPaceSecondsPerKm: number | null;
+}
+
+/** One matched segment effort within an activity. */
+export interface WorkoutSegmentEffort {
+  id: number;
+  name: string;
+  distanceKm: number;
+  elapsedSeconds: number;
+  avgHr: number | null;
+  maxHr: number | null;
+  prRank: number | null; // 1=PR, 2/3 = 2nd/3rd best, null otherwise
+}
+
+/**
+ * One detected effort bout from the velocity stream — a continuous stretch of
+ * running ('work') or walking/standing ('recovery'). Reconstructs interval
+ * structure that distance-auto-splits and a single lap can't show.
+ */
+export interface WorkoutInterval {
+  index: number;
+  kind: 'work' | 'recovery';
+  distanceKm: number;
+  durationSeconds: number;
+  avgPaceSecondsPerKm: number | null; // null for near-stationary recovery
+  avgHr: number | null;
+}
+
+/**
+ * Rich per-activity detail (Strava). Persisted as JSON on the workout row and
+ * returned by GET /api/workouts/:id. Summary stats live on Workout itself.
+ */
+export interface WorkoutDetail {
+  splits: WorkoutSplit[];
+  laps: WorkoutLap[];
+  segments: WorkoutSegmentEffort[];
+  /** Run/walk bouts detected from the velocity stream (null if no stream). */
+  intervals?: WorkoutInterval[] | null;
+  avgCadence: number | null; // spm (Strava reports per-leg; doubled for runs)
+  totalElevationGain: number | null; // meters
+  avgWatts: number | null;
+  sufferScore: number | null; // Strava "relative effort"
+  gearName: string | null;
+  deviceName: string | null;
+  description: string | null;
+  fetchedAt: string; // ISO when detail was pulled
+}
+
 export interface MetricTrendPoint {
   date: string;
   value: number | null;

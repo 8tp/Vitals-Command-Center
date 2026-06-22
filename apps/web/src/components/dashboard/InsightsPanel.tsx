@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { InsightItem, BriefingRecord } from '@vcc/shared';
 import { apiGet, apiPost } from '../../lib/api.js';
@@ -15,16 +15,38 @@ interface TodayResp {
   summary: unknown;
 }
 
+/** Parse a timestamp to epoch ms, normalizing sqlite's tz-less 'YYYY-MM-DD HH:MM:SS' (UTC) to ISO. */
+function toEpoch(s?: string | null): number {
+  if (!s) return NaN;
+  const iso = /[zZ]|[+-]\d\d:?\d\d$/.test(s) ? s : `${s.replace(' ', 'T')}Z`;
+  return Date.parse(iso);
+}
+
 /**
  * DAILY BRIEF — the persistent ops-dispatch panel. Renders today's flags
- * (severity-coded) and the markdown briefing styled like a field dispatch:
- * a mono meta line, then clean typographic body.
+ * (severity-coded) and the markdown briefing styled like a field dispatch.
+ *
+ * When `autoSummary` is on it generates today's brief automatically: once when
+ * none exists, and again when `freshnessKey` (the newest data event today, e.g.
+ * a run that just synced) is newer than the current brief — so the brief
+ * refreshes itself after a morning workout. The Regenerate button is manual and
+ * always available.
  */
-export function InsightsPanel() {
+export function InsightsPanel({
+  autoSummary = false,
+  freshnessKey,
+  compact = false,
+}: {
+  autoSummary?: boolean;
+  freshnessKey?: string;
+  /** Dashboard placement: tighter header + a capped, scrollable brief body. */
+  compact?: boolean;
+}) {
   const [data, setData] = useState<TodayResp | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const config = useConfigStatus();
+  const autoRef = useRef<string | null>(null);
 
   const load = useCallback(() => {
     apiGet<TodayResp>('/api/insights/today')
@@ -75,6 +97,23 @@ export function InsightsPanel() {
     }
   }, []);
 
+  // Auto-generate: when enabled, write the brief if it's missing for today, or
+  // refresh it when newer data (freshnessKey) postdates the current brief. The
+  // ref guards against re-firing for the same state (no generation loop).
+  useEffect(() => {
+    if (!autoSummary || generating || !data || !data.summary) return;
+    const missing = !data.briefing;
+    const stale =
+      !!data.briefing &&
+      !!freshnessKey &&
+      toEpoch(data.briefing.createdAt) < toEpoch(freshnessKey);
+    if (!missing && !stale) return;
+    const key = missing ? `missing:${data.date}` : `stale:${freshnessKey}`;
+    if (autoRef.current === key) return;
+    autoRef.current = key;
+    void generate();
+  }, [autoSummary, data, freshnessKey, generating, generate]);
+
   const flags = data?.insights ?? [];
   const briefDate = data?.briefing
     ? fmtDate(data.briefing.createdAt.slice(0, 10), 'EEEE, MMM d')
@@ -84,11 +123,13 @@ export function InsightsPanel() {
     : null;
 
   return (
-    <div className="card flex flex-col h-full overflow-hidden">
+    <div className={`card flex flex-col overflow-hidden ${compact ? '' : 'h-full'}`}>
       {/* Header */}
-      <div className="px-5 py-5 flex items-start justify-between gap-3">
+      <div className={`px-5 flex items-start justify-between gap-3 ${compact ? 'py-4' : 'py-5'}`}>
         <div>
-          <h2 className="font-display text-lg font-semibold text-ink">Your daily brief</h2>
+          <h2 className={`font-display font-semibold text-ink ${compact ? 'text-[15px]' : 'text-lg'}`}>
+            Your daily brief
+          </h2>
           <div className="text-sm text-ink-mute mt-1">
             {briefDate}
             {briefTime && <span> · {briefTime}</span>}
@@ -103,7 +144,7 @@ export function InsightsPanel() {
               disabled={generating || !data?.summary}
               title={!data?.summary ? 'Sync first to populate today' : 'Refresh your brief'}
             >
-              {generating ? 'Writing…' : data?.briefing ? 'Refresh' : 'Generate'}
+              {generating ? 'Writing…' : data?.briefing ? 'Regenerate' : 'Generate'}
             </button>
           )}
           <Link
@@ -141,7 +182,9 @@ export function InsightsPanel() {
 
       {/* Brief body */}
       {data?.briefing ? (
-        <div className="px-5 py-5 mt-4 flex-1 overflow-y-auto scrollbar-thin">
+        <div
+          className={`px-5 mt-4 overflow-y-auto scrollbar-thin ${compact ? 'py-4 max-h-[20rem]' : 'py-5 flex-1'}`}
+        >
           <Markdown>{data.briefing.content}</Markdown>
         </div>
       ) : config && !config.claudeApiConfigured ? (

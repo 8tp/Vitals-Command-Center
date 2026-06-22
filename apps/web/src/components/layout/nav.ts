@@ -6,10 +6,17 @@ export const NAV = [
   { to: '/sleep', label: 'Sleep', short: 'Sleep', icon: 'sleep' },
   { to: '/workouts', label: 'Activity', short: 'Activity', icon: 'activity' },
   { to: '/habits', label: 'Habits', short: 'Habits', icon: 'habits' },
-  { to: '/ask', label: 'Ask AI', short: 'Ask AI', icon: 'ask' },
+  { to: '/ask', label: 'Ask AI', short: 'Ask AI', icon: 'ask', ai: true },
 ] as const satisfies ReadonlyArray<{
   to: string;
   label: string;
   short: string;
   icon: NavIconKey;
+  /** AI-only tab: hidden when the AI master switch is off. */
+  ai?: boolean;
 }>;
+
+/** Nav items visible given the AI master switch (drops AI-only tabs when off). */
+export function visibleNav(aiEnabled: boolean): (typeof NAV)[number][] {
+  return NAV.filter((item) => aiEnabled || !('ai' in item && item.ai));
+}

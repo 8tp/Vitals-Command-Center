@@ -34,6 +34,7 @@ export interface SyncResult {
   dailyUpserted: number;
   sleepUpserted: number;
   workoutUpserted: number;
+  detailFetched: number; // Strava activities whose rich detail was backfilled
 }
 
 const EMPTY_WHOOP: WhoopFetchResult = { daily: [], sleepSessions: [], workouts: [] };
@@ -164,17 +165,60 @@ export async function runSync(
       ...strava.workouts,
     ]);
 
+    // Backfill rich detail (splits/laps/segments + calories) for Strava runs
+    // that don't have it yet — eager so the run modal and AI context have data
+    // without a click. One extra API call per new activity (rate-limit safe).
+    const detailFetched = await backfillStravaDetail(db, log, start, end);
+
     const result: SyncResult = {
       dates: daily.dates,
       dailyUpserted: daily.upserted,
       sleepUpserted,
       workoutUpserted,
+      detailFetched,
     };
     log.info(result, 'sync complete');
     return result;
   } finally {
     running = false;
   }
+}
+
+/**
+ * Fetch + persist detail for Strava workouts in [start,end] that lack it. Gated
+ * the same way as the Strava pull (creds + enabled + token). Each activity is
+ * an independent fetch; a single failure is logged and skipped so one bad id
+ * never aborts the sync.
+ */
+async function backfillStravaDetail(
+  db: Database,
+  log: FastifyBaseLogger,
+  start: string,
+  end: string,
+): Promise<number> {
+  if (!process.env.STRAVA_CLIENT_ID) return 0;
+  if (!queries.settings.getIntegrationSetting(db, 'strava').enabled) return 0;
+  const ids = queries.workouts.listMissingDetail(db, 'strava', start, end);
+  if (ids.length === 0) return 0;
+
+  const client = new StravaClient(undefined, log.child({ module: 'strava-detail' }));
+  if (!client.hasTokens()) return 0;
+
+  let fetched = 0;
+  for (const id of ids) {
+    const activityId = id.replace(/^strava-/, '');
+    try {
+      const res = await client.getActivityDetail(activityId);
+      if (!res) continue; // 404 → skip
+      queries.workouts.upsertDetail(db, id, res.detail);
+      if (res.calories != null) queries.workouts.setCalories(db, id, res.calories);
+      fetched += 1;
+    } catch (err) {
+      log.warn({ err, id }, 'strava detail fetch failed; skipping');
+    }
+  }
+  log.info({ fetched, candidates: ids.length }, 'strava detail backfilled');
+  return fetched;
 }
 
 function writeSessions(

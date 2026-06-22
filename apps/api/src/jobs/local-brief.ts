@@ -10,6 +10,15 @@ export async function runLocalBrief(
   log: FastifyBaseLogger,
   date = todayIso(),
 ): Promise<{ date: string; chars: number }> {
+  // Respect the app-level AI switches: the master gate and the auto-generate
+  // toggle. Manual generation (the dashboard Regenerate button) goes through the
+  // route's generateLocalBrief directly and is unaffected by this guard.
+  const aiEnabled = queries.settings.getAppSettingJson<boolean>(db, 'aiEnabled', true);
+  const autoSummary = queries.settings.getAppSettingJson<boolean>(db, 'aiAutoSummary', true);
+  if (!aiEnabled || !autoSummary) {
+    log.info({ date, aiEnabled, autoSummary }, 'local brief: auto-generate disabled, skipping');
+    return { date, chars: 0 };
+  }
   log.info({ date }, 'local brief starting');
   const content = await generateLocalBrief(db, date);
   queries.briefings.store(db, { date, type: 'daily', content, metricsSnapshot: null });

@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { Workout, WorkoutSource } from '@vcc/shared';
+import type { Workout, WorkoutSource, WorkoutDetail } from '@vcc/shared';
 
 interface WorkoutRow {
   id: string;
@@ -84,4 +84,50 @@ export function upsert(db: Database, w: Workout): void {
     z5: w.zoneMinutes.z5,
     notes: w.notes,
   });
+}
+
+/** Persist rich detail (JSON) for an already-upserted workout. */
+export function upsertDetail(db: Database, id: string, detail: WorkoutDetail): void {
+  db.prepare('UPDATE workouts SET detail_json = ? WHERE id = ?').run(JSON.stringify(detail), id);
+}
+
+/** Optionally refresh calories when the detail endpoint supplies a value the
+ * summary list omits (Strava: calories live only on the detail endpoint). */
+export function setCalories(db: Database, id: string, calories: number): void {
+  db.prepare('UPDATE workouts SET calories = ? WHERE id = ?').run(calories, id);
+}
+
+/** A workout row plus its parsed detail (null until fetched). */
+export function getWithDetail(
+  db: Database,
+  id: string,
+): { workout: Workout; detail: WorkoutDetail | null } | null {
+  const row = db.prepare('SELECT * FROM workouts WHERE id = ?').get(id) as
+    | (WorkoutRow & { detail_json: string | null })
+    | undefined;
+  if (!row) return null;
+  let detail: WorkoutDetail | null = null;
+  if (row.detail_json) {
+    try {
+      detail = JSON.parse(row.detail_json) as WorkoutDetail;
+    } catch {
+      detail = null;
+    }
+  }
+  return { workout: toWorkout(row), detail };
+}
+
+/** IDs of workouts in [start,end] from `source` that have no detail yet. */
+export function listMissingDetail(
+  db: Database,
+  source: WorkoutSource,
+  start: string,
+  end: string,
+): string[] {
+  const rows = db
+    .prepare(
+      'SELECT id FROM workouts WHERE source = ? AND date BETWEEN ? AND ? AND detail_json IS NULL',
+    )
+    .all(source, start, end) as { id: string }[];
+  return rows.map((r) => r.id);
 }

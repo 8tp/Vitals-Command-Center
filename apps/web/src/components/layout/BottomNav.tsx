@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
-import { NAV } from './nav.js';
+import { visibleNav } from './nav.js';
 import { NAV_ICONS } from '../shared/icons.js';
+import { useSettingsStore, selectAiEnabled } from '../../stores/settingsStore.js';
 
 /**
  * Mobile bottom tab bar — the only navigation below md (the Sidebar is
@@ -9,6 +10,7 @@ import { NAV_ICONS } from '../shared/icons.js';
  * the iPhone home indicator when installed as a PWA.
  */
 export function BottomNav() {
+  const aiEnabled = useSettingsStore(selectAiEnabled);
   return (
     <nav
       className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-bg-base/90 backdrop-blur-md"
@@ -16,7 +18,7 @@ export function BottomNav() {
       aria-label="Primary"
     >
       <ul className="flex items-stretch">
-        {NAV.map((item) => {
+        {visibleNav(aiEnabled).map((item) => {
           const Icon = NAV_ICONS[item.icon];
           return (
             <li key={item.to} className="flex-1">

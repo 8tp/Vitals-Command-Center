@@ -10,9 +10,6 @@
     "clean": "rm -rf dist .vite *.tsbuildinfo"
   },
   "dependencies": {
-    "@fontsource/ibm-plex-mono": "^5.2.7",
-    "@fontsource/ibm-plex-sans": "^5.2.8",
-    "@fontsource/space-grotesk": "^5.2.10",
     "@vcc/shared": "*",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

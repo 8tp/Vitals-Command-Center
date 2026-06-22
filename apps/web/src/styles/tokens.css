@@ -2,13 +2,24 @@
  * Vitals — design tokens · "Instrument" (Soft Daylight)
  * ------------------------------------------------------------------
  * Data-forward daylight: cool silver-white canvas, edge-to-edge layout
- * grouped by HAIRLINES + whitespace (not cards), bold Geist numerals,
+ * grouped by HAIRLINES + whitespace (not cards), bold Plus Jakarta numerals,
  * ONE locked UI accent = electric blue #2563EB. Sleep stages get their
  * own calm multi-hue data palette (indigo / teal / sky / amber).
  *
  * Token NAMES are stable across both themes (components consume by name);
  * only VALUES change. DEFAULT theme = LIGHT (this is a daylight design).
  */
+
+/* Brand typeface — Plus Jakarta Sans (self-hosted variable woff2, SIL OFL).
+   Same family as the marketing assets, so app + brand stay in sync. */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-variable.woff2') format('woff2');
+}
+
 :root {
   /* Structural surfaces — cool silver-white daylight */
   --base: #F6F8FA;            /* page canvas */
@@ -66,9 +77,9 @@
   --device-strava-soft: rgba(252, 82, 0, 0.12);
 
   /* Fonts — Geist everywhere, Geist Mono for technical labels/axes only. */
-  --font-display: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Menlo', monospace;
 
   /* Radii — one big consistent squircle + small for chips/inputs */
   --radius-sm: 12px;

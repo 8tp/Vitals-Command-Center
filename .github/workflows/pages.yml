@@ -1,10 +1,19 @@
 name: Deploy marketing site (GitHub Pages)
 
 # Publishes the static marketing site in site/ to GitHub Pages.
-# Requires Pages to be enabled with Source = "GitHub Actions"
-# (Settings → Pages, or `gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow`).
-# Pages on a PRIVATE repo needs GitHub Pro/Team/Enterprise; on Free, make the repo
-# public (e.g. at release) and the next push to main publishes automatically.
+#
+# ARMED BUT GUARDED: the deploy job only runs once the repo variable
+# PAGES_ENABLED == 'true', so it skips (cleanly, no red X) until release.
+#
+# To go live at release:
+#   1. Make Pages available — make the repo PUBLIC (Free plan), or upgrade to
+#      GitHub Pro to keep it private.
+#   2. Enable Pages with Source = GitHub Actions:
+#        gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow
+#      (or Settings → Pages → Build and deployment → Source: GitHub Actions)
+#   3. Flip the switch:  gh variable set PAGES_ENABLED --body true
+#   Then any push to main touching site/** publishes automatically
+#   (or run it now: gh workflow run "Deploy marketing site (GitHub Pages)").
 
 on:
   push:
@@ -27,6 +36,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Skips (no failure) until you set the PAGES_ENABLED repo variable at release.
+    if: ${{ vars.PAGES_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages

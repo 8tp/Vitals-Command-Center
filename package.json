@@ -2,7 +2,16 @@
   "name": "vitals-command-center",
   "version": "0.1.0",
   "private": true,
-  "description": "Personal health intelligence platform aggregating WHOOP, Oura, and Apple Watch data into a tactical dashboard.",
+  "description": "Self-hosted, privacy-first health dashboard — unify Fitbit, Oura, WHOOP, Apple Health & Strava into one daily readiness read with a local AI brief.",
+  "license": "MIT",
+  "homepage": "https://vitals.chuds.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/8tp/Vitals-Command-Center.git"
+  },
+  "bugs": {
+    "url": "https://github.com/8tp/Vitals-Command-Center/issues"
+  },
   "type": "module",
   "workspaces": [
     "apps/*",

@@ -47,7 +47,7 @@ Then:
 ## 2. Clone and install
 
 ```bash
-git clone https://github.com/8tp/vitals-command-center.git
+git clone https://github.com/8tp/Vitals-Command-Center.git
 cd vitals-command-center
 npm install
 ```

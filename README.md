@@ -94,7 +94,7 @@ a fully populated dashboard with no accounts and no OAuth.
 
 ```bash
 # 1. Clone + configure
-git clone https://github.com/8tp/vitals-command-center.git
+git clone https://github.com/8tp/Vitals-Command-Center.git
 cd vitals-command-center
 cp .env.example .env
 

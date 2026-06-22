@@ -65,7 +65,7 @@ Please report security issues **privately** — do not open a public issue for a
 exploitable vulnerability.
 
 - Preferred: open a private **GitHub Security Advisory** at
-  `https://github.com/8tp/vitals-command-center/security/advisories/new`.
+  `https://github.com/8tp/Vitals-Command-Center/security/advisories/new`.
 - Or contact the maintainer (**8tp**) through the contact listed on the GitHub
   profile.
 

@@ -12,7 +12,7 @@ an issue and ask.
 Prerequisites: **Node 20+** (the repo targets Node 22 for some tooling) and npm.
 
 ```bash
-git clone https://github.com/8tp/vitals-command-center.git
+git clone https://github.com/8tp/Vitals-Command-Center.git
 cd vitals-command-center
 npm install
 cp .env.example .env        # fill in only what you need

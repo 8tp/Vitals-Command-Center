@@ -23,7 +23,7 @@ You need two things on the box:
 
 ```bash
 # Clone + configure (the defaults in .env are enough for the demo)
-git clone https://github.com/8tp/vitals-command-center.git
+git clone https://github.com/8tp/Vitals-Command-Center.git
 cd vitals-command-center
 cp .env.example .env
 

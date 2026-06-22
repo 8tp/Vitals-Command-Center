@@ -1,0 +1,33 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Apple touch icon master: FULL-BLEED square (no baked rounding, no
+       transparency) — iOS applies its own squircle mask. Same Instrument mark
+       as icon.svg, content kept clear of the corners iOS rounds. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="512" cy="300" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.20"/>
+      <stop offset="0.62" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- full-bleed backdrop (opaque, square) -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#sheen)"/>
+
+  <!-- content scaled to ~90% so it clears the iOS corner mask -->
+  <g transform="translate(512 512) scale(0.9) translate(-512 -512)">
+    <!-- readiness gauge track (270°, opening at bottom) -->
+    <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="#ffffff" stroke-opacity="0.20" stroke-width="44" stroke-linecap="round"/>
+    <!-- readiness progress (~66%) -->
+    <path d="M 271.6 740.4 A 340 340 0 1 1 752.4 740.4" fill="none" stroke="#ffffff" stroke-width="44" stroke-linecap="round" stroke-dasharray="1057 1700"/>
+    <!-- progress endpoint marker -->
+    <circle cx="744.6" cy="252.1" r="15" fill="#2563EB" stroke="#ffffff" stroke-width="10"/>
+    <!-- heartbeat / pulse through the center -->
+    <path d="M 352 512 L 452 512 L 486 470 L 514 512 L 540 512 L 566 402 L 596 624 L 622 512 L 672 512"
+          fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

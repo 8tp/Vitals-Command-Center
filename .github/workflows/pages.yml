@@ -1,0 +1,45 @@
+name: Deploy marketing site (GitHub Pages)
+
+# Publishes the static marketing site in site/ to GitHub Pages.
+# Requires Pages to be enabled with Source = "GitHub Actions"
+# (Settings → Pages, or `gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow`).
+# Pages on a PRIVATE repo needs GitHub Pro/Team/Enterprise; on Free, make the repo
+# public (e.g. at release) and the next push to main publishes automatically.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch: {}
+
+# Least-privilege token: only what Pages deployment needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One Pages deploy at a time; don't cancel an in-progress production deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site/ artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

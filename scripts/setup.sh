@@ -62,7 +62,13 @@ cat <<BANNER
 ${GREEN}
 ✓ setup complete${RESET}
 next steps:
-  1. Edit .env — at minimum WHOOP, OURA, ANTHROPIC creds
+  1. npm run db:seed   # optional: 90 days of demo data to explore right away
   2. npm run dev       # api (3001) + web (5173) + mcp-server concurrently
   3. Open http://localhost:5173
+
+to use your own data, edit .env:
+  - one source is enough to start — Oura is easiest (a Personal Access Token,
+    no OAuth); see docs/QUICKSTART.md
+  - the AI brief needs an AI provider — set AI_PROVIDERS=ollama for fully local,
+    or keep the default claude/codex CLI. No Anthropic API key required.
 BANNER

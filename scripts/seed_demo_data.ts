@@ -7,6 +7,7 @@
  *   npm run db:seed                     # default 90 days ending today
  *   tsx scripts/seed_demo_data.ts 60    # custom day count
  */
+import 'dotenv/config'; // load .env so a custom DB_PATH seeds the configured DB
 import { openDb, queries } from '@vcc/db';
 import { randomUUID } from 'node:crypto';
 import { normalizeAndUpsert } from '../apps/api/src/services/normalizer.js';

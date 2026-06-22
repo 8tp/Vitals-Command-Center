@@ -1,13 +1,14 @@
 {
+  "//": "EXAMPLE MCP config for Claude Code / Claude Desktop. Replace the two placeholders: <node> with your node binary (run `which node`), and /ABSOLUTE/PATH/TO/vitals with your repo path.",
   "mcpServers": {
     "vitals-command-center": {
-      "command": "/Users/user/.local/share/fnm/node-versions/v20.11.1/installation/bin/node",
+      "command": "<node>",
       "args": [
-        "/Users/user/Personal/Health/node_modules/tsx/dist/cli.mjs",
-        "/Users/user/Personal/Health/apps/mcp-server/src/index.ts"
+        "/ABSOLUTE/PATH/TO/vitals/node_modules/tsx/dist/cli.mjs",
+        "/ABSOLUTE/PATH/TO/vitals/apps/mcp-server/src/index.ts"
       ],
       "env": {
-        "DB_PATH": "/Users/user/Personal/Health/data/vitals.db"
+        "DB_PATH": "/ABSOLUTE/PATH/TO/vitals/data/vitals.db"
       }
     }
   }

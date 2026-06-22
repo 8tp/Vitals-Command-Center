@@ -8,7 +8,8 @@
 
 set -euo pipefail
 
-REPO="${VCC_REPO:-/Users/user/Personal/Health}"
+# Repo root: override with VCC_REPO, else derive from this script's location.
+REPO="${VCC_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$REPO"
 
 DB="$REPO/data/vitals.db"
@@ -29,10 +30,11 @@ fi
 log "running sync"
 npm run --silent sync:manual -- --days 2 >> "$LOG" 2>&1 || log "sync failed (continuing)"
 
-# 3. Need at least Oura readiness for today to be worth briefing.
-READY=$(sqlite3 "$DB" "SELECT oura_readiness_score FROM daily_summary WHERE date='$TODAY' AND oura_readiness_score IS NOT NULL")
-if [ -z "$READY" ]; then
-  log "no Oura readiness for $TODAY yet — will retry next window"
+# 3. Only brief once there's data for today (any source). Adjust this gate to
+#    your primary source if you want to wait for a specific metric.
+ROWS=$(sqlite3 "$DB" "SELECT COUNT(*) FROM daily_summary WHERE date='$TODAY'")
+if [ "$ROWS" -eq 0 ]; then
+  log "no data for $TODAY yet — will retry next window"
   exit 0
 fi
 

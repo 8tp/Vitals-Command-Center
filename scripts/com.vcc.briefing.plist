@@ -9,12 +9,13 @@
     <array>
         <string>/bin/zsh</string>
         <string>-lc</string>
-        <string>/Users/user/Personal/Health/scripts/brief-if-ready.sh</string>
+        <string>/ABSOLUTE/PATH/TO/vitals/scripts/brief-if-ready.sh</string>
     </array>
 
-    <!-- Fire every 30 min from 07:00 to 12:00 local. Script is idempotent:
-         first window with Oura data for today writes the briefing; later
-         windows short-circuit. Handles weekday early-rise and weekend sleep-in. -->
+    <!-- EXAMPLE (macOS). Replace /ABSOLUTE/PATH/TO/vitals above with your repo
+         path before `launchctl load`. Fires every 30 min from 07:00 to 12:00
+         local; the script is idempotent (first window with data for today
+         writes the briefing, later windows short-circuit). -->
     <key>StartCalendarInterval</key>
     <array>
         <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>0</integer></dict>
@@ -31,9 +32,9 @@
     </array>
 
     <key>StandardOutPath</key>
-    <string>/Users/user/Personal/Health/data/briefings/launchd.out.log</string>
+    <string>/ABSOLUTE/PATH/TO/vitals/data/briefings/launchd.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/user/Personal/Health/data/briefings/launchd.err.log</string>
+    <string>/ABSOLUTE/PATH/TO/vitals/data/briefings/launchd.err.log</string>
 
     <key>RunAtLoad</key>
     <false/>

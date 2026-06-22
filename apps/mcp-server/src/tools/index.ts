@@ -16,7 +16,7 @@ export const TOOL_DEFINITIONS = [
   {
     name: 'get_full_context',
     description:
-      "ONE-SHOT briefing packet. Returns today's full summary + 14-day compact window + 7-day workouts + previous briefing + a briefingTemplate string. Call this first when the user asks for a morning briefing, status, or general health read. After composing the briefing, call save_briefing to persist it.",
+      "ONE-SHOT briefing packet. Returns today's full summary + 14-day compact window + recent runs (with per-split pace/HR) + previous briefing + a briefingTemplate string. Call this first when the user asks for a morning briefing, status, or general health read. After composing the briefing, call save_briefing to persist it.",
     inputSchema: {
       type: 'object',
       properties: { date: { type: 'string', description: 'YYYY-MM-DD, defaults to today' } },

@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { queries } from '@vcc/db';
 import { schemas } from '@vcc/shared';
 import { parseRange, todayIso } from '../lib/range.js';

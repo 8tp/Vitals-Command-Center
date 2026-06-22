@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import type { Database } from 'better-sqlite3';
 import { z } from 'zod';
 import { queries } from '@vcc/db';
 import { INTEGRATION_IDS, type IntegrationId } from '@vcc/shared';
@@ -21,7 +22,7 @@ const appPatch = z.object({
   aiAutoSummary: z.boolean().optional(),
 });
 
-function buildSettings(db: import('better-sqlite3').Database) {
+function buildSettings(db: Database) {
   return {
     app: {
       autoSyncEnabled: queries.settings.getAppSettingJson<boolean>(db, 'autoSyncEnabled', true),

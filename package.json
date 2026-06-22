@@ -24,6 +24,7 @@
     "dev:mcp": "npm run dev --workspace apps/mcp-server",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc -b",
+    "test": "node --import tsx --test tests/*.test.ts",
     "lint": "eslint \"{apps,packages,scripts}/**/*.{ts,tsx}\"",
     "format": "prettier --write \"{apps,packages,scripts}/**/*.{ts,tsx,css,json,md}\"",
     "db:migrate": "npm run db:migrate --workspace packages/db",

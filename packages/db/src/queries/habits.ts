@@ -121,7 +121,7 @@ export function streaks(db: Database): HabitStreak[] {
     const dates = new Set(rows.map((r) => r.date));
     let current = 0;
     const today = new Date().toISOString().slice(0, 10);
-    let cursor = new Date(today);
+    const cursor = new Date(today);
     while (dates.has(cursor.toISOString().slice(0, 10))) {
       current += 1;
       cursor.setDate(cursor.getDate() - 1);

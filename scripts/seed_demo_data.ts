@@ -77,6 +77,10 @@ function main() {
 
   for (let i = 0; i < days; i++) {
     const date = addDays(start, i);
+    // workouts + sleep_sessions FK to daily_summary(date), so the parent row must
+    // exist before we upsert children. normalizeAndUpsert (below) later fills in
+    // the real consensus values via ON CONFLICT(date) DO UPDATE.
+    db.prepare('INSERT OR IGNORE INTO daily_summary (date, devices_active) VALUES (?, 0)').run(date);
     baselineHrv += gauss(rng, 0.02, 0.15);
     baselineRhr += gauss(rng, -0.01, 0.1);
 

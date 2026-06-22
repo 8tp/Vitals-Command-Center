@@ -80,6 +80,16 @@ export function IconHabits(props: IconProps) {
   );
 }
 
+/** Trends — rising trend line with an arrow head. */
+export function IconTrends(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4 16.5l4.5-5 3.5 3 6.5-7.5" />
+      <path d="M14.5 6.5H19V11" />
+    </Svg>
+  );
+}
+
 /** Ask Claude — friendly sparkle. */
 export function IconSparkle(props: IconProps) {
   return (
@@ -345,6 +355,7 @@ export const NAV_ICONS = {
   sleep: IconSleep,
   activity: IconActivity,
   habits: IconHabits,
+  trends: IconTrends,
   sparkle: IconSparkle,
   ask: IconAskAI,
 } as const;

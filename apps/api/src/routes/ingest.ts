@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import type { Database } from 'better-sqlite3';
 import { queries } from '@vcc/db';
 import { ok, fail } from '../lib/envelope.js';
 import { normalizeAndUpsert } from '../services/normalizer.js';
@@ -83,6 +84,6 @@ export const registerIngestRoutes: FastifyPluginAsync = async (app) => {
   });
 };
 
-function ensureDailyStub(db: import('better-sqlite3').Database, date: string): void {
+function ensureDailyStub(db: Database, date: string): void {
   db.prepare(`INSERT OR IGNORE INTO daily_summary (date, devices_active) VALUES (?, 0)`).run(date);
 }

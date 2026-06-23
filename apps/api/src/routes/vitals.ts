@@ -1,6 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { queries } from '@vcc/db';
 import { DEVICE_SOURCES, type DeviceSource } from '@vcc/shared';
 import { parseRange } from '../lib/range.js';
 import { ok } from '../lib/envelope.js';

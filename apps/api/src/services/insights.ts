@@ -1,6 +1,7 @@
 import type { Database } from 'better-sqlite3';
-import type { NormalizedDailySummary, InsightItem } from '@vcc/shared';
-import { ALERT_THRESHOLDS } from '@vcc/shared';
+import type { NormalizedDailySummary, InsightItem, DeviceSource } from '@vcc/shared';
+import { ALERT_THRESHOLDS, DEVICE_LABEL } from '@vcc/shared';
+import { computeIntegrationStatuses } from '../lib/integrationStatus.js';
 
 /**
  * Rule-based insights (fast, deterministic, no LLM). These sit alongside the
@@ -74,7 +75,13 @@ export function buildInsightsForDate(db: Database, today: NormalizedDailySummary
     });
   }
 
-  // Device coverage advisory
+  // Device coverage advisory — relative to the wearables the user actually runs
+  // (enabled AND configured). A device you don't use (dormant WHOOP/Oura with no
+  // credentials) is not "missing"; it simply isn't part of your setup.
+  const expected = computeIntegrationStatuses(db)
+    .filter((s) => s.kind === 'wearable' && s.enabled && s.configured)
+    .map((s) => s.id as DeviceSource);
+
   if (today.devices.active === 0) {
     out.push({
       id: 'no-devices',
@@ -83,14 +90,18 @@ export function buildInsightsForDate(db: Database, today: NormalizedDailySummary
       body: 'Falling back to habit tracker + previous trends. Not an anomaly.',
       sources: [],
     });
-  } else if (today.devices.active < 3) {
-    out.push({
-      id: 'partial-coverage',
-      severity: 'blue',
-      title: `Running on ${today.devices.active}/3 devices`,
-      body: `Missing: ${['whoop', 'oura', 'apple'].filter((d) => !today.devices[d as 'whoop' | 'oura' | 'apple']).join(', ')}.`,
-      sources: [],
-    });
+  } else {
+    const missing = expected.filter((d) => !today.devices[d]);
+    // Only flag when you run 2+ devices and one of YOURS is absent today.
+    if (expected.length >= 2 && missing.length > 0) {
+      out.push({
+        id: 'partial-coverage',
+        severity: 'blue',
+        title: `Running on ${expected.length - missing.length}/${expected.length} devices`,
+        body: `Missing today: ${missing.map((d) => DEVICE_LABEL[d]).join(', ')}.`,
+        sources: [],
+      });
+    }
   }
 
   return out;

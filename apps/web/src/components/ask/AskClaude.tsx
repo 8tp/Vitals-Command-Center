@@ -29,7 +29,7 @@ export function AskClaude() {
   const { daily } = useHealthData();
   const readiness = deriveReadiness(daily);
 
-  const { ask, answer, pending, error, stop } = useAsk();
+  const { ask, answer, typing, pending, error, stop } = useAsk();
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   // The assistant message currently receiving streamed tokens.
@@ -46,10 +46,11 @@ export function AskClaude() {
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: answer } : m)));
   }, [answer]);
 
-  // When the request settles, surface any error in the bubble and release the
-  // streaming slot so the next question starts a fresh assistant message.
+  // When the request settles AND the typewriter has caught up, surface any error
+  // in the bubble and release the streaming slot so the next question starts a
+  // fresh assistant message. Waiting on `typing` keeps the reveal mirroring.
   useEffect(() => {
-    if (pending) return;
+    if (pending || typing) return;
     const id = streamingId.current;
     if (!id) return;
     streamingId.current = null;
@@ -60,7 +61,7 @@ export function AskClaude() {
           : m,
       ),
     );
-  }, [pending, error]);
+  }, [pending, typing, error]);
 
   // Keep the newest message in view as it streams in.
   useLayoutEffect(() => {
@@ -109,7 +110,11 @@ export function AskClaude() {
       {/* Conversation thread */}
       <div className="flex-1 flex flex-col gap-5 py-4 pb-7">
         {messages.map((m, i) => (
-          <ChatMessage key={m.id} message={m} streaming={pending && i === messages.length - 1} />
+          <ChatMessage
+            key={m.id}
+            message={m}
+            streaming={(pending || typing) && i === messages.length - 1}
+          />
         ))}
         <div ref={scrollAnchor} aria-hidden className="h-px" />
       </div>

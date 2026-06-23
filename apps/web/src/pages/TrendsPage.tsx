@@ -205,9 +205,12 @@ export default function TrendsPage() {
               <>
                 <Sparkline
                   values={series.values}
+                  labels={series.dates}
                   baseline={avg}
                   height={120}
                   color={c.upIsGood ? 'var(--signal)' : 'var(--accent)'}
+                  format={(v) => `${fmtNum(v, c.dp)}${c.unit}`}
+                  formatLabel={(d) => fmtDate(d, 'EEE, MMM d')}
                 />
                 <div className="flex justify-between meta-mono mt-2">
                   <span>{series.dates[0] ? fmtDate(series.dates[0], 'MMM d') : ''}</span>

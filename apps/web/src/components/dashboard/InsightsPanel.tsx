@@ -115,11 +115,16 @@ export function InsightsPanel({
   }, [autoSummary, data, freshnessKey, generating, generate]);
 
   const flags = data?.insights ?? [];
-  const briefDate = data?.briefing
-    ? fmtDate(data.briefing.createdAt.slice(0, 10), 'EEEE, MMM d')
-    : fmtDate(data?.date ?? new Date().toISOString().slice(0, 10), 'EEEE, MMM d');
-  const briefTime = data?.briefing
-    ? new Date(data.briefing.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  // Use the briefing's logical civil date for the header (the day it's about),
+  // and the UTC-normalized createdAt for the time — sqlite stores a tz-less
+  // 'YYYY-MM-DD HH:MM:SS' in UTC, which new Date() would misread as local.
+  const briefDate = fmtDate(
+    data?.briefing?.date ?? data?.date ?? new Date().toISOString().slice(0, 10),
+    'EEEE, MMM d',
+  );
+  const briefEpoch = data?.briefing ? toEpoch(data.briefing.createdAt) : NaN;
+  const briefTime = Number.isFinite(briefEpoch)
+    ? new Date(briefEpoch).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null;
 
   return (

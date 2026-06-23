@@ -13,7 +13,15 @@ export default function AskPage() {
 
   return (
     <div className="max-w-[780px] mx-auto px-4 sm:px-6">
-      {config?.claudeApiConfigured ? <AskClaude /> : <AskEmptyState />}
+      {config === undefined ? (
+        // Hold a stable, empty frame until config resolves — avoids flashing the
+        // setup empty-state for a beat before the chat mounts.
+        <div className="min-h-[60vh]" aria-busy="true" />
+      ) : config?.claudeApiConfigured ? (
+        <AskClaude />
+      ) : (
+        <AskEmptyState />
+      )}
     </div>
   );
 }

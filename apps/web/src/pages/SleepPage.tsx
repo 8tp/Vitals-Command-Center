@@ -234,7 +234,14 @@ export default function SleepPage() {
         </div>
         {nights.length >= 2 ? (
           <>
-            <Sparkline values={sleepHours} baseline={SLEEP_TARGET_HOURS} height={120} />
+            <Sparkline
+              values={sleepHours}
+              labels={series.map((n) => n.date)}
+              baseline={SLEEP_TARGET_HOURS}
+              height={120}
+              format={(v) => `${v.toFixed(1)}h`}
+              formatLabel={(d) => fmtDate(d, 'EEE, MMM d')}
+            />
             <div className="flex justify-between meta-mono mt-2">
               <span>{fmtDate(firstDate, 'MMM d')}</span>
               <span>{fmtDate(today, 'MMM d')}</span>

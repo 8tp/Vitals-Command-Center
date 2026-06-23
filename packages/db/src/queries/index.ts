@@ -3,6 +3,7 @@ export * as sleep from './sleep.js';
 export * as workouts from './workouts.js';
 export * as habits from './habits.js';
 export * as briefings from './briefings.js';
+export * as conversations from './conversations.js';
 export * as context from './context.js';
 export * as syncLog from './syncLog.js';
 export * as settings from './settings.js';

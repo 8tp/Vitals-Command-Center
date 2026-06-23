@@ -17,12 +17,43 @@ Rules:
 - Do not use any tools or run commands; answer from the provided data only.
 - Workouts/runs may be tracked elsewhere (e.g. Strava) and absent here; for training questions reason from recovery + steps.`;
 
+export interface AskOptions {
+  /** Prior turns in this thread (oldest → newest), for follow-up context. */
+  history?: { role: 'user' | 'assistant'; content: string }[];
+  /** A daily brief this thread is anchored to — fed as additional context. */
+  anchorBrief?: string | null;
+}
+
 export async function answerQuestion(
   db: Database,
   question: string,
   date?: string,
+  opts: AskOptions = {},
 ): Promise<{ text: string; cli: 'claude' | 'codex' }> {
   const context = buildBriefContext(db, date ?? todayIso());
-  const prompt = `${ASK_SYSTEM}\n\n## About the user\n${getUserProfile()}\n\n---\nHEALTH DATA:\n${context}\n\n---\nQUESTION: ${question}\n\nAnswer:`;
-  return runAgent(prompt, { cli: process.env.ASK_CLI as 'claude' | 'codex' | undefined });
+
+  const parts = [
+    ASK_SYSTEM,
+    `\n\n## About the user\n${getUserProfile()}`,
+    `\n\n---\nHEALTH DATA:\n${context}`,
+  ];
+
+  if (opts.anchorBrief) {
+    parts.push(
+      `\n\n---\nEARLIER DAILY BRIEF (the user is asking a follow-up about this brief):\n${opts.anchorBrief}`,
+    );
+  }
+
+  // Keep the last few turns so follow-ups have context without an unbounded prompt.
+  const history = (opts.history ?? []).slice(-8);
+  if (history.length) {
+    const transcript = history
+      .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+      .join('\n\n');
+    parts.push(`\n\n---\nCONVERSATION SO FAR:\n${transcript}`);
+  }
+
+  parts.push(`\n\n---\nQUESTION: ${question}\n\nAnswer:`);
+
+  return runAgent(parts.join(''), { cli: process.env.ASK_CLI as 'claude' | 'codex' | undefined });
 }

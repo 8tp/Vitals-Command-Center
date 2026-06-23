@@ -22,6 +22,14 @@ export const registerInsightsRoutes: FastifyPluginAsync = async (app) => {
     return ok(computeWeeklySummary(req.server.db, end || todayIso()));
   });
 
+  // Recent daily briefs, newest first — includes prior regenerations (each is
+  // its own row) so the history shows older versions too.
+  app.get('/insights/briefings', async (req) => {
+    const { limit } = req.query as { limit?: string };
+    const n = Math.min(Math.max(Number(limit) || 30, 1), 100);
+    return ok(queries.briefings.listRecent(req.server.db, 'daily', n));
+  });
+
   app.get('/insights/briefing/:date', async (req, reply) => {
     const { date } = req.params as { date: string };
     const briefing = queries.briefings.latestOfType(req.server.db, 'daily', date);

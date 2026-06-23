@@ -1,10 +1,14 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAsk } from '../../hooks/useAsk.js';
 import { useHealthData } from '../../hooks/useHealthData.js';
 import { deriveReadiness } from '../../lib/readiness.js';
+import { getConversation } from '../../lib/api.js';
+import { fmtDate } from '../../lib/formatters.js';
 import { Markdown } from '../shared/Markdown.js';
 import { AskAvatar, AskGreeting, CHIPS, GROUNDING_NOTE } from './AskShell.js';
+import { ConversationHistory } from './ConversationHistory.js';
 import { IconSend } from '../shared/icons.js';
 
 interface Message {
@@ -32,12 +36,53 @@ export function AskClaude() {
   const { ask, answer, typing, pending, error, stop } = useAsk();
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
+  // The persisted thread these messages belong to (null until the first reply).
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  // A daily brief this thread follows up on, when arriving via "Discuss".
+  const [anchorDate, setAnchorDate] = useState<string | undefined>(undefined);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyKey, setHistoryKey] = useState(0);
   // The assistant message currently receiving streamed tokens.
   const streamingId = useRef<string | null>(null);
   const scrollAnchor = useRef<HTMLDivElement>(null);
   const inputId = useId();
+  const location = useLocation();
 
   const started = messages.length > 0;
+
+  // Arriving from a brief's "Discuss" button: start a fresh thread anchored to
+  // that brief. location.key changes on every navigation so re-clicking works.
+  const incomingAnchor = (location.state as { anchorBriefDate?: string } | null)?.anchorBriefDate;
+  useEffect(() => {
+    if (!incomingAnchor) return;
+    stop();
+    setMessages([]);
+    setConversationId(null);
+    setAnchorDate(incomingAnchor);
+    // Clear nav state so a refresh doesn't re-anchor.
+    window.history.replaceState({}, '');
+  }, [incomingAnchor, location.key, stop]);
+
+  const newChat = useCallback(() => {
+    stop();
+    setMessages([]);
+    setConversationId(null);
+    setAnchorDate(undefined);
+    setDraft('');
+  }, [stop]);
+
+  const loadConversation = useCallback(
+    async (id: string) => {
+      setHistoryOpen(false);
+      const conv = await getConversation(id);
+      stop();
+      streamingId.current = null;
+      setConversationId(conv.id);
+      setAnchorDate(conv.anchorDate ?? undefined);
+      setMessages(conv.messages.map((m) => ({ id: m.id, role: m.role, text: m.content })));
+    },
+    [stop],
+  );
 
   // Mirror streamed tokens into the in-flight assistant message as they arrive.
   useEffect(() => {
@@ -79,7 +124,16 @@ export function AskClaude() {
       { id: assistantId, role: 'assistant', text: '' },
     ]);
     setDraft('');
-    ask(question);
+    const startingNew = !conversationId;
+    ask(question, {
+      conversationId: conversationId ?? undefined,
+      // Anchor only applies to the first message of a brand-new anchored thread.
+      anchorBriefDate: conversationId ? undefined : anchorDate,
+      onConversationId: (id) => {
+        setConversationId(id);
+        if (startingNew) setHistoryKey((k) => k + 1); // refresh the drawer list
+      },
+    });
   };
 
   return (
@@ -87,10 +141,32 @@ export function AskClaude() {
     // short conversation. Mobile subtracts the sticky top bar (h-14 + safe area);
     // desktop has no top bar (the rail is the chrome).
     <div className="flex flex-col min-h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] md:min-h-[100dvh]">
+      {/* Control bar — new chat + history */}
+      <div className="flex items-center justify-end gap-2 pt-4 -mb-2">
+        {(started || conversationId) && (
+          <button type="button" className="btn-soft px-3 py-1.5 text-[13px]" onClick={newChat}>
+            New chat
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn-soft px-3 py-1.5 text-[13px]"
+          onClick={() => setHistoryOpen(true)}
+        >
+          History
+        </button>
+      </div>
+
       {/* Greeting */}
-      <header className="pt-9 sm:pt-10 pb-2 animate-fade-rise">
+      <header className="pt-5 pb-2 animate-fade-rise">
         <AskGreeting readiness={readiness} />
-        {!started && (
+        {anchorDate && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent-wash text-accent-deep px-3.5 py-1.5 text-[12.5px] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+            Following up on your {fmtDate(anchorDate, 'EEE, MMM d')} brief
+          </div>
+        )}
+        {!started && !anchorDate && (
           <div className="flex flex-wrap gap-2.5 mt-6">
             {CHIPS.map((c) => (
               <button
@@ -167,6 +243,14 @@ export function AskClaude() {
         </form>
         <p className="text-center mt-2.5 text-ink-mute text-[11px]">{GROUNDING_NOTE}</p>
       </div>
+
+      <ConversationHistory
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onSelect={loadConversation}
+        activeId={conversationId}
+        reloadKey={historyKey}
+      />
     </div>
   );
 }

@@ -29,6 +29,7 @@ import { registerCompareRoutes } from './routes/compare.js';
 import { registerHabitRoutes } from './routes/habits.js';
 import { registerInsightsRoutes } from './routes/insights.js';
 import { registerAskRoutes } from './routes/ask.js';
+import { registerConversationRoutes } from './routes/conversations.js';
 import { registerSyncRoutes } from './routes/sync.js';
 import { registerIngestRoutes } from './routes/ingest.js';
 import { registerAuthRoutes } from './routes/auth.js';
@@ -86,6 +87,7 @@ async function main() {
   await app.register(registerHabitRoutes, { prefix: '/api' });
   await app.register(registerInsightsRoutes, { prefix: '/api' });
   await app.register(registerAskRoutes, { prefix: '/api' });
+  await app.register(registerConversationRoutes, { prefix: '/api' });
   await app.register(registerSyncRoutes, { prefix: '/api' });
   await app.register(registerIngestRoutes, { prefix: '/api' });
   await app.register(registerAuthRoutes, { prefix: '/api' });

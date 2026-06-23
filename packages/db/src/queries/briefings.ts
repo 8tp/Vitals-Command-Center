@@ -47,6 +47,22 @@ export function latestBefore(db: Database, type: BriefingType, date: string): Br
   return row ? toBriefing(row) : null;
 }
 
+export function byId(db: Database, id: string): BriefingRecord | null {
+  const row = db.prepare('SELECT * FROM briefings WHERE id = ?').get(id) as BriefingRow | undefined;
+  return row ? toBriefing(row) : null;
+}
+
+/**
+ * Recent briefings of a type, newest first — INCLUDING multiple per day (each
+ * regenerate is its own row), so the history shows prior versions too.
+ */
+export function listRecent(db: Database, type: BriefingType, limit = 30): BriefingRecord[] {
+  const rows = db
+    .prepare('SELECT * FROM briefings WHERE type = ? ORDER BY date DESC, created_at DESC LIMIT ?')
+    .all(type, limit) as BriefingRow[];
+  return rows.map(toBriefing);
+}
+
 export function store(
   db: Database,
   input: Omit<BriefingRecord, 'id' | 'createdAt'>,

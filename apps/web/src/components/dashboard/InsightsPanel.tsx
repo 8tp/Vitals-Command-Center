@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { InsightItem, BriefingRecord } from '@vcc/shared';
-import { apiGet, apiPost } from '../../lib/api.js';
+import { apiGet, apiPost, listBriefings } from '../../lib/api.js';
 import { Markdown } from '../shared/Markdown.js';
 import { ClaudeSetupPanel } from '../shared/ClaudeSetupPanel.js';
 import { useConfigStatus } from '../../hooks/useConfigStatus.js';
@@ -45,8 +45,18 @@ export function InsightsPanel({
   const [data, setData] = useState<TodayResp | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Brief history: an older brief being viewed instead of today's, + the list.
+  const [viewing, setViewing] = useState<BriefingRecord | null>(null);
+  const [history, setHistory] = useState<BriefingRecord[] | null>(null);
+  const [histOpen, setHistOpen] = useState(false);
   const config = useConfigStatus();
+  const navigate = useNavigate();
   const autoRef = useRef<string | null>(null);
+
+  const openHistory = useCallback(() => {
+    setHistOpen((o) => !o);
+    if (history == null) listBriefings().then(setHistory).catch(() => setHistory([]));
+  }, [history]);
 
   const load = useCallback(() => {
     apiGet<TodayResp>('/api/insights/today')
@@ -90,6 +100,9 @@ export function InsightsPanel({
     try {
       const briefing = await apiPost<{ date?: string }, BriefingRecord>('/api/insights/generate', {});
       setData((d) => (d ? { ...d, briefing } : d));
+      setViewing(null); // snap back to the fresh brief
+      setHistory(null); // prior brief is retained; refetch the list lazily
+      setHistOpen(false);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -115,14 +128,16 @@ export function InsightsPanel({
   }, [autoSummary, data, freshnessKey, generating, generate]);
 
   const flags = data?.insights ?? [];
+  // The brief being shown: an older one the user is browsing, else today's.
+  const shown = viewing ?? data?.briefing ?? null;
   // Use the briefing's logical civil date for the header (the day it's about),
   // and the UTC-normalized createdAt for the time — sqlite stores a tz-less
   // 'YYYY-MM-DD HH:MM:SS' in UTC, which new Date() would misread as local.
   const briefDate = fmtDate(
-    data?.briefing?.date ?? data?.date ?? new Date().toISOString().slice(0, 10),
+    shown?.date ?? data?.date ?? new Date().toISOString().slice(0, 10),
     'EEEE, MMM d',
   );
-  const briefEpoch = data?.briefing ? toEpoch(data.briefing.createdAt) : NaN;
+  const briefEpoch = shown ? toEpoch(shown.createdAt) : NaN;
   const briefTime = Number.isFinite(briefEpoch)
     ? new Date(briefEpoch).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null;
@@ -142,7 +157,7 @@ export function InsightsPanel({
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {config?.claudeApiConfigured && (
+          {config?.claudeApiConfigured && !viewing && (
             <button
               className="inline-flex items-center justify-center min-h-[40px] rounded-full px-4 text-sm font-medium text-signal bg-signal-soft hover:opacity-80 disabled:opacity-40 transition-opacity"
               onClick={generate}
@@ -152,14 +167,81 @@ export function InsightsPanel({
               {generating ? 'Writing…' : data?.briefing ? 'Regenerate' : 'Generate'}
             </button>
           )}
-          <Link
-            to="/ask"
-            className="inline-flex items-center justify-center min-h-[40px] rounded-full px-4 text-sm font-medium text-ink-dim bg-bg-surface2 hover:text-ink transition-colors"
+          {shown && config?.claudeApiConfigured ? (
+            <button
+              onClick={() => navigate('/ask', { state: { anchorBriefDate: shown.date } })}
+              className="inline-flex items-center justify-center min-h-[40px] rounded-full px-4 text-sm font-medium text-ink-dim bg-bg-surface2 hover:text-ink transition-colors"
+              title="Ask a follow-up about this brief"
+            >
+              Discuss
+            </button>
+          ) : (
+            <Link
+              to="/ask"
+              className="inline-flex items-center justify-center min-h-[40px] rounded-full px-4 text-sm font-medium text-ink-dim bg-bg-surface2 hover:text-ink transition-colors"
+            >
+              Ask
+            </Link>
+          )}
+          <button
+            onClick={openHistory}
+            aria-label="Past briefs"
+            title="Past briefs"
+            className="grid place-items-center w-10 h-10 rounded-full shrink-0 text-ink-dim bg-bg-surface2 hover:text-ink transition-colors"
           >
-            Ask
-          </Link>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+              <path d="M3 4v4h4" />
+              <path d="M12 8v4l3 2" />
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Past-briefs list */}
+      {histOpen && (
+        <div className="mx-5 mb-1 rounded-xl bg-bg-surface2 max-h-56 overflow-y-auto scrollbar-thin">
+          {history == null ? (
+            <div className="px-4 py-3 text-sm text-ink-mute">Loading…</div>
+          ) : history.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-ink-mute">No briefs yet.</div>
+          ) : (
+            <ul className="divide-y divide-hairline">
+              {history.map((b) => {
+                const t = toEpoch(b.createdAt);
+                const time = Number.isFinite(t)
+                  ? new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  : '';
+                const isShown = shown?.id === b.id;
+                return (
+                  <li key={b.id}>
+                    <button
+                      onClick={() => {
+                        setViewing(b);
+                        setHistOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                        isShown ? 'text-accent' : 'text-ink-dim hover:text-ink'
+                      }`}
+                    >
+                      {fmtDate(b.date, 'EEE, MMM d')} <span className="text-ink-mute">· {time}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {viewing && (
+        <div className="mx-5 mb-2 flex items-center justify-between rounded-lg bg-accent-wash px-3.5 py-2 text-[12.5px] text-accent-deep">
+          <span>Viewing an earlier brief</span>
+          <button onClick={() => setViewing(null)} className="font-semibold hover:opacity-80">
+            Back to latest
+          </button>
+        </div>
+      )}
 
       {/* Flags / things to watch */}
       <div className="px-5 space-y-2.5">
@@ -186,11 +268,11 @@ export function InsightsPanel({
       {error && <div className="px-5 pt-2 text-alert text-sm">{error}</div>}
 
       {/* Brief body */}
-      {data?.briefing ? (
+      {shown ? (
         <div
           className={`px-5 mt-4 overflow-y-auto scrollbar-thin ${compact ? 'py-4 max-h-[20rem]' : 'py-5 flex-1'}`}
         >
-          <Markdown>{data.briefing.content}</Markdown>
+          <Markdown>{shown.content}</Markdown>
         </div>
       ) : config && !config.claudeApiConfigured ? (
         <div className="px-5 py-5 mt-4">

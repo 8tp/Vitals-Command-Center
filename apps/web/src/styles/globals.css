@@ -8,6 +8,17 @@
   #root {
     height: 100%;
   }
+
+  /* App shell: exactly one *dynamic* viewport tall so the bottom nav is a normal
+     flex child pinned below the scroll area — no position:fixed, which jumps and
+     overlaps content over a nested scroller in iOS standalone PWAs. 100vh is the
+     fallback for browsers without dvh; overflow-hidden keeps <main> the only
+     scroller (no page-level rubber-banding). */
+  .app-shell {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
   body {
     background: var(--base);
     color: var(--ink);

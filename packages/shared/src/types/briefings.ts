@@ -38,6 +38,39 @@ export interface WeeklySummary {
   worstSleep: { date: string; hours: number } | null;
 }
 
+/** A persisted Ask AI conversation thread. */
+export interface Conversation {
+  id: string;
+  title: string;
+  /** briefings.id this thread follows up on, or null for a free-form chat. */
+  anchorBriefId: string | null;
+  /** The anchored brief's civil date, for display. */
+  anchorDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversationId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+/** Lightweight row for the history drawer. */
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  anchorDate: string | null;
+  updatedAt: string;
+  messageCount: number;
+}
+
+export interface ConversationWithMessages extends Conversation {
+  messages: ConversationMessage[];
+}
+
 export interface InsightItem {
   id: string;
   severity: 'green' | 'amber' | 'red' | 'blue';

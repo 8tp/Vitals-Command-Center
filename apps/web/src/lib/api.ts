@@ -1,4 +1,9 @@
-import type { ApiResponse } from '@vcc/shared';
+import type {
+  ApiResponse,
+  BriefingRecord,
+  ConversationSummary,
+  ConversationWithMessages,
+} from '@vcc/shared';
 
 const BASE = import.meta.env.VITE_API_BASE ?? '';
 
@@ -37,10 +42,28 @@ export async function apiPatch<TBody, TRes>(path: string, body: TBody): Promise<
   return json.data;
 }
 
+export async function apiDelete(path: string): Promise<void> {
+  const res = await fetch(`${BASE}${path}`, { method: 'DELETE', headers: { Accept: 'application/json' } });
+  const json = (await res.json()) as ApiResponse<unknown>;
+  if (!json.ok) throw new ApiError(json.error.code, json.error.error, json.error.details);
+}
+
+// Ask AI history + daily-brief history.
+export const listConversations = () => apiGet<ConversationSummary[]>('/api/conversations');
+export const getConversation = (id: string) => apiGet<ConversationWithMessages>(`/api/conversations/${id}`);
+export const deleteConversation = (id: string) => apiDelete(`/api/conversations/${id}`);
+export const listBriefings = () => apiGet<BriefingRecord[]>('/api/insights/briefings');
+
 export function askStream(
-  body: { question: string; context?: { date?: string; includeBriefing?: boolean } },
+  body: {
+    question: string;
+    conversationId?: string;
+    anchorBriefDate?: string;
+    context?: { date?: string; includeBriefing?: boolean };
+  },
   onToken: (chunk: string) => void,
   signal?: AbortSignal,
+  onMeta?: (meta: { conversationId: string | null }) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     fetch(`${BASE}/api/ask`, {
@@ -51,6 +74,8 @@ export function askStream(
     })
       .then(async (res) => {
         if (!res.ok || !res.body) throw new Error(`ask HTTP ${res.status}`);
+        // The server returns the thread id in a header before streaming the body.
+        onMeta?.({ conversationId: res.headers.get('X-Conversation-Id') });
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buf = '';

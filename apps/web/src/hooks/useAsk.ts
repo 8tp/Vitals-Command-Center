@@ -33,22 +33,39 @@ export function useAsk() {
     return () => clearTimeout(id);
   }, [full, displayed]);
 
-  const ask = useCallback((question: string) => {
-    abortRef.current?.abort();
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-    setFull('');
-    setDisplayed('');
-    setError(null);
-    setElapsed(0);
-    startRef.current = Date.now();
-    setPending(true);
-    askStream({ question }, (tok) => setFull((a) => a + tok), ctrl.signal)
-      .catch((err) => {
-        if ((err as Error).name !== 'AbortError') setError((err as Error).message);
-      })
-      .finally(() => setPending(false));
-  }, []);
+  const ask = useCallback(
+    (
+      question: string,
+      opts: {
+        conversationId?: string;
+        anchorBriefDate?: string;
+        onConversationId?: (id: string) => void;
+      } = {},
+    ) => {
+      abortRef.current?.abort();
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+      setFull('');
+      setDisplayed('');
+      setError(null);
+      setElapsed(0);
+      startRef.current = Date.now();
+      setPending(true);
+      askStream(
+        { question, conversationId: opts.conversationId, anchorBriefDate: opts.anchorBriefDate },
+        (tok) => setFull((a) => a + tok),
+        ctrl.signal,
+        (meta) => {
+          if (meta.conversationId) opts.onConversationId?.(meta.conversationId);
+        },
+      )
+        .catch((err) => {
+          if ((err as Error).name !== 'AbortError') setError((err as Error).message);
+        })
+        .finally(() => setPending(false));
+    },
+    [],
+  );
 
   const stop = useCallback(() => {
     abortRef.current?.abort();

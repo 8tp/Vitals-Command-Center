@@ -6,14 +6,16 @@ import { useSettingsStore, selectAiEnabled } from '../../stores/settingsStore.js
 
 /**
  * Mobile bottom tab bar — the only navigation below md (the Sidebar is
- * hidden there). Fixed to the bottom, 5 tabs, safe-area aware so it clears
- * the iPhone home indicator when installed as a PWA.
+ * hidden there). A normal flex child at the bottom of the app shell (NOT
+ * position:fixed — that jumps and overlaps content over a nested scroller in
+ * iOS standalone PWAs), 5 tabs, safe-area aware so it clears the iPhone home
+ * indicator when installed as a PWA.
  */
 export function BottomNav() {
   const aiEnabled = useSettingsStore(selectAiEnabled);
   return (
     <nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-bg-base/90 backdrop-blur-md"
+      className="md:hidden shrink-0 border-t border-hairline bg-bg-base"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Primary"
     >

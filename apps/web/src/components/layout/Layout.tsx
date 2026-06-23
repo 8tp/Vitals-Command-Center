@@ -11,12 +11,12 @@ import { SettingsModal } from '../settings/SettingsModal.js';
  */
 export function Layout() {
   return (
-    <div className="h-full flex flex-col md:flex-row">
+    <div className="app-shell flex flex-col md:flex-row">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="max-w-[1320px] mx-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-12">
+          <div className="max-w-[1320px] mx-auto pb-8 md:pb-12">
             <Outlet />
           </div>
         </main>

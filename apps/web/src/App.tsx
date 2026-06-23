@@ -5,7 +5,6 @@ import DashboardPage from './pages/DashboardPage.js';
 import SleepPage from './pages/SleepPage.js';
 import WorkoutsPage from './pages/WorkoutsPage.js';
 import TrendsPage from './pages/TrendsPage.js';
-import HabitsPage from './pages/HabitsPage.js';
 import AskPage from './pages/AskPage.js';
 import { useSettingsStore, selectAiEnabled } from './stores/settingsStore.js';
 
@@ -24,7 +23,6 @@ export default function App() {
         <Route path="sleep" element={<SleepPage />} />
         <Route path="workouts" element={<WorkoutsPage />} />
         <Route path="trends" element={<TrendsPage />} />
-        <Route path="habits" element={<HabitsPage />} />
         {/* Ask is an AI surface — when AI is disabled the route falls through to home. */}
         <Route path="ask" element={aiEnabled ? <AskPage /> : <Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

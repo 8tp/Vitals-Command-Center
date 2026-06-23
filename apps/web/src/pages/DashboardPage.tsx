@@ -108,6 +108,7 @@ export default function DashboardPage() {
 
   // hrv series (oldest → newest)
   const hrvSeries = [...daily].reverse().map((d) => d.fitbit?.hrv ?? d.consensus.hrv ?? null);
+  const hrvDates = [...daily].reverse().map((d) => d.date);
 
   // sleep stages (latest night)
   const sd = daily.find((d) => d.fitbit?.sleepHours != null)?.fitbit;
@@ -225,7 +226,14 @@ export default function DashboardPage() {
             <h3 className="section-heading text-[15px]">14-day HRV</h3>
             <span className="meta-mono">{fmtNum(hrv.value, 0)} ms · baseline {fmtNum(hrv.baseline, 0)}</span>
           </div>
-          <Sparkline values={hrvSeries} baseline={hrv.baseline} height={120} />
+          <Sparkline
+            values={hrvSeries}
+            labels={hrvDates}
+            baseline={hrv.baseline}
+            height={120}
+            format={(v) => `${fmtNum(v, 0)} ms`}
+            formatLabel={(d) => fmtDate(d, 'EEE, MMM d')}
+          />
           <div className="flex justify-between meta-mono mt-2">
             <span>{fmtDate(daily[daily.length - 1]?.date ?? today, 'MMM d')}</span>
             <span>{fmtDate(today, 'MMM d')}</span>

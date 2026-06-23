@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { askStream } from '../lib/api.js';
 
 export function useAsk() {
-  const [answer, setAnswer] = useState('');
-  // The backend returns the whole answer in one shot after a long wait, so
-  // this is an honest "request in flight" flag, not token streaming.
+  // `full` is everything received from the backend (which today returns the
+  // answer in one shot); `displayed` is the typewriter-revealed slice so the
+  // assistant appears to type its reply back rather than snapping in whole.
+  const [full, setFull] = useState('');
+  const [displayed, setDisplayed] = useState('');
   const [pending, setPending] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -20,22 +22,41 @@ export function useAsk() {
     return () => clearInterval(id);
   }, [pending]);
 
+  // Typewriter: advance `displayed` toward `full` at a roughly constant pace
+  // (~1.5s total regardless of length) so long and short replies feel similar.
+  useEffect(() => {
+    if (displayed.length >= full.length) return;
+    const id = setTimeout(() => {
+      const inc = Math.max(2, Math.ceil(full.length / 90));
+      setDisplayed(full.slice(0, Math.min(full.length, displayed.length + inc)));
+    }, 16);
+    return () => clearTimeout(id);
+  }, [full, displayed]);
+
   const ask = useCallback((question: string) => {
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
-    setAnswer('');
+    setFull('');
+    setDisplayed('');
     setError(null);
     setElapsed(0);
     startRef.current = Date.now();
     setPending(true);
-    askStream({ question }, (tok) => setAnswer((a) => a + tok), ctrl.signal)
+    askStream({ question }, (tok) => setFull((a) => a + tok), ctrl.signal)
       .catch((err) => {
         if ((err as Error).name !== 'AbortError') setError((err as Error).message);
       })
       .finally(() => setPending(false));
   }, []);
 
-  const stop = useCallback(() => abortRef.current?.abort(), []);
-  return { answer, pending, elapsed, error, ask, stop };
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    // Snap the reveal to whatever arrived so a stopped answer doesn't hang mid-type.
+    setDisplayed(full);
+  }, [full]);
+
+  // True while there's still buffered text to reveal.
+  const typing = displayed.length < full.length;
+  return { answer: displayed, typing, pending, elapsed, error, ask, stop };
 }

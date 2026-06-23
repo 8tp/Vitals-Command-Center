@@ -26,8 +26,13 @@ export interface ConfigStatus {
   };
 }
 
+/**
+ * `undefined` = still loading (first fetch in flight), `null` = failed to load,
+ * object = resolved. Callers reading fields can keep using `config?.x`; those
+ * that must avoid a loading flash (the Ask page) check for `undefined`.
+ */
 export function useConfigStatus() {
-  const [status, setStatus] = useState<ConfigStatus | null>(null);
+  const [status, setStatus] = useState<ConfigStatus | null | undefined>(undefined);
   useEffect(() => {
     apiGet<ConfigStatus>('/api/config/status')
       .then(setStatus)
